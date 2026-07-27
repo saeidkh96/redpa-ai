@@ -22,10 +22,18 @@ class Settings(BaseSettings):
 
     app_name: str = "RedPA AI"
     app_version: str = "0.1.0"
-    environment: Literal["development", "testing", "staging", "production"] = (
-        "development"
-    )
+
+    environment: Literal[
+        "development",
+        "testing",
+        "staging",
+        "production",
+    ] = "development"
+
     debug: bool = True
+
+    log_level: str = "INFO"
+    log_format: str = "console"
 
     api_v1_prefix: str = "/api/v1"
 
@@ -39,6 +47,7 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+asyncpg://postgres:postgres@localhost:5432/redpa"
     )
+
     redis_url: str = "redis://localhost:6379/0"
 
     chroma_host: str = "localhost"
