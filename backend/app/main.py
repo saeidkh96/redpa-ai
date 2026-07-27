@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def create_application() -> FastAPI:
-    """Create and configure the FastAPI application."""
+    """Create and configure the RedPA AI application."""
 
     application = FastAPI(
         title=f"{settings.app_name} API",
@@ -23,7 +23,11 @@ def create_application() -> FastAPI:
             "Backend API for the RedPA AI multi-agent enterprise platform."
         ),
         version=settings.app_version,
-        debug=settings.debug,
+
+        # Keep this False so our JSON 500 handler is always used.
+        # Application debugging is controlled separately by settings.debug.
+        debug=False,
+
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
@@ -41,10 +45,12 @@ def create_application() -> FastAPI:
     )
 
     logger.info(
-        "Application configured: name=%s environment=%s version=%s",
+        "Application configured | name=%s environment=%s "
+        "version=%s debug=%s",
         settings.app_name,
         settings.environment,
         settings.app_version,
+        settings.debug,
     )
 
     return application

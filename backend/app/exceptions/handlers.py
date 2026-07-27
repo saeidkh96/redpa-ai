@@ -14,6 +14,16 @@ from app.middleware.request_context import get_request_id
 logger = logging.getLogger(__name__)
 
 
+def resolve_request_id(request: Request) -> str:
+    """Return the current request ID from request state or context."""
+
+    return getattr(
+        request.state,
+        "request_id",
+        get_request_id(),
+    )
+
+
 def build_error_response(
     *,
     code: str,
@@ -21,7 +31,7 @@ def build_error_response(
     request_id: str,
     details: Any | None = None,
 ) -> dict[str, Any]:
-    """Build the standard API error response."""
+    """Create the standard RedPA API error response."""
 
     error: dict[str, Any] = {
         "code": code,
@@ -39,22 +49,21 @@ async def app_exception_handler(
     request: Request,
     exc: AppException,
 ) -> JSONResponse:
-    """Handle expected application exceptions."""
+    """Handle known application errors."""
 
-    request_id = get_request_id()
+    request_id = resolve_request_id(request)
 
     logger.warning(
-        (
-            "Application error | code=%s status_code=%s "
-            "method=%s path=%s"
-        ),
+        "Application exception | request_id=%s code=%s "
+        "status=%s method=%s path=%s",
+        request_id,
         exc.code,
         exc.status_code,
         request.method,
         request.url.path,
     )
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=exc.status_code,
         content=build_error_response(
             code=exc.code,
@@ -65,6 +74,10 @@ async def app_exception_handler(
         headers=exc.headers,
     )
 
+    response.headers["X-Request-ID"] = request_id
+
+    return response
+
 
 async def http_exception_handler(
     request: Request,
@@ -72,7 +85,7 @@ async def http_exception_handler(
 ) -> JSONResponse:
     """Handle FastAPI HTTP exceptions."""
 
-    request_id = get_request_id()
+    request_id = resolve_request_id(request)
 
     if isinstance(exc.detail, str):
         message = exc.detail
@@ -82,17 +95,16 @@ async def http_exception_handler(
         details = exc.detail
 
     logger.warning(
-        (
-            "HTTP error | status_code=%s method=%s "
-            "path=%s detail=%s"
-        ),
+        "HTTP exception | request_id=%s status=%s "
+        "method=%s path=%s detail=%s",
+        request_id,
         exc.status_code,
         request.method,
         request.url.path,
         exc.detail,
     )
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=exc.status_code,
         content=build_error_response(
             code=f"http_{exc.status_code}",
@@ -103,18 +115,25 @@ async def http_exception_handler(
         headers=exc.headers,
     )
 
+    response.headers["X-Request-ID"] = request_id
+
+    return response
+
 
 async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ) -> JSONResponse:
-    """Handle request validation errors."""
+    """Handle invalid request input."""
 
-    request_id = get_request_id()
+    request_id = resolve_request_id(request)
 
     validation_errors = [
         {
-            "field": ".".join(str(part) for part in error["loc"]),
+            "field": ".".join(
+                str(location_part)
+                for location_part in error["loc"]
+            ),
             "message": error["msg"],
             "type": error["type"],
         }
@@ -122,13 +141,15 @@ async def validation_exception_handler(
     ]
 
     logger.warning(
-        "Validation error | method=%s path=%s errors=%s",
+        "Validation exception | request_id=%s "
+        "method=%s path=%s errors=%s",
+        request_id,
         request.method,
         request.url.path,
         validation_errors,
     )
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content=build_error_response(
             code="validation_error",
@@ -138,23 +159,28 @@ async def validation_exception_handler(
         ),
     )
 
+    response.headers["X-Request-ID"] = request_id
+
+    return response
+
 
 async def unhandled_exception_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
-    """Handle unexpected application errors."""
+    """Handle unexpected internal errors."""
 
-    request_id = get_request_id()
+    request_id = resolve_request_id(request)
 
     logger.exception(
-        "Unhandled exception | method=%s path=%s",
+        "Unhandled exception | request_id=%s method=%s path=%s",
+        request_id,
         request.method,
         request.url.path,
         exc_info=exc,
     )
 
-    details: Any | None = None
+    details: dict[str, str] | None = None
 
     if settings.debug:
         details = {
@@ -162,7 +188,7 @@ async def unhandled_exception_handler(
             "message": str(exc),
         }
 
-    return JSONResponse(
+    response = JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=build_error_response(
             code="internal_server_error",
@@ -172,9 +198,13 @@ async def unhandled_exception_handler(
         ),
     )
 
+    response.headers["X-Request-ID"] = request_id
+
+    return response
+
 
 def register_exception_handlers(application: FastAPI) -> None:
-    """Register all application exception handlers."""
+    """Register all global exception handlers."""
 
     application.add_exception_handler(
         AppException,
