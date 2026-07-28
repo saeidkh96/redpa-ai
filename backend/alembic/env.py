@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from app.core.config import settings
 from app.database.base import Base
 
+from app.models import Conversation, Message, User
 # Import ORM models so Alembic can discover their metadata.
 from app.models import User  # noqa: F401
 

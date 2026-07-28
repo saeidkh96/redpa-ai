@@ -1,14 +1,16 @@
 from functools import lru_cache
-from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """
-    Central application configuration.
-    """
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
     app_name: str = Field(
         default="RedPA AI",
@@ -20,18 +22,13 @@ class Settings(BaseSettings):
         alias="APP_VERSION",
     )
 
-    environment: Literal[
-        "development",
-        "testing",
-        "staging",
-        "production",
-    ] = Field(
+    environment: str = Field(
         default="development",
         alias="ENVIRONMENT",
     )
 
     debug: bool = Field(
-        default=False,
+        default=True,
         alias="DEBUG",
     )
 
@@ -42,16 +39,6 @@ class Settings(BaseSettings):
 
     database_url: str = Field(
         alias="DATABASE_URL",
-    )
-
-    cors_allowed_origins: list[str] = Field(
-        default_factory=lambda: [
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:3000",
-            "http://127.0.0.1:5173",
-        ],
-        alias="CORS_ALLOWED_ORIGINS",
     )
 
     jwt_secret_key: str = Field(
@@ -68,13 +55,77 @@ class Settings(BaseSettings):
         alias="ACCESS_TOKEN_EXPIRE_MINUTES",
     )
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-        populate_by_name=True,
+    cors_allowed_origins: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
+        alias="CORS_ALLOWED_ORIGINS",
     )
+
+    ollama_base_url: str = Field(
+        default="http://localhost:11434",
+        alias="OLLAMA_BASE_URL",
+    )
+
+    ollama_model: str = Field(
+        default="qwen2.5:7b",
+        alias="OLLAMA_MODEL",
+    )
+
+    ollama_timeout_seconds: float = Field(
+        default=120.0,
+        alias="OLLAMA_TIMEOUT_SECONDS",
+    )
+
+    ollama_temperature: float = Field(
+        default=0.2,
+        ge=0.0,
+        le=2.0,
+        alias="OLLAMA_TEMPERATURE",
+    )
+
+    ollama_max_context_messages: int = Field(
+        default=20,
+        ge=1,
+        le=100,
+        alias="OLLAMA_MAX_CONTEXT_MESSAGES",
+    )
+
+    @field_validator(
+        "cors_allowed_origins",
+        mode="before",
+    )
+    @classmethod
+    def parse_cors_allowed_origins(
+        cls,
+        value: str | list[str],
+    ) -> list[str]:
+        if isinstance(value, list):
+            return value
+
+        if isinstance(value, str):
+            cleaned_value = value.strip()
+
+            if not cleaned_value:
+                return []
+
+            if cleaned_value.startswith("["):
+                import json
+
+                return json.loads(cleaned_value)
+
+            return [
+                origin.strip()
+                for origin in cleaned_value.split(",")
+                if origin.strip()
+            ]
+
+        raise ValueError(
+            "CORS_ALLOWED_ORIGINS must be a list or comma-separated string."
+        )
 
 
 @lru_cache
