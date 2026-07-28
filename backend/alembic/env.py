@@ -11,7 +11,8 @@ from app.database.base import Base
 from app.models import Conversation, Message, User
 # Import ORM models so Alembic can discover their metadata.
 from app.models import User  # noqa: F401
-
+from app.database.base import Base, TimestampMixin
+import app.models
 
 config = context.config
 
