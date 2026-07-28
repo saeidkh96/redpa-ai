@@ -1,12 +1,17 @@
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 
+from app.agents.nodes.capability_unavailable import (
+    capability_unavailable_node,
+)
 from app.agents.nodes.chat import chat_node
 from app.agents.nodes.planner import planner_node
 from app.agents.nodes.response import response_node
+from app.agents.router import route_after_planner
 from app.agents.state import AgentState
 
 
-def create_agent_graph():
+def create_agent_graph() -> CompiledStateGraph:
     graph_builder = StateGraph(
         AgentState,
     )
@@ -22,6 +27,11 @@ def create_agent_graph():
     )
 
     graph_builder.add_node(
+        "capability_unavailable",
+        capability_unavailable_node,
+    )
+
+    graph_builder.add_node(
         "response",
         response_node,
     )
@@ -31,13 +41,24 @@ def create_agent_graph():
         "planner",
     )
 
-    graph_builder.add_edge(
+    graph_builder.add_conditional_edges(
         "planner",
-        "chat",
+        route_after_planner,
+        {
+            "chat": "chat",
+            "capability_unavailable": (
+                "capability_unavailable"
+            ),
+        },
     )
 
     graph_builder.add_edge(
         "chat",
+        "response",
+    )
+
+    graph_builder.add_edge(
+        "capability_unavailable",
         "response",
     )
 
