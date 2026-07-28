@@ -1,67 +1,114 @@
-![Python](https://img.shields.io/badge/Python-3.14-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-
 # 🚀 RedPA AI
 
-**Production-Ready Enterprise AI Platform** built with FastAPI, PostgreSQL, and modern AI technologies.
+![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?logo=sqlalchemy)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063)
+![Ollama](https://img.shields.io/badge/Ollama-qwen2.5:7b-black)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-success)
+![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen)
 
-RedPA AI is an enterprise-grade backend designed for AI-powered support automation. The project combines secure authentication, scalable backend architecture, retrieval-augmented generation (RAG), and multi-agent workflows to automate customer support while keeping humans in the loop for complex cases.
 
----
+> An enterprise-ready Agentic AI platform for building intelligent AI assistants, multi-agent workflows, and production-grade autonomous systems.
 
-## ✨ Current Features
+RedPA AI is an open-source backend platform focused on modern AI engineering. It combines FastAPI, PostgreSQL, and local Large Language Models (LLMs) to provide a scalable foundation for conversational AI, persistent memory, and future multi-agent orchestration.
 
-- ✅ FastAPI Backend
-- ✅ PostgreSQL Database
-- ✅ SQLAlchemy 2.0 (Async)
-- ✅ Alembic Database Migrations
-- ✅ JWT Authentication
-- ✅ User Registration & Login
-- ✅ Password Hashing (Argon2)
-- ✅ Protected API Endpoints
-- ✅ Pydantic v2 Validation
-- ✅ OpenAPI / Swagger Documentation
-- ✅ Async Architecture
-- ✅ Health Check Endpoint
+The project is designed with clean architecture principles and aims to evolve into a complete enterprise Agentic AI platform with LangGraph, Retrieval-Augmented Generation (RAG), MCP, and Human-in-the-Loop workflows.
 
 ---
 
-# 🛠 Tech Stack
+# ✨ Current Features
 
-| Category | Technologies |
-|-----------|--------------|
-| Backend | FastAPI |
-| Language | Python 3.14 |
-| Database | PostgreSQL |
-| ORM | SQLAlchemy Async |
-| Migration | Alembic |
-| Authentication | JWT |
-| Password Hashing | Argon2 |
-| Validation | Pydantic v2 |
-| API Docs | Swagger / OpenAPI |
+## 🔐 Authentication
+
+- JWT Authentication
+- User Registration
+- User Login
+- Password Hashing
+- Protected API Endpoints
+
+---
+
+## 💬 Conversation Management
+
+- Persistent Conversations
+- Conversation History
+- Message Storage
+- User / Assistant Roles
+- Pagination Support
+
+---
+
+## 🤖 AI Integration
+
+- Ollama Integration
+- Local LLM Support
+- Persistent Chat Memory
+- Context-aware Conversations
+- AI Chat Endpoint
+- LLM Health Monitoring
+
+---
+
+## 🗄 Database
+
+- PostgreSQL
+- SQLAlchemy 2.0 (Async)
+- Alembic Migrations
+- UUID Primary Keys
+- Async Database Sessions
+
+---
+
+## ⚡ API
+
+- FastAPI
+- RESTful Architecture
+- OpenAPI Documentation
+- Swagger UI
+- Modular Routing
 
 ---
 
 # 🏗 Architecture
 
 ```
-                Client
-                   │
-                   ▼
-            FastAPI Backend
-                   │
-      ┌────────────┴────────────┐
-      ▼                         ▼
- Authentication          Business Logic
-      │                         │
-      └────────────┬────────────┘
-                   ▼
-             PostgreSQL Database
+                    Client
+                       │
+                       ▼
+                FastAPI REST API
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+          ▼                         ▼
+ Authentication              Conversation API
+          │                         │
+          └────────────┬────────────┘
+                       ▼
+                 Chat Service
+                       │
+                       ▼
+                  Ollama Client
+                       │
+                       ▼
+               Local LLM (Qwen)
+                       │
+                       ▼
+                  PostgreSQL
 ```
 
-The project follows a modular architecture with clear separation of concerns to simplify maintenance and future scaling.
+---
+
+# 🛠 Tech Stack
+
+| Backend | AI | Database | Tools |
+|---------|----|----------|-------|
+| Python 3.14 | Ollama | PostgreSQL | Git |
+| FastAPI | Qwen2.5 | SQLAlchemy Async | Docker (planned) |
+| Pydantic v2 | Local LLM | Alembic | VS Code |
+| HTTPX | Agentic AI | AsyncPG | Swagger |
 
 ---
 
@@ -70,36 +117,181 @@ The project follows a modular architecture with clear separation of concerns to 
 ```
 backend/
 │
-├── alembic/
-│
 ├── app/
 │   ├── api/
+│   ├── clients/
 │   ├── core/
 │   ├── database/
-│   ├── middleware/
 │   ├── models/
 │   ├── schemas/
 │   ├── services/
-│   ├── utils/
-│   └── main.py
+│   ├── main.py
+│   └── ...
 │
-├── tests/
-│
-└── requirements.txt
+├── alembic/
+├── requirements.txt
+└── .env
 ```
+
+---
+
+# 🔌 Available API Endpoints
+
+## Authentication
+
+```
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+```
+
+---
+
+## Users
+
+```
+GET    /api/v1/users/me
+```
+
+---
+
+## Conversations
+
+```
+POST   /api/v1/conversations
+GET    /api/v1/conversations
+GET    /api/v1/conversations/{id}
+```
+
+---
+
+## Messages
+
+```
+POST   /api/v1/conversations/{id}/messages
+GET    /api/v1/conversations/{id}/messages
+```
+
+---
+
+## Chat
+
+```
+POST   /api/v1/chat
+```
+
+---
+
+## LLM
+
+```
+GET    /api/v1/llm/health
+```
+
+---
+
+# 📸 Current Capabilities
+
+✅ User authentication
+
+✅ Persistent conversations
+
+✅ Persistent AI chat history
+
+✅ Local LLM integration
+
+✅ Async database architecture
+
+✅ OpenAPI documentation
+
+✅ Conversation context
+
+✅ Usage metadata collection
+
+---
+
+# 🚧 Roadmap
+
+## Version 0.2
+
+- LangGraph Integration
+- State Management
+- Agent Workflow
+- Chat Orchestrator
+
+---
+
+## Version 0.3
+
+- Retrieval-Augmented Generation (RAG)
+- ChromaDB
+- Document Upload
+- Semantic Search
+
+---
+
+## Version 0.4
+
+- Planner Agent
+- Research Agent
+- Tool Agent
+- SQL Agent
+
+---
+
+## Version 0.5
+
+- MCP Server
+- MCP Client
+- Tool Registry
+- External Integrations
+
+---
+
+## Version 0.6
+
+- Human-in-the-Loop
+- Approval Workflows
+- Background Tasks
+- Long-running Agents
+
+---
+
+## Version 1.0
+
+- Multi-Agent Platform
+- Docker Compose
+- Kubernetes Deployment
+- Monitoring
+- Grafana
+- Prometheus
+- GitHub Actions
+- Production CI/CD
+
+---
+
+# 🎯 Project Goals
+
+RedPA AI aims to become an enterprise-grade Agentic AI platform capable of:
+
+- Building autonomous AI agents
+- Long-term conversational memory
+- Multi-agent collaboration
+- Enterprise AI workflows
+- Local and cloud LLM support
+- Production deployment
 
 ---
 
 # 🚀 Getting Started
 
-## Clone the repository
+Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/redpa-ai.git
+git clone https://github.com/<your-username>/redpa-ai.git
 cd redpa-ai/backend
 ```
 
-## Create virtual environment
+Create a virtual environment
 
 ```bash
 python -m venv .venv
@@ -109,8 +301,8 @@ Activate
 
 Windows
 
-```powershell
-.venv\Scripts\Activate.ps1
+```bash
+.venv\Scripts\activate
 ```
 
 Linux / macOS
@@ -119,47 +311,41 @@ Linux / macOS
 source .venv/bin/activate
 ```
 
-## Install dependencies
+Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+Run PostgreSQL
 
-## Configure Environment
+Configure your `.env`
 
-Create a `.env` file inside the backend directory.
-
-Example:
-
-```env
-DATABASE_URL=postgresql+asyncpg://postgres:password@localhost:5432/redpa_ai
-
-JWT_SECRET_KEY=YOUR_SECRET_KEY
-
-JWT_ALGORITHM=HS256
-
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
----
-
-## Database Migration
+Run migrations
 
 ```bash
 alembic upgrade head
 ```
 
----
+Start Ollama
 
-## Run Development Server
+```bash
+ollama serve
+```
+
+Pull the model
+
+```bash
+ollama pull qwen2.5:7b
+```
+
+Run the backend
 
 ```bash
 fastapi dev app/main.py
 ```
 
-Swagger UI
+Open Swagger
 
 ```
 http://127.0.0.1:8000/docs
@@ -167,55 +353,33 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# 📌 Roadmap
+# 📈 Current Status
 
-## ✅ Completed
-
-- Authentication
-- PostgreSQL Integration
-- Alembic Migrations
-- JWT Security
-- Health Monitoring
-
-## 🚧 In Progress
-
-- Ticket Management System
-- Role-Based Authorization
-- Refresh Tokens
-
-## 🔜 Planned
-
-- Multi-Agent AI Workflow
-- LangGraph Integration
-- RAG Pipeline
-- ChromaDB
-- Redis
-- Background Workers
-- Docker Compose
-- GitHub Actions CI/CD
-- Prometheus Monitoring
-- Grafana Dashboards
-- Human Review Dashboard
-- Audit Logging
-- AI Evaluation Pipeline
-
----
-
-# 🎯 Project Vision
-
-RedPA AI aims to become a production-ready enterprise AI platform capable of:
-
-- Intelligent ticket classification
-- AI-powered response generation
-- Retrieval-Augmented Generation (RAG)
-- Multi-agent orchestration
-- Human-in-the-loop approval workflows
-- Enterprise authentication and authorization
-- Observability and monitoring
-- Production deployment
+| Component | Status |
+|------------|--------|
+| Authentication | ✅ |
+| PostgreSQL | ✅ |
+| Async SQLAlchemy | ✅ |
+| Alembic | ✅ |
+| Conversations | ✅ |
+| Messages | ✅ |
+| Ollama Integration | ✅ |
+| AI Chat | ✅ |
+| Conversation Memory | ✅ |
+| Swagger | ✅ |
+| LangGraph | 🚧 |
+| RAG | 🚧 |
+| Multi-Agent | 🚧 |
+| MCP | 🚧 |
 
 ---
 
 # 📄 License
 
 MIT License
+
+---
+
+# ⭐ Star the repository
+
+If you find this project useful, consider giving it a ⭐ to support future development.
