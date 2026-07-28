@@ -1,111 +1,84 @@
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """
-    Application configuration loaded from environment variables.
+    Central application configuration.
     """
 
-    # Application
-    app_name: str = "RedPA AI"
-    app_version: str = "0.1.0"
-    environment: str = "development"
-    debug: bool = True
+    app_name: str = Field(
+        default="RedPA AI",
+        alias="APP_NAME",
+    )
 
-    # API
-    api_v1_prefix: str = "/api/v1"
+    app_version: str = Field(
+        default="0.1.0",
+        alias="APP_VERSION",
+    )
 
-    # Server
-    host: str = "127.0.0.1"
-    port: int = 8000
+    environment: Literal[
+        "development",
+        "testing",
+        "staging",
+        "production",
+    ] = Field(
+        default="development",
+        alias="ENVIRONMENT",
+    )
 
-    # Logging
-    log_level: str = "INFO"
+    debug: bool = Field(
+        default=False,
+        alias="DEBUG",
+    )
 
-    # CORS
-    cors_allowed_origins: list[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+    api_v1_prefix: str = Field(
+        default="/api/v1",
+        alias="API_V1_PREFIX",
+    )
 
-    cors_allowed_methods: list[str] = [
-        "GET",
-        "POST",
-        "PUT",
-        "PATCH",
-        "DELETE",
-        "OPTIONS",
-    ]
+    database_url: str = Field(
+        alias="DATABASE_URL",
+    )
 
-    cors_allowed_headers: list[str] = ["*"]
+    cors_allowed_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173",
+        ],
+        alias="CORS_ALLOWED_ORIGINS",
+    )
 
-    cors_exposed_headers: list[str] = [
-        "X-Request-ID",
-        "X-Process-Time-Ms",
-    ]
+    jwt_secret_key: str = Field(
+        alias="JWT_SECRET_KEY",
+    )
 
-    cors_allow_credentials: bool = True
+    jwt_algorithm: str = Field(
+        default="HS256",
+        alias="JWT_ALGORITHM",
+    )
+
+    access_token_expire_minutes: int = Field(
+        default=30,
+        alias="ACCESS_TOKEN_EXPIRE_MINUTES",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        populate_by_name=True,
     )
-
-    @field_validator("environment")
-    @classmethod
-    def validate_environment(cls, value: str) -> str:
-        allowed_environments = {
-            "development",
-            "testing",
-            "staging",
-            "production",
-        }
-
-        normalized_value = value.lower().strip()
-
-        if normalized_value not in allowed_environments:
-            raise ValueError(
-                "Environment must be one of: "
-                f"{', '.join(sorted(allowed_environments))}"
-            )
-
-        return normalized_value
-
-    @field_validator("log_level")
-    @classmethod
-    def validate_log_level(cls, value: str) -> str:
-        allowed_log_levels = {
-            "DEBUG",
-            "INFO",
-            "WARNING",
-            "ERROR",
-            "CRITICAL",
-        }
-
-        normalized_value = value.upper().strip()
-
-        if normalized_value not in allowed_log_levels:
-            raise ValueError(
-                "Log level must be one of: "
-                f"{', '.join(sorted(allowed_log_levels))}"
-            )
-
-        return normalized_value
 
 
 @lru_cache
 def get_settings() -> Settings:
-    """
-    Return a cached Settings instance.
-    """
-
     return Settings()
 
 

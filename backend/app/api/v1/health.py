@@ -1,10 +1,8 @@
-import logging
-from typing import Literal
-
-from fastapi import APIRouter, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, status
 
 from app.core.config import settings
+from app.database.session import check_database_connection
+from app.schemas.health import HealthResponse, ServiceStatus
 
 
 router = APIRouter(
@@ -12,31 +10,26 @@ router = APIRouter(
     tags=["Health"],
 )
 
-logger = logging.getLogger(__name__)
-
-
-class HealthResponse(BaseModel):
-    status: Literal["healthy"]
-    service: str
-    version: str
-    environment: str
-    request_id: str
-
 
 @router.get(
     "",
     response_model=HealthResponse,
-    summary="Check API health",
+    status_code=status.HTTP_200_OK,
+    summary="Check application health",
 )
-async def health_check(request: Request) -> HealthResponse:
-    """Return the current API health status."""
+async def get_health() -> HealthResponse:
+    """
+    Return application and database health information.
+    """
 
-    logger.info("Health check requested")
+    database_is_healthy = await check_database_connection()
 
     return HealthResponse(
-        status="healthy",
-        service=f"{settings.app_name} API",
+        status="healthy" if database_is_healthy else "degraded",
+        service=settings.app_name,
         version=settings.app_version,
         environment=settings.environment,
-        request_id=request.state.request_id,
+        database=ServiceStatus(
+            status="healthy" if database_is_healthy else "unhealthy",
+        ),
     )
