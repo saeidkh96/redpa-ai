@@ -1,303 +1,264 @@
-![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql)
-![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-DC244C)
-![LangGraph](https://img.shields.io/badge/LangGraph-Agent_Workflows-4B32C3)
-![Ollama](https://img.shields.io/badge/Ollama-qwen2.5:7b-black)
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Active-success)
-
-![GitHub stars](https://img.shields.io/github/stars/saeidkh96/redpa-ai?style=social)
-![GitHub forks](https://img.shields.io/github/forks/saeidkh96/redpa-ai?style=social)
-![GitHub issues](https://img.shields.io/github/issues/saeidkh96/redpa-ai)
-![GitHub last commit](https://img.shields.io/github/last-commit/saeidkh96/redpa-ai)
-
 # 🚀 RedPA AI
 
-> An enterprise-ready Agentic AI Platform built with FastAPI, LangGraph, Ollama, PostgreSQL and Qdrant.
+![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Production-009688?logo=fastapi)
+![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_AI-purple)
+![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql)
+![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-DC244C)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-RedPA AI is an open-source platform for building production-grade AI assistants capable of understanding documents, retrieving relevant knowledge using Retrieval-Augmented Generation (RAG), and orchestrating intelligent workflows through AI agents.
+**RedPA AI** is an open-source, production-oriented Agentic AI platform
+for building intelligent assistants with Retrieval-Augmented Generation
+(RAG), document understanding, conversational memory (planned), and
+multi-agent workflows.
 
----
+------------------------------------------------------------------------
 
-## ✨ Features
+# Features
 
-- 🔐 JWT Authentication
-- 💬 Persistent AI Conversations
-- 📄 Document Upload
-- 📑 PDF, DOCX, TXT & Markdown Support
-- 🔍 Automatic Text Extraction
-- ✂️ Smart Document Chunking
-- 🧠 Local Embeddings with Ollama
-- ⚡ Vector Search using Qdrant
-- 📚 Retrieval-Augmented Generation (RAG)
-- 🤖 LangGraph Agent Workflow
-- 🐳 Docker Support
-- 📖 Interactive Swagger API
-- ⚡ Async FastAPI Backend
+-   JWT Authentication
+-   Conversation Management
+-   Persistent Chat History
+-   LangGraph Agent Workflow
+-   Planner-based Routing
+-   Conversational RAG
+-   Document Upload
+-   Text Extraction
+-   Intelligent Chunking
+-   Embedding Generation
+-   Semantic Retrieval
+-   Qdrant Vector Database
+-   Ollama Local Models
+-   PostgreSQL Persistence
+-   Async FastAPI API
+-   Docker Ready
+-   Swagger Documentation
 
----
+------------------------------------------------------------------------
 
-# 🏗 Architecture
+# Architecture
 
+``` text
+Client
+   │
+   ▼
+FastAPI API
+   │
+   ▼
+Chat Service
+   │
+   ▼
+Orchestrator
+   │
+   ▼
+LangGraph
+ ├── Chat Node
+ ├── RAG Node
+ └── Response Node
+        │
+        ▼
+Retriever
+        │
+        ▼
+Qdrant
+        │
+        ▼
+Context Builder
+        │
+        ▼
+Ollama
 ```
-                +----------------------+
-                |      FastAPI API     |
-                +----------+-----------+
-                           |
-             +-------------+-------------+
-             |                           |
-             ▼                           ▼
-      PostgreSQL                  LangGraph Agent
-             |                           |
-             ▼                           ▼
-     Document Metadata           Ollama LLM
-             |
-             ▼
-     Document Extraction
-             |
-             ▼
-      Chunking Service
-             |
-             ▼
-    Ollama Embeddings
-             |
-             ▼
-         Qdrant Vector DB
-             |
-             ▼
-      Semantic Retrieval
-```
 
----
+------------------------------------------------------------------------
 
-# 📄 Document Processing Pipeline
+# RAG Pipeline
 
-```
+``` text
 Upload Document
-        │
-        ▼
-Store File
-        │
-        ▼
+      │
+      ▼
 Extract Text
-        │
-        ▼
-Save Content
-        │
-        ▼
+      │
+      ▼
 Chunk Document
-        │
-        ▼
+      │
+      ▼
 Generate Embeddings
-        │
-        ▼
+      │
+      ▼
 Store in Qdrant
-        │
-        ▼
-READY
+      │
+      ▼
+User Question
+      │
+      ▼
+Retriever
+      │
+      ▼
+Context Builder
+      │
+      ▼
+Ollama
+      │
+      ▼
+Grounded Response + Sources
 ```
 
----
+------------------------------------------------------------------------
 
-# 🛠 Tech Stack
+# Tech Stack
 
 ## Backend
 
-- FastAPI
-- SQLAlchemy
-- Alembic
-- Pydantic
-- AsyncIO
+-   FastAPI
+-   SQLAlchemy
+-   Alembic
+-   Pydantic
+-   AsyncIO
 
 ## AI
 
-- LangGraph
-- Ollama
-- Local Embeddings
-- RAG
+-   LangGraph
+-   Ollama
+-   qwen2.5:7b
+-   nomic-embed-text
+-   RAG
 
 ## Database
 
-- PostgreSQL
-- Qdrant Vector Database
+-   PostgreSQL
+-   Qdrant
 
 ## DevOps
 
-- Docker
-- Docker Compose
+-   Docker
+-   Docker Compose
 
----
+------------------------------------------------------------------------
 
-# 📂 Project Structure
+# Project Structure
 
-```
+``` text
 backend/
-│
-├── app/
-│   ├── api/
-│   ├── core/
-│   ├── db/
-│   ├── models/
-│   ├── repositories/
-│   ├── schemas/
-│   ├── services/
-│   ├── agents/
-│   └── utils/
-│
-├── storage/
-├── alembic/
-└── tests/
+ ├── app/
+ │   ├── agents/
+ │   ├── api/
+ │   ├── clients/
+ │   ├── core/
+ │   ├── database/
+ │   ├── models/
+ │   ├── prompts/
+ │   ├── repositories/
+ │   ├── schemas/
+ │   └── services/
+ ├── alembic/
+ ├── storage/
+ └── tests/
 ```
 
----
+------------------------------------------------------------------------
 
-# 🚀 Running the Project
+# Installation
 
-## Clone
-
-```bash
-git clone https://github.com/YOUR_USERNAME/redpa-ai.git
+``` bash
+git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
-```
 
----
-
-## Install
-
-```bash
 python -m venv .venv
-```
 
-Windows
-
-```bash
+# Windows
 .venv\Scripts\activate
-```
 
-Linux / macOS
-
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
----
+Run infrastructure:
 
-## Start PostgreSQL & Qdrant
-
-```bash
+``` bash
 docker compose up -d
 ```
 
----
+Start Ollama:
 
-## Start Ollama
-
-```bash
+``` bash
 ollama serve
-```
 
-Pull required models
-
-```bash
 ollama pull qwen2.5:7b
 ollama pull nomic-embed-text
 ```
 
----
+Run API:
 
-## Run FastAPI
-
-```bash
+``` bash
 uvicorn app.main:app --reload
 ```
 
-Swagger
+Swagger:
 
-```
-http://127.0.0.1:8000/docs
-```
+    http://127.0.0.1:8000/docs
 
----
+------------------------------------------------------------------------
 
-# 📚 Current Capabilities
+# Current Capabilities
 
-- User authentication
-- Conversation management
-- AI chat
-- Document upload
-- Automatic document parsing
-- Semantic chunking
-- Local embedding generation
-- Vector indexing
-- Semantic search
-- RAG-ready architecture
+-   Authentication
+-   Conversations
+-   Persistent Chat
+-   Document Upload
+-   Document Parsing
+-   Chunking
+-   Embeddings
+-   Qdrant Integration
+-   Retriever Service
+-   Context Builder
+-   Conversational RAG
+-   LangGraph Routing
+-   Source Attribution
 
----
+------------------------------------------------------------------------
 
-# 🚧 Roadmap
+# Roadmap
 
-### ✅ Completed
+## Completed
 
-- Authentication
-- Chat API
-- LangGraph Integration
-- Document Processing
-- Chunking
-- Embeddings
-- Qdrant Integration
+-   Authentication
+-   Chat API
+-   LangGraph
+-   Planner Agent
+-   RAG
+-   Retriever
+-   Context Builder
+-   Source Citation
 
-### 🚀 In Progress
+## Planned
 
-- Retriever Service
-- Context Builder
-- RAG Pipeline
-- Source Citation
+-   Streaming Responses
+-   Conversation Memory
+-   Tool Calling
+-   SQL Agent
+-   Research Agent
+-   Human Review
+-   Monitoring
+-   GitHub Actions
+-   MCP Integration
+-   A2A Protocol
 
-### 🔜 Planned
+------------------------------------------------------------------------
 
-- Multi-Agent System
-- Tool Calling
-- SQL Agent
-- Research Agent
-- Human-in-the-Loop
-- Long-term Memory
-- MCP Integration
-- A2A Communication
-- Monitoring Dashboard
-- GitHub Actions CI/CD
+# Why RedPA AI?
 
----
+RedPA AI is designed as a portfolio-quality project demonstrating modern
+backend engineering, retrieval-augmented generation, production-ready
+API design, and agent orchestration. The architecture emphasizes modular
+services, clear separation of concerns, and extensibility for future
+enterprise AI capabilities.
 
-# 📷 Screenshots
+------------------------------------------------------------------------
 
-Coming soon.
-
----
-
-# 🤝 Contributing
-
-Pull requests are welcome.
-
-For major changes, please open an issue first.
-
----
-
-# 📄 License
+# License
 
 MIT License
 
-Copyright (c) 2026 Saeed Khalilian
-
----
-
-# ⭐ Support
-
-If you find this project useful, consider giving it a ⭐ on GitHub.
+Copyright (c) 2026 Saeid Khalilian
