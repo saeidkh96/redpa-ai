@@ -1,114 +1,132 @@
-# 🚀 RedPA AI
-
 ![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.116-009688?logo=fastapi)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791?logo=postgresql)
-![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-red?logo=sqlalchemy)
-![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063)
+![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-DC244C)
+![LangGraph](https://img.shields.io/badge/LangGraph-Agent_Workflows-4B32C3)
 ![Ollama](https://img.shields.io/badge/Ollama-qwen2.5:7b-black)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
-![PRs](https://img.shields.io/badge/PRs-Welcome-brightgreen)
 
+![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/redpa-ai?style=social)
+![GitHub forks](https://img.shields.io/github/forks/YOUR_USERNAME/redpa-ai?style=social)
+![GitHub issues](https://img.shields.io/github/issues/YOUR_USERNAME/redpa-ai)
+![GitHub last commit](https://img.shields.io/github/last-commit/YOUR_USERNAME/redpa-ai)
 
-> An enterprise-ready Agentic AI platform for building intelligent AI assistants, multi-agent workflows, and production-grade autonomous systems.
+# 🚀 RedPA AI
 
-RedPA AI is an open-source backend platform focused on modern AI engineering. It combines FastAPI, PostgreSQL, and local Large Language Models (LLMs) to provide a scalable foundation for conversational AI, persistent memory, and future multi-agent orchestration.
+> An enterprise-ready Agentic AI Platform built with FastAPI, LangGraph, Ollama, PostgreSQL and Qdrant.
 
-The project is designed with clean architecture principles and aims to evolve into a complete enterprise Agentic AI platform with LangGraph, Retrieval-Augmented Generation (RAG), MCP, and Human-in-the-Loop workflows.
-
----
-
-# ✨ Current Features
-
-## 🔐 Authentication
-
-- JWT Authentication
-- User Registration
-- User Login
-- Password Hashing
-- Protected API Endpoints
+RedPA AI is an open-source platform for building production-grade AI assistants capable of understanding documents, retrieving relevant knowledge using Retrieval-Augmented Generation (RAG), and orchestrating intelligent workflows through AI agents.
 
 ---
 
-## 💬 Conversation Management
+## ✨ Features
 
-- Persistent Conversations
-- Conversation History
-- Message Storage
-- User / Assistant Roles
-- Pagination Support
-
----
-
-## 🤖 AI Integration
-
-- Ollama Integration
-- Local LLM Support
-- Persistent Chat Memory
-- Context-aware Conversations
-- AI Chat Endpoint
-- LLM Health Monitoring
-
----
-
-## 🗄 Database
-
-- PostgreSQL
-- SQLAlchemy 2.0 (Async)
-- Alembic Migrations
-- UUID Primary Keys
-- Async Database Sessions
-
----
-
-## ⚡ API
-
-- FastAPI
-- RESTful Architecture
-- OpenAPI Documentation
-- Swagger UI
-- Modular Routing
+- 🔐 JWT Authentication
+- 💬 Persistent AI Conversations
+- 📄 Document Upload
+- 📑 PDF, DOCX, TXT & Markdown Support
+- 🔍 Automatic Text Extraction
+- ✂️ Smart Document Chunking
+- 🧠 Local Embeddings with Ollama
+- ⚡ Vector Search using Qdrant
+- 📚 Retrieval-Augmented Generation (RAG)
+- 🤖 LangGraph Agent Workflow
+- 🐳 Docker Support
+- 📖 Interactive Swagger API
+- ⚡ Async FastAPI Backend
 
 ---
 
 # 🏗 Architecture
 
 ```
-                    Client
-                       │
-                       ▼
-                FastAPI REST API
-                       │
-          ┌────────────┴────────────┐
-          │                         │
-          ▼                         ▼
- Authentication              Conversation API
-          │                         │
-          └────────────┬────────────┘
-                       ▼
-                 Chat Service
-                       │
-                       ▼
-                  Ollama Client
-                       │
-                       ▼
-               Local LLM (Qwen)
-                       │
-                       ▼
-                  PostgreSQL
+                +----------------------+
+                |      FastAPI API     |
+                +----------+-----------+
+                           |
+             +-------------+-------------+
+             |                           |
+             ▼                           ▼
+      PostgreSQL                  LangGraph Agent
+             |                           |
+             ▼                           ▼
+     Document Metadata           Ollama LLM
+             |
+             ▼
+     Document Extraction
+             |
+             ▼
+      Chunking Service
+             |
+             ▼
+    Ollama Embeddings
+             |
+             ▼
+         Qdrant Vector DB
+             |
+             ▼
+      Semantic Retrieval
+```
+
+---
+
+# 📄 Document Processing Pipeline
+
+```
+Upload Document
+        │
+        ▼
+Store File
+        │
+        ▼
+Extract Text
+        │
+        ▼
+Save Content
+        │
+        ▼
+Chunk Document
+        │
+        ▼
+Generate Embeddings
+        │
+        ▼
+Store in Qdrant
+        │
+        ▼
+READY
 ```
 
 ---
 
 # 🛠 Tech Stack
 
-| Backend | AI | Database | Tools |
-|---------|----|----------|-------|
-| Python 3.14 | Ollama | PostgreSQL | Git |
-| FastAPI | Qwen2.5 | SQLAlchemy Async | Docker (planned) |
-| Pydantic v2 | Local LLM | Alembic | VS Code |
-| HTTPX | Agentic AI | AsyncPG | Swagger |
+## Backend
+
+- FastAPI
+- SQLAlchemy
+- Alembic
+- Pydantic
+- AsyncIO
+
+## AI
+
+- LangGraph
+- Ollama
+- Local Embeddings
+- RAG
+
+## Database
+
+- PostgreSQL
+- Qdrant Vector Database
+
+## DevOps
+
+- Docker
+- Docker Compose
 
 ---
 
@@ -119,185 +137,38 @@ backend/
 │
 ├── app/
 │   ├── api/
-│   ├── clients/
 │   ├── core/
-│   ├── database/
+│   ├── db/
 │   ├── models/
+│   ├── repositories/
 │   ├── schemas/
 │   ├── services/
-│   ├── main.py
-│   └── ...
+│   ├── agents/
+│   └── utils/
 │
+├── storage/
 ├── alembic/
-├── requirements.txt
-└── .env
+└── tests/
 ```
 
 ---
 
-# 🔌 Available API Endpoints
+# 🚀 Running the Project
 
-## Authentication
-
-```
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-```
-
----
-
-## Users
-
-```
-GET    /api/v1/users/me
-```
-
----
-
-## Conversations
-
-```
-POST   /api/v1/conversations
-GET    /api/v1/conversations
-GET    /api/v1/conversations/{id}
-```
-
----
-
-## Messages
-
-```
-POST   /api/v1/conversations/{id}/messages
-GET    /api/v1/conversations/{id}/messages
-```
-
----
-
-## Chat
-
-```
-POST   /api/v1/chat
-```
-
----
-
-## LLM
-
-```
-GET    /api/v1/llm/health
-```
-
----
-
-# 📸 Current Capabilities
-
-✅ User authentication
-
-✅ Persistent conversations
-
-✅ Persistent AI chat history
-
-✅ Local LLM integration
-
-✅ Async database architecture
-
-✅ OpenAPI documentation
-
-✅ Conversation context
-
-✅ Usage metadata collection
-
----
-
-# 🚧 Roadmap
-
-## Version 0.2
-
-- LangGraph Integration
-- State Management
-- Agent Workflow
-- Chat Orchestrator
-
----
-
-## Version 0.3
-
-- Retrieval-Augmented Generation (RAG)
-- ChromaDB
-- Document Upload
-- Semantic Search
-
----
-
-## Version 0.4
-
-- Planner Agent
-- Research Agent
-- Tool Agent
-- SQL Agent
-
----
-
-## Version 0.5
-
-- MCP Server
-- MCP Client
-- Tool Registry
-- External Integrations
-
----
-
-## Version 0.6
-
-- Human-in-the-Loop
-- Approval Workflows
-- Background Tasks
-- Long-running Agents
-
----
-
-## Version 1.0
-
-- Multi-Agent Platform
-- Docker Compose
-- Kubernetes Deployment
-- Monitoring
-- Grafana
-- Prometheus
-- GitHub Actions
-- Production CI/CD
-
----
-
-# 🎯 Project Goals
-
-RedPA AI aims to become an enterprise-grade Agentic AI platform capable of:
-
-- Building autonomous AI agents
-- Long-term conversational memory
-- Multi-agent collaboration
-- Enterprise AI workflows
-- Local and cloud LLM support
-- Production deployment
-
----
-
-# 🚀 Getting Started
-
-Clone the repository
+## Clone
 
 ```bash
-git clone https://github.com/<your-username>/redpa-ai.git
-cd redpa-ai/backend
+git clone https://github.com/YOUR_USERNAME/redpa-ai.git
+cd redpa-ai
 ```
 
-Create a virtual environment
+---
+
+## Install
 
 ```bash
 python -m venv .venv
 ```
-
-Activate
 
 Windows
 
@@ -317,35 +188,38 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
-Run PostgreSQL
+---
 
-Configure your `.env`
-
-Run migrations
+## Start PostgreSQL & Qdrant
 
 ```bash
-alembic upgrade head
+docker compose up -d
 ```
 
-Start Ollama
+---
+
+## Start Ollama
 
 ```bash
 ollama serve
 ```
 
-Pull the model
+Pull required models
 
 ```bash
 ollama pull qwen2.5:7b
+ollama pull nomic-embed-text
 ```
 
-Run the backend
+---
+
+## Run FastAPI
 
 ```bash
-fastapi dev app/main.py
+uvicorn app.main:app --reload
 ```
 
-Open Swagger
+Swagger
 
 ```
 http://127.0.0.1:8000/docs
@@ -353,24 +227,66 @@ http://127.0.0.1:8000/docs
 
 ---
 
-# 📈 Current Status
+# 📚 Current Capabilities
 
-| Component | Status |
-|------------|--------|
-| Authentication | ✅ |
-| PostgreSQL | ✅ |
-| Async SQLAlchemy | ✅ |
-| Alembic | ✅ |
-| Conversations | ✅ |
-| Messages | ✅ |
-| Ollama Integration | ✅ |
-| AI Chat | ✅ |
-| Conversation Memory | ✅ |
-| Swagger | ✅ |
-| LangGraph | 🚧 |
-| RAG | 🚧 |
-| Multi-Agent | 🚧 |
-| MCP | 🚧 |
+- User authentication
+- Conversation management
+- AI chat
+- Document upload
+- Automatic document parsing
+- Semantic chunking
+- Local embedding generation
+- Vector indexing
+- Semantic search
+- RAG-ready architecture
+
+---
+
+# 🚧 Roadmap
+
+### ✅ Completed
+
+- Authentication
+- Chat API
+- LangGraph Integration
+- Document Processing
+- Chunking
+- Embeddings
+- Qdrant Integration
+
+### 🚀 In Progress
+
+- Retriever Service
+- Context Builder
+- RAG Pipeline
+- Source Citation
+
+### 🔜 Planned
+
+- Multi-Agent System
+- Tool Calling
+- SQL Agent
+- Research Agent
+- Human-in-the-Loop
+- Long-term Memory
+- MCP Integration
+- A2A Communication
+- Monitoring Dashboard
+- GitHub Actions CI/CD
+
+---
+
+# 📷 Screenshots
+
+Coming soon.
+
+---
+
+# 🤝 Contributing
+
+Pull requests are welcome.
+
+For major changes, please open an issue first.
 
 ---
 
@@ -378,8 +294,10 @@ http://127.0.0.1:8000/docs
 
 MIT License
 
+Copyright (c) 2026 Saeed Khalilian
+
 ---
 
-# ⭐ Star the repository
+# ⭐ Support
 
-If you find this project useful, consider giving it a ⭐ to support future development.
+If you find this project useful, consider giving it a ⭐ on GitHub.
