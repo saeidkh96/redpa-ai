@@ -8,10 +8,10 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-success)
 
-![GitHub stars](https://img.shields.io/github/stars/SaeedKhalilian/redpa-ai?style=social)
-![GitHub forks](https://img.shields.io/github/forks/SaeedKhalilian/redpa-ai?style=social)
-![GitHub issues](https://img.shields.io/github/issues/SaeedKhalilian/redpa-ai)
-![GitHub last commit](https://img.shields.io/github/last-commit/SaeedKhalilian/redpa-ai)
+![GitHub stars](https://img.shields.io/github/stars/saeidkh96/redpa-ai?style=social)
+![GitHub forks](https://img.shields.io/github/forks/saeidkh96/redpa-ai?style=social)
+![GitHub issues](https://img.shields.io/github/issues/saeidkh96/redpa-ai)
+![GitHub last commit](https://img.shields.io/github/last-commit/saeidkh96/redpa-ai)
 
 # 🚀 RedPA AI
 
