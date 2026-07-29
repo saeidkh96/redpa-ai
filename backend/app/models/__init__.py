@@ -4,13 +4,14 @@ from app.models.document import (
     DocumentSource,
     DocumentStatus,
 )
+from app.models.document_content import DocumentContent
 from app.models.message import (
     Message,
     MessageRole,
     MessageStatus,
 )
 from app.models.user import User
-
+from app.models.document_chunk import DocumentChunk
 
 __all__ = [
     "User",
@@ -21,4 +22,6 @@ __all__ = [
     "Document",
     "DocumentSource",
     "DocumentStatus",
+    "DocumentContent",
+    "DocumentChunk",
 ]
