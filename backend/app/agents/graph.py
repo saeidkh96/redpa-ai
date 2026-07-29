@@ -6,6 +6,7 @@ from app.agents.nodes.capability_unavailable import (
 )
 from app.agents.nodes.chat import chat_node
 from app.agents.nodes.planner import planner_node
+from app.agents.nodes.rag import rag_node
 from app.agents.nodes.response import response_node
 from app.agents.router import route_after_planner
 from app.agents.state import AgentState
@@ -24,6 +25,11 @@ def create_agent_graph() -> CompiledStateGraph:
     graph_builder.add_node(
         "chat",
         chat_node,
+    )
+
+    graph_builder.add_node(
+        "rag",
+        rag_node,
     )
 
     graph_builder.add_node(
@@ -46,6 +52,7 @@ def create_agent_graph() -> CompiledStateGraph:
         route_after_planner,
         {
             "chat": "chat",
+            "rag": "rag",
             "capability_unavailable": (
                 "capability_unavailable"
             ),
@@ -54,6 +61,11 @@ def create_agent_graph() -> CompiledStateGraph:
 
     graph_builder.add_edge(
         "chat",
+        "response",
+    )
+
+    graph_builder.add_edge(
+        "rag",
         "response",
     )
 
