@@ -48,3 +48,7 @@ frontend/node_modules/
 
 # Misc
 *.swp
+
+# Document uploads
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
