@@ -37,6 +37,42 @@ class OrchestratorService:
         )
 
     @classmethod
+    async def resume(
+        cls,
+        *,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+        history: list[Message],
+        review_id: uuid.UUID,
+        requested_action: str | None,
+        request_content: str | None,
+        action_payload: dict[str, Any] | None,
+        reviewed_by: uuid.UUID | None,
+        reviewed_at: Any,
+        reviewer_feedback: str | None,
+    ) -> OrchestratorResult:
+        initial_state = cls._build_resume_state(
+            conversation_id=conversation_id,
+            user_id=user_id,
+            history=history,
+            review_id=review_id,
+            requested_action=requested_action,
+            request_content=request_content,
+            action_payload=action_payload,
+            reviewed_by=reviewed_by,
+            reviewed_at=reviewed_at,
+            reviewer_feedback=reviewer_feedback,
+        )
+
+        final_state = await agent_graph.ainvoke(
+            initial_state,
+        )
+
+        return cls._build_result(
+            final_state,
+        )
+
+    @classmethod
     async def stream(
         cls,
         conversation_id: uuid.UUID,
@@ -49,15 +85,75 @@ class OrchestratorService:
             history=history,
         )
 
+        async for event in cls._stream_state(
+            initial_state=initial_state,
+            conversation_id=conversation_id,
+            resumed=False,
+        ):
+            yield event
+
+    @classmethod
+    async def stream_resume(
+        cls,
+        *,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+        history: list[Message],
+        review_id: uuid.UUID,
+        requested_action: str | None,
+        request_content: str | None,
+        action_payload: dict[str, Any] | None,
+        reviewed_by: uuid.UUID | None,
+        reviewed_at: Any,
+        reviewer_feedback: str | None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        initial_state = cls._build_resume_state(
+            conversation_id=conversation_id,
+            user_id=user_id,
+            history=history,
+            review_id=review_id,
+            requested_action=requested_action,
+            request_content=request_content,
+            action_payload=action_payload,
+            reviewed_by=reviewed_by,
+            reviewed_at=reviewed_at,
+            reviewer_feedback=reviewer_feedback,
+        )
+
+        async for event in cls._stream_state(
+            initial_state=initial_state,
+            conversation_id=conversation_id,
+            resumed=True,
+        ):
+            yield event
+
+    @classmethod
+    async def _stream_state(
+        cls,
+        *,
+        initial_state: dict[str, Any],
+        conversation_id: uuid.UUID,
+        resumed: bool,
+    ) -> AsyncIterator[dict[str, Any]]:
         accumulated_state: dict[str, Any] = {
             **initial_state,
         }
 
         yield {
-            "event": "workflow_started",
+            "event": (
+                "workflow_resume_started"
+                if resumed
+                else "workflow_started"
+            ),
             "data": {
                 "conversation_id": str(
                     conversation_id,
+                ),
+                "resumed": resumed,
+                "approved_review_id": (
+                    initial_state.get(
+                        "approved_review_id",
+                    )
                 ),
             },
         }
@@ -70,7 +166,10 @@ class OrchestratorService:
             ],
             version="v2",
         ):
-            if not isinstance(stream_chunk, dict):
+            if not isinstance(
+                stream_chunk,
+                dict,
+            ):
                 continue
 
             chunk_type = str(
@@ -99,9 +198,7 @@ class OrchestratorService:
                 async for update_event in (
                     cls._handle_update_chunk(
                         chunk_data=chunk_data,
-                        accumulated_state=(
-                            accumulated_state
-                        ),
+                        accumulated_state=accumulated_state,
                     )
                 ):
                     yield update_event
@@ -111,18 +208,29 @@ class OrchestratorService:
         )
 
         yield {
-            "event": "workflow_completed",
+            "event": (
+                "workflow_resume_completed"
+                if resumed
+                else "workflow_completed"
+            ),
             "data": {
-                "response_content": (
-                    result.response_content
+                **cls._build_result_event_data(
+                    result,
                 ),
-                "model": result.model,
-                "provider": result.provider,
-                "route": result.route,
-                "planner_reason": (
-                    result.planner_reason
+                "resumed": resumed,
+                "approval_granted": bool(
+                    accumulated_state.get(
+                        "approval_granted",
+                        False,
+                    )
                 ),
-                "usage": result.usage,
+                "approved_review_id": (
+                    cls._optional_string(
+                        accumulated_state.get(
+                            "approved_review_id",
+                        )
+                    )
+                ),
             },
         }
 
@@ -130,7 +238,10 @@ class OrchestratorService:
     async def _handle_custom_chunk(
         chunk_data: Any,
     ) -> AsyncIterator[dict[str, Any]]:
-        if not isinstance(chunk_data, dict):
+        if not isinstance(
+            chunk_data,
+            dict,
+        ):
             return
 
         event_type = str(
@@ -196,11 +307,17 @@ class OrchestratorService:
         chunk_data: Any,
         accumulated_state: dict[str, Any],
     ) -> AsyncIterator[dict[str, Any]]:
-        if not isinstance(chunk_data, dict):
+        if not isinstance(
+            chunk_data,
+            dict,
+        ):
             return
 
         for node_name, node_update in chunk_data.items():
-            if not isinstance(node_update, dict):
+            if not isinstance(
+                node_update,
+                dict,
+            ):
                 continue
 
             accumulated_state.update(
@@ -225,6 +342,45 @@ class OrchestratorService:
                             )
                             or ""
                         ),
+                        "approval_granted": bool(
+                            node_update.get(
+                                "approval_granted",
+                                False,
+                            )
+                        ),
+                        "approved_review_id": (
+                            OrchestratorService._optional_string(
+                                node_update.get(
+                                    "approved_review_id",
+                                )
+                            )
+                        ),
+                    },
+                }
+
+            if node_name == "human_review":
+                yield {
+                    "event": "human_review_required",
+                    "data": {
+                        "status": str(
+                            node_update.get(
+                                "review_status",
+                                "pending",
+                            )
+                            or "pending"
+                        ),
+                        "reason": str(
+                            node_update.get(
+                                "review_reason",
+                                "",
+                            )
+                            or ""
+                        ),
+                        "requested_action": (
+                            node_update.get(
+                                "requested_action",
+                            )
+                        ),
                     },
                 }
 
@@ -244,9 +400,170 @@ class OrchestratorService:
         user_id: uuid.UUID,
         history: list[Message],
     ) -> dict[str, Any]:
+        messages = OrchestratorService._build_messages(
+            history,
+        )
+
+        return {
+            "conversation_id": str(
+                conversation_id,
+            ),
+            "user_id": str(
+                user_id,
+            ),
+            "messages": messages,
+            "requires_human_review": False,
+            "review_status": None,
+            "review_reason": None,
+            "review_id": None,
+            "approval_granted": False,
+            "approved_review_id": None,
+            "requested_action": None,
+            "request_content": None,
+            "action_payload": None,
+            "reviewed_by": None,
+            "reviewed_at": None,
+            "reviewer_feedback": None,
+            "completed": False,
+            "error": None,
+        }
+
+    @staticmethod
+    def _build_resume_state(
+        *,
+        conversation_id: uuid.UUID,
+        user_id: uuid.UUID,
+        history: list[Message],
+        review_id: uuid.UUID,
+        requested_action: str | None,
+        request_content: str | None,
+        action_payload: dict[str, Any] | None,
+        reviewed_by: uuid.UUID | None,
+        reviewed_at: Any,
+        reviewer_feedback: str | None,
+    ) -> dict[str, Any]:
+        messages = OrchestratorService._build_messages(
+            history,
+        )
+
+        normalized_action_payload = (
+            {
+                **action_payload,
+            }
+            if isinstance(
+                action_payload,
+                dict,
+            )
+            else {}
+        )
+
+        normalized_request_content = (
+            OrchestratorService._optional_string(
+                request_content,
+            )
+        )
+
+        if normalized_request_content:
+            latest_user_content = (
+                OrchestratorService
+                ._get_latest_user_message_content(
+                    messages,
+                )
+            )
+
+            if latest_user_content != normalized_request_content:
+                messages.append(
+                    {
+                        "role": MessageRole.USER.value,
+                        "content": normalized_request_content,
+                    }
+                )
+
+        normalized_action_payload.update(
+            {
+                "approval_required": False,
+                "approval_granted": True,
+                "approved_review_id": str(
+                    review_id,
+                ),
+            }
+        )
+
+        resume_route = (
+            OrchestratorService._optional_string(
+                normalized_action_payload.get(
+                    "resume_route",
+                )
+            )
+            or OrchestratorService._optional_string(
+                normalized_action_payload.get(
+                    "original_route",
+                )
+            )
+        )
+
+        return {
+            "conversation_id": str(
+                conversation_id,
+            ),
+            "user_id": str(
+                user_id,
+            ),
+            "messages": messages,
+            "route": resume_route,
+            "planner_reason": (
+                "The workflow is being resumed after human "
+                f"approval for review '{review_id}'."
+            ),
+            "requires_human_review": False,
+            "review_status": "approved",
+            "review_reason": None,
+            "review_id": str(
+                review_id,
+            ),
+            "approval_granted": True,
+            "approved_review_id": str(
+                review_id,
+            ),
+            "requested_action": (
+                OrchestratorService._optional_string(
+                    requested_action,
+                )
+            ),
+            "request_content": (
+                normalized_request_content
+            ),
+            "action_payload": (
+                normalized_action_payload
+            ),
+            "reviewed_by": (
+                str(
+                    reviewed_by,
+                )
+                if reviewed_by is not None
+                else None
+            ),
+            "reviewed_at": (
+                OrchestratorService._serialize_datetime(
+                    reviewed_at,
+                )
+            ),
+            "reviewer_feedback": (
+                OrchestratorService._optional_string(
+                    reviewer_feedback,
+                )
+            ),
+            "completed": False,
+            "error": None,
+        }
+
+    @staticmethod
+    def _build_messages(
+        history: list[Message],
+    ) -> list[dict[str, str]]:
         messages: list[dict[str, str]] = [
             {
-                "role": "system",
+                "role": MessageRole.SYSTEM.value,
                 "content": REDPA_SYSTEM_PROMPT,
             }
         ]
@@ -261,7 +578,9 @@ class OrchestratorService:
             if message.role not in allowed_roles:
                 continue
 
-            content = message.content.strip()
+            content = str(
+                message.content,
+            ).strip()
 
             if not content:
                 continue
@@ -273,16 +592,60 @@ class OrchestratorService:
                 }
             )
 
+        return messages
+
+    @staticmethod
+    def _get_latest_user_message_content(
+        messages: list[dict[str, str]],
+    ) -> str | None:
+        for message in reversed(
+            messages,
+        ):
+            if message.get(
+                "role",
+            ) != MessageRole.USER.value:
+                continue
+
+            content = str(
+                message.get(
+                    "content",
+                    "",
+                )
+                or ""
+            ).strip()
+
+            if content:
+                return content
+
+        return None
+
+    @staticmethod
+    def _build_result_event_data(
+        result: OrchestratorResult,
+    ) -> dict[str, Any]:
         return {
-            "conversation_id": str(
-                conversation_id,
+            "response_content": result.response_content,
+            "model": result.model,
+            "provider": result.provider,
+            "route": result.route,
+            "planner_reason": result.planner_reason,
+            "usage": result.usage,
+            "requires_human_review": (
+                result.requires_human_review
             ),
-            "user_id": str(
-                user_id,
+            "review_status": result.review_status,
+            "review_reason": result.review_reason,
+            "review_id": result.review_id,
+            "requested_action": (
+                result.requested_action
             ),
-            "messages": messages,
-            "completed": False,
-            "error": None,
+            "request_content": result.request_content,
+            "action_payload": result.action_payload,
+            "reviewed_by": result.reviewed_by,
+            "reviewed_at": result.reviewed_at,
+            "reviewer_feedback": (
+                result.reviewer_feedback
+            ),
         }
 
     @staticmethod
@@ -357,6 +720,87 @@ class OrchestratorService:
         ):
             usage = {}
 
+        requires_human_review = bool(
+            final_state.get(
+                "requires_human_review",
+                False,
+            )
+        )
+
+        review_status = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "review_status",
+                )
+            )
+        )
+
+        review_reason = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "review_reason",
+                )
+            )
+        )
+
+        review_id = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "review_id",
+                )
+            )
+        )
+
+        requested_action = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "requested_action",
+                )
+            )
+        )
+
+        request_content = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "request_content",
+                )
+            )
+        )
+
+        action_payload = final_state.get(
+            "action_payload",
+        )
+
+        if not isinstance(
+            action_payload,
+            dict,
+        ):
+            action_payload = None
+
+        reviewed_by = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "reviewed_by",
+                )
+            )
+        )
+
+        reviewed_at = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "reviewed_at",
+                )
+            )
+        )
+
+        reviewer_feedback = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "reviewer_feedback",
+                )
+            )
+        )
+
         if not response_content:
             raise LLMInvalidResponseError(
                 "The agent workflow returned an empty "
@@ -384,6 +828,37 @@ class OrchestratorService:
                 "The planner returned no routing reason."
             )
 
+        if (
+            requires_human_review
+            and not review_reason
+        ):
+            review_reason = planner_reason
+
+        if (
+            requires_human_review
+            and not review_status
+        ):
+            review_status = "pending"
+
+        if bool(
+            final_state.get(
+                "approval_granted",
+                False,
+            )
+        ):
+            requires_human_review = False
+            review_status = "approved"
+            review_reason = None
+
+            review_id = (
+                OrchestratorService._optional_string(
+                    final_state.get(
+                        "approved_review_id",
+                    )
+                )
+                or review_id
+            )
+
         return OrchestratorResult(
             response_content=response_content,
             model=model,
@@ -391,4 +866,57 @@ class OrchestratorService:
             route=route,
             planner_reason=planner_reason,
             usage=usage,
+            requires_human_review=requires_human_review,
+            review_status=review_status,
+            review_reason=review_reason,
+            review_id=review_id,
+            requested_action=requested_action,
+            request_content=request_content,
+            action_payload=action_payload,
+            reviewed_by=reviewed_by,
+            reviewed_at=reviewed_at,
+            reviewer_feedback=reviewer_feedback,
         )
+
+    @staticmethod
+    def _serialize_datetime(
+        value: Any,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        isoformat_method = getattr(
+            value,
+            "isoformat",
+            None,
+        )
+
+        if callable(
+            isoformat_method,
+        ):
+            serialized_value = str(
+                isoformat_method(),
+            ).strip()
+
+            if serialized_value:
+                return serialized_value
+
+        return OrchestratorService._optional_string(
+            value,
+        )
+
+    @staticmethod
+    def _optional_string(
+        value: Any,
+    ) -> str | None:
+        if value is None:
+            return None
+
+        normalized_value = str(
+            value,
+        ).strip()
+
+        if not normalized_value:
+            return None
+
+        return normalized_value

@@ -15,6 +15,7 @@ ReviewStatus = Literal[
     "pending",
     "approved",
     "rejected",
+    "cancelled",
 ]
 
 
@@ -37,6 +38,14 @@ class AgentState(TypedDict, total=False):
     review_status: ReviewStatus | None
     review_reason: str | None
     review_id: str | None
+
+    approval_granted: bool
+    approved_review_id: str | None
+
+    requested_action: str | None
+    request_content: str | None
+    action_payload: dict[str, Any] | None
+
     reviewed_by: str | None
     reviewed_at: str | None
     reviewer_feedback: str | None

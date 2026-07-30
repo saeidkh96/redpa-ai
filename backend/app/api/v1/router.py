@@ -9,6 +9,7 @@ from app.api.v1.documents import router as documents_router
 from app.api.v1.health import router as health_router
 from app.api.v1.llm import router as llm_router
 from app.api.v1.messages import router as messages_router
+from app.api.v1.reviews import router as reviews_router
 from app.api.v1.users import router as users_router
 
 
@@ -22,3 +23,4 @@ api_router.include_router(messages_router)
 api_router.include_router(chat_router)
 api_router.include_router(llm_router)
 api_router.include_router(documents_router)
+api_router.include_router(reviews_router)

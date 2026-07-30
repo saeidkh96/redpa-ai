@@ -31,3 +31,17 @@ class OrchestratorResult(BaseModel):
     usage: dict[str, Any] = Field(
         default_factory=dict,
     )
+
+    requires_human_review: bool = False
+
+    review_status: str | None = None
+    review_reason: str | None = None
+    review_id: str | None = None
+
+    requested_action: str | None = None
+    request_content: str | None = None
+    action_payload: dict[str, Any] | None = None
+
+    reviewed_by: str | None = None
+    reviewed_at: str | None = None
+    reviewer_feedback: str | None = None
