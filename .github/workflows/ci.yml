@@ -25,10 +25,6 @@ jobs:
     name: Backend CI
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: backend
-
     env:
       PYTHONUNBUFFERED: "1"
       PYTHONDONTWRITEBYTECODE: "1"
@@ -52,46 +48,106 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-          cache: "pip"
-          cache-dependency-path: backend/requirements.txt
+
+      - name: Show repository structure
+        shell: bash
+        run: |
+          echo "Current directory:"
+          pwd
+
+          echo ""
+          echo "Repository files:"
+          find . -maxdepth 3 -type f | sort
 
       - name: Show Python version
         run: |
           python --version
-          pip --version
+          python -m pip --version
 
       - name: Upgrade pip
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
       - name: Install backend dependencies
+        shell: bash
         run: |
-          pip install -r requirements.txt
+          if [ -f "requirements.txt" ]; then
+            echo "Installing dependencies from root requirements.txt"
+            python -m pip install -r requirements.txt
 
-      - name: Install test dependencies
-        run: |
-          pip install pytest pytest-asyncio httpx
+          elif [ -f "backend/requirements.txt" ]; then
+            echo "Installing dependencies from backend/requirements.txt"
+            python -m pip install -r backend/requirements.txt
 
-      - name: Compile backend source
-        run: |
-          python -m compileall -q app
+          elif [ -f "pyproject.toml" ]; then
+            echo "Installing project from root pyproject.toml"
+            python -m pip install .
 
-      - name: Verify application imports
+          elif [ -f "backend/pyproject.toml" ]; then
+            echo "Installing project from backend/pyproject.toml"
+            python -m pip install ./backend
+
+          else
+            echo "ERROR: No requirements.txt or pyproject.toml was found."
+            exit 1
+          fi
+
+      - name: Install CI test dependencies
         run: |
-          python -c "from app.main import app; print('FastAPI application imported successfully')"
+          python -m pip install pytest pytest-asyncio httpx
+
+      - name: Compile Python source
+        shell: bash
+        run: |
+          if [ -d "backend/app" ]; then
+            echo "Compiling backend/app"
+            python -m compileall -q backend/app
+
+          elif [ -d "app" ]; then
+            echo "Compiling app"
+            python -m compileall -q app
+
+          else
+            echo "ERROR: Neither backend/app nor app directory was found."
+            exit 1
+          fi
+
+      - name: Verify FastAPI application import
+        shell: bash
+        run: |
+          if [ -f "backend/app/main.py" ]; then
+            echo "Importing application from backend/app/main.py"
+            cd backend
+            python -c "from app.main import app; print('FastAPI application imported successfully:', app.title)"
+
+          elif [ -f "app/main.py" ]; then
+            echo "Importing application from app/main.py"
+            python -c "from app.main import app; print('FastAPI application imported successfully:', app.title)"
+
+          else
+            echo "ERROR: app/main.py was not found."
+            exit 1
+          fi
 
       - name: Run tests
         shell: bash
         run: |
-          if find tests -type f -name "test_*.py" 2>/dev/null | grep -q .; then
+          if [ -d "backend/tests" ] && find backend/tests -type f -name "test_*.py" | grep -q .; then
+            echo "Running tests from backend/tests"
+            cd backend
             python -m pytest tests -v
+
+          elif [ -d "tests" ] && find tests -type f -name "test_*.py" | grep -q .; then
+            echo "Running tests from tests"
+            python -m pytest tests -v
+
           else
-            echo "No tests were found."
-            echo "Backend installation, compilation, and import checks passed."
+            echo "No pytest test files were found."
+            echo "Dependency installation, compilation, and application import passed."
           fi
