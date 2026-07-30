@@ -4,7 +4,8 @@ from dataclasses import dataclass, field
 from typing import Any
 from uuid import UUID
 
-from app.clients.ollama_client import OllamaClient
+from app.core.config import settings
+from app.core.exceptions import LLMServiceError
 from app.prompts.rag_prompt import (
     RAG_PROMPT_TEMPLATE,
     RAG_SYSTEM_PROMPT,
@@ -14,11 +15,14 @@ from app.services.context_builder_service import (
     BuiltContext,
     ContextBuilderService,
 )
+from app.services.llm_service import (
+    LLMService,
+    llm_service,
+)
 from app.services.retriever_service import (
     RetrievedChunk,
     RetrieverService,
 )
-from app.core.exceptions import LLMServiceError
 
 
 @dataclass(slots=True)
@@ -59,7 +63,7 @@ class RAGService:
         *,
         retriever: RetrieverService | None = None,
         context_builder: ContextBuilderService | None = None,
-        ollama_client: OllamaClient | None = None,
+        language_model_service: LLMService | None = None,
         default_limit: int = 5,
         default_score_threshold: float = 0.20,
         default_max_context_characters: int = 12_000,
@@ -90,9 +94,9 @@ class RAGService:
             )
         )
 
-        self.ollama_client = (
-            ollama_client
-            or OllamaClient()
+        self.llm_service = (
+            language_model_service
+            or llm_service
         )
 
         self.default_limit = default_limit
@@ -172,17 +176,17 @@ class RAGService:
             if not built_context.context.strip():
                 return self._build_no_context_result()
 
-            ollama_messages = self._build_messages(
+            llm_messages = self._build_messages(
                 question=cleaned_question,
                 built_context=built_context,
             )
 
-            ollama_response = await self.ollama_client.chat(
-                messages=ollama_messages,
+            llm_response = await self.llm_service.generate(
+                messages=llm_messages,
             )
 
             answer = (
-                ollama_response.message.content.strip()
+                llm_response.message.content.strip()
             )
 
             if not answer:
@@ -198,11 +202,13 @@ class RAGService:
 
             return RAGResult(
                 answer=answer,
-                model=ollama_response.model,
+                model=llm_response.model,
                 provider="ollama",
                 context_used=True,
                 sources=sources,
-                retrieval_count=len(retrieved_chunks),
+                retrieval_count=len(
+                    retrieved_chunks
+                ),
                 context_characters=(
                     built_context.total_characters
                 ),
@@ -211,22 +217,22 @@ class RAGService:
                 ),
                 usage={
                     "prompt_eval_count": (
-                        ollama_response.prompt_eval_count
+                        llm_response.prompt_eval_count
                     ),
                     "eval_count": (
-                        ollama_response.eval_count
+                        llm_response.eval_count
                     ),
                     "total_duration": (
-                        ollama_response.total_duration
+                        llm_response.total_duration
                     ),
                     "load_duration": (
-                        ollama_response.load_duration
+                        llm_response.load_duration
                     ),
                     "prompt_eval_duration": (
-                        ollama_response.prompt_eval_duration
+                        llm_response.prompt_eval_duration
                     ),
                     "eval_duration": (
-                        ollama_response.eval_duration
+                        llm_response.eval_duration
                     ),
                 },
             )
@@ -238,7 +244,7 @@ class RAGService:
             raise
 
         except Exception as exception:
-           raise RAGServiceError(
+            raise RAGServiceError(
                 f"The RAG workflow failed: {exception}"
             ) from exception
 
@@ -336,12 +342,8 @@ class RAGService:
                     chunk_index=(
                         retrieved_chunk.chunk_index
                     ),
-                    score=(
-                        retrieved_chunk.score
-                    ),
-                    text=(
-                        retrieved_chunk.text
-                    ),
+                    score=retrieved_chunk.score,
+                    text=retrieved_chunk.text,
                     metadata=(
                         retrieved_chunk.metadata
                         or {}
@@ -351,15 +353,14 @@ class RAGService:
 
         return sources
 
-    def _build_no_context_result(
-        self,
-    ) -> RAGResult:
+    @staticmethod
+    def _build_no_context_result() -> RAGResult:
         return RAGResult(
             answer=(
                 "I couldn't find the answer in the "
                 "uploaded documents."
             ),
-            model=self.ollama_client.model,
+            model=settings.ollama_model,
             provider="ollama",
             context_used=False,
             sources=[],

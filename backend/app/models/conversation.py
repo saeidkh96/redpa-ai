@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.base import Base
 
 if TYPE_CHECKING:
+    from app.models.human_review import HumanReview
     from app.models.message import Message
 
 
@@ -64,6 +65,14 @@ class Conversation(Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by="Message.created_at",
+    )
+
+    human_reviews: Mapped[list["HumanReview"]] = relationship(
+        "HumanReview",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="HumanReview.created_at",
     )
 
     def __repr__(self) -> str:

@@ -77,6 +77,27 @@ ROUTE_KEYWORDS: dict[AgentRoute, tuple[str, ...]] = {
 }
 
 
+HIGH_RISK_PATTERNS: tuple[str, ...] = (
+    "delete",
+    "remove",
+    "drop table",
+    "truncate",
+    "transfer money",
+    "wire money",
+    "payment",
+    "bank account",
+    "send email",
+    "email someone",
+    "approve invoice",
+    "purchase",
+    "buy",
+    "refund",
+    "create calendar event",
+    "schedule a meeting",
+    "create github issue",
+)
+
+
 ROUTE_PRIORITIES: tuple[AgentRoute, ...] = (
     "human_review",
     "tool",
@@ -88,6 +109,7 @@ ROUTE_PRIORITIES: tuple[AgentRoute, ...] = (
 
 def _normalize_text(text: str) -> str:
     normalized = text.casefold()
+
     normalized = re.sub(
         r"\s+",
         " ",
@@ -100,21 +122,48 @@ def _normalize_text(text: str) -> str:
 def _get_latest_user_message(
     state: AgentState,
 ) -> str | None:
-    messages = state.get("messages", [])
+    messages = state.get(
+        "messages",
+        [],
+    )
 
     for message in reversed(messages):
-        if message.get("role") != "user":
+        if not isinstance(
+            message,
+            dict,
+        ):
             continue
 
-        content = message.get("content", "")
+        if message.get(
+            "role",
+        ) != "user":
+            continue
 
-        if not isinstance(content, str):
+        content = message.get(
+            "content",
+            "",
+        )
+
+        if not isinstance(
+            content,
+            str,
+        ):
             continue
 
         normalized_content = content.strip()
 
         if normalized_content:
             return normalized_content
+
+    return None
+
+
+def _detect_high_risk_action(
+    normalized_message: str,
+) -> str | None:
+    for pattern in HIGH_RISK_PATTERNS:
+        if pattern in normalized_message:
+            return pattern
 
     return None
 
@@ -126,29 +175,46 @@ def _detect_route(
         user_message,
     )
 
+    high_risk_action = _detect_high_risk_action(
+        normalized_message,
+    )
+
+    if high_risk_action is not None:
+        return (
+            "human_review",
+            (
+                "Selected the 'human_review' route because "
+                "the request contains the high-risk action "
+                f"'{high_risk_action}'."
+            ),
+        )
+
     for route in ROUTE_PRIORITIES:
         keywords = ROUTE_KEYWORDS.get(
             route,
             (),
         )
 
-        matched_keywords = [
-            keyword
-            for keyword in keywords
-            if keyword in normalized_message
-        ]
+        matched_keyword = next(
+            (
+                keyword
+                for keyword in keywords
+                if keyword in normalized_message
+            ),
+            None,
+        )
 
-        if matched_keywords:
-            matched_keyword = matched_keywords[0]
+        if matched_keyword is None:
+            continue
 
-            return (
-                route,
-                (
-                    f"Selected the '{route}' route because "
-                    f"the request matched the routing signal "
-                    f"'{matched_keyword}'."
-                ),
-            )
+        return (
+            route,
+            (
+                f"Selected the '{route}' route because "
+                "the request matched the routing signal "
+                f"'{matched_keyword}'."
+            ),
+        )
 
     return (
         "chat",
@@ -173,13 +239,29 @@ async def planner_node(
                 "Selected the 'chat' route because no valid "
                 "user message was available."
             ),
+            "requires_human_review": False,
+            "review_status": None,
+            "review_reason": None,
         }
 
     route, reason = _detect_route(
         latest_user_message,
     )
 
+    requires_human_review = route == "human_review"
+
     return {
         "route": route,
         "planner_reason": reason,
+        "requires_human_review": requires_human_review,
+        "review_status": (
+            "pending"
+            if requires_human_review
+            else None
+        ),
+        "review_reason": (
+            reason
+            if requires_human_review
+            else None
+        ),
     }

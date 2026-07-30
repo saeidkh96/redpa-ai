@@ -11,6 +11,13 @@ AgentRoute = Literal[
 ]
 
 
+ReviewStatus = Literal[
+    "pending",
+    "approved",
+    "rejected",
+]
+
+
 class AgentState(TypedDict, total=False):
     conversation_id: str
     user_id: str
@@ -25,6 +32,14 @@ class AgentState(TypedDict, total=False):
     provider: str
 
     usage: dict[str, Any]
+
+    requires_human_review: bool
+    review_status: ReviewStatus | None
+    review_reason: str | None
+    review_id: str | None
+    reviewed_by: str | None
+    reviewed_at: str | None
+    reviewer_feedback: str | None
 
     completed: bool
     error: str | None

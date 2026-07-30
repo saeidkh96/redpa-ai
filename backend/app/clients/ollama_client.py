@@ -1,3 +1,6 @@
+import json
+from collections.abc import AsyncIterator
+
 import httpx
 from pydantic import ValidationError
 
@@ -33,24 +36,39 @@ class OllamaClient:
             or settings.ollama_timeout_seconds
         )
 
-    async def chat(
+    def _build_chat_request(
         self,
         messages: list[OllamaChatMessage],
-    ) -> OllamaChatResponse:
-        request_data = OllamaChatRequest(
+        *,
+        stream: bool,
+    ) -> OllamaChatRequest:
+        return OllamaChatRequest(
             model=self.model,
             messages=messages,
-            stream=False,
+            stream=stream,
             options={
                 "temperature": settings.ollama_temperature,
             },
         )
 
+    def _create_timeout(self) -> httpx.Timeout:
+        return httpx.Timeout(
+            timeout=self.timeout_seconds,
+            connect=10.0,
+        )
+
+    async def chat(
+        self,
+        messages: list[OllamaChatMessage],
+    ) -> OllamaChatResponse:
+        request_data = self._build_chat_request(
+            messages,
+            stream=False,
+        )
+
         try:
             async with httpx.AsyncClient(
-                timeout=httpx.Timeout(
-                    self.timeout_seconds,
-                ),
+                timeout=self._create_timeout(),
             ) as client:
                 response = await client.post(
                     f"{self.base_url}/api/chat",
@@ -108,6 +126,129 @@ class OllamaClient:
             )
 
         return parsed_response
+
+    async def stream_chat(
+        self,
+        messages: list[OllamaChatMessage],
+    ) -> AsyncIterator[str]:
+        """
+        Stream assistant response tokens from Ollama.
+
+        Ollama returns newline-delimited JSON objects. Each object may
+        contain a partial token in:
+
+            payload["message"]["content"]
+
+        Tokens are yielded without stripping whitespace because leading
+        spaces are significant when reconstructing the final response.
+        """
+
+        request_data = self._build_chat_request(
+            messages,
+            stream=True,
+        )
+
+        received_content = False
+        stream_completed = False
+
+        try:
+            async with httpx.AsyncClient(
+                timeout=self._create_timeout(),
+            ) as client:
+                async with client.stream(
+                    method="POST",
+                    url=f"{self.base_url}/api/chat",
+                    json=request_data.model_dump(
+                        exclude_none=True,
+                    ),
+                ) as response:
+                    response.raise_for_status()
+
+                    async for line in response.aiter_lines():
+                        if not line:
+                            continue
+
+                        try:
+                            payload = json.loads(line)
+                        except json.JSONDecodeError as exception:
+                            raise LLMInvalidResponseError(
+                                "Ollama returned an invalid streaming "
+                                "JSON response."
+                            ) from exception
+
+                        error_message = payload.get("error")
+
+                        if error_message:
+                            raise LLMInvalidResponseError(
+                                "Ollama returned a streaming error: "
+                                f"{error_message}"
+                            )
+
+                        message = payload.get("message") or {}
+                        content = message.get("content")
+
+                        if content is not None:
+                            if not isinstance(content, str):
+                                raise LLMInvalidResponseError(
+                                    "Ollama returned invalid streaming "
+                                    "message content."
+                                )
+
+                            if content:
+                                received_content = True
+                                yield content
+
+                        if payload.get("done") is True:
+                            stream_completed = True
+                            break
+
+        except LLMInvalidResponseError:
+            raise
+
+        except httpx.ConnectError as exception:
+            raise LLMConnectionError(
+                "Could not connect to Ollama. "
+                "Make sure Ollama is installed and running."
+            ) from exception
+
+        except httpx.TimeoutException as exception:
+            raise LLMTimeoutError(
+                "Ollama streaming response timed out."
+            ) from exception
+
+        except httpx.HTTPStatusError as exception:
+            try:
+                response_text = await exception.response.aread()
+                decoded_response = response_text.decode(
+                    "utf-8",
+                    errors="replace",
+                )
+            except Exception:
+                decoded_response = (
+                    "Could not read the Ollama error response."
+                )
+
+            raise LLMInvalidResponseError(
+                "Ollama returned an unsuccessful streaming response. "
+                f"Status: {exception.response.status_code}. "
+                f"Response: {decoded_response}"
+            ) from exception
+
+        except httpx.RequestError as exception:
+            raise LLMConnectionError(
+                "Could not communicate with Ollama while streaming: "
+                f"{exception}"
+            ) from exception
+
+        if not stream_completed:
+            raise LLMInvalidResponseError(
+                "Ollama closed the stream before completing the response."
+            )
+
+        if not received_content:
+            raise LLMInvalidResponseError(
+                "Ollama returned an empty streaming response."
+            )
 
     async def health_check(
         self,

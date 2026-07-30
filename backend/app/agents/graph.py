@@ -5,6 +5,9 @@ from app.agents.nodes.capability_unavailable import (
     capability_unavailable_node,
 )
 from app.agents.nodes.chat import chat_node
+from app.agents.nodes.human_review import (
+    human_review_node,
+)
 from app.agents.nodes.planner import planner_node
 from app.agents.nodes.rag import rag_node
 from app.agents.nodes.response import response_node
@@ -33,6 +36,11 @@ def create_agent_graph() -> CompiledStateGraph:
     )
 
     graph_builder.add_node(
+        "human_review",
+        human_review_node,
+    )
+
+    graph_builder.add_node(
         "capability_unavailable",
         capability_unavailable_node,
     )
@@ -53,6 +61,7 @@ def create_agent_graph() -> CompiledStateGraph:
         {
             "chat": "chat",
             "rag": "rag",
+            "human_review": "human_review",
             "capability_unavailable": (
                 "capability_unavailable"
             ),
@@ -66,6 +75,11 @@ def create_agent_graph() -> CompiledStateGraph:
 
     graph_builder.add_edge(
         "rag",
+        "response",
+    )
+
+    graph_builder.add_edge(
+        "human_review",
         "response",
     )
 
