@@ -9,6 +9,7 @@ from app.api.v1.documents import router as documents_router
 from app.api.v1.health import router as health_router
 from app.api.v1.llm import router as llm_router
 from app.api.v1.messages import router as messages_router
+from app.api.v1.metrics import router as metrics_router
 from app.api.v1.reviews import router as reviews_router
 from app.api.v1.users import router as users_router
 
@@ -16,6 +17,7 @@ from app.api.v1.users import router as users_router
 api_router = APIRouter()
 
 api_router.include_router(health_router)
+api_router.include_router(metrics_router)
 api_router.include_router(auth_router)
 api_router.include_router(users_router)
 api_router.include_router(conversations_router)

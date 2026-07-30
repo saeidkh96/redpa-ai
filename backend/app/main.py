@@ -10,6 +10,7 @@ from app.database.session import (
     check_database_connection,
     close_database_connection,
 )
+from app.monitoring.metrics import PrometheusMetricsMiddleware
 
 
 @asynccontextmanager
@@ -52,7 +53,18 @@ def create_application() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
-        expose_headers=["X-Request-ID"],
+        expose_headers=[
+            "X-Request-ID",
+            "X-Process-Time-Ms",
+        ],
+    )
+
+    application.add_middleware(
+        PrometheusMetricsMiddleware,
+        excluded_paths={
+            "/metrics",
+            "/api/v1/metrics",
+        },
     )
 
     application.include_router(
