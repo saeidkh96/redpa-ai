@@ -22,9 +22,9 @@ ALLOWED_LLM_ROLES = {
 }
 
 
-async def chat_node(
+def _build_llm_messages(
     state: AgentState,
-) -> dict[str, Any]:
+) -> list[OllamaChatMessage]:
     raw_messages = state.get(
         "messages",
         [],
@@ -38,7 +38,10 @@ async def chat_node(
     llm_messages: list[OllamaChatMessage] = []
 
     for raw_message in raw_messages:
-        if not isinstance(raw_message, dict):
+        if not isinstance(
+            raw_message,
+            dict,
+        ):
             continue
 
         role = str(
@@ -76,6 +79,16 @@ async def chat_node(
             "language model request."
         )
 
+    return llm_messages
+
+
+async def chat_node(
+    state: AgentState,
+) -> dict[str, Any]:
+    llm_messages = _build_llm_messages(
+        state,
+    )
+
     writer = get_stream_writer()
 
     response_parts: list[str] = []
@@ -104,12 +117,12 @@ async def chat_node(
 
     except Exception as exception:
         raise LLMInvalidResponseError(
-            "The chat agent failed while streaming the "
+            "The chat agent failed while generating the "
             f"language model response: {exception}"
         ) from exception
 
     response_content = "".join(
-        response_parts
+        response_parts,
     ).strip()
 
     if not response_content:
@@ -129,6 +142,11 @@ async def chat_node(
         "model": settings.ollama_model,
         "provider": "ollama",
         "usage": {
-            "streamed": True,
+            # The model response was internally generated
+            # token by token.
+            #
+            # This is different from whether the HTTP endpoint
+            # returned SSE streaming to the client.
+            "generation_streamed": True,
         },
     }

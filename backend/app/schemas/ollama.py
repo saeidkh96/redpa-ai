@@ -10,7 +10,6 @@ class OllamaChatMessage(BaseModel):
         "assistant",
         "tool",
     ]
-
     content: str
 
 
@@ -18,6 +17,12 @@ class OllamaChatRequest(BaseModel):
     model: str
     messages: list[OllamaChatMessage]
     stream: bool = False
+
+    # Supports Ollama JSON mode:
+    # - "json"
+    # - a full JSON schema dictionary
+    format: str | dict[str, Any] | None = None
+
     options: dict[str, Any] | None = None
 
 

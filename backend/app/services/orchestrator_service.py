@@ -342,6 +342,60 @@ class OrchestratorService:
                             )
                             or ""
                         ),
+                        "planner_confidence": (
+                            OrchestratorService._safe_float(
+                                node_update.get(
+                                    "planner_confidence",
+                                    0.0,
+                                ),
+                                minimum=0.0,
+                                maximum=1.0,
+                            )
+                        ),
+                        "planner_provider": (
+                            OrchestratorService._optional_string(
+                                node_update.get(
+                                    "planner_provider",
+                                )
+                            )
+                        ),
+                        "planner_model": (
+                            OrchestratorService._optional_string(
+                                node_update.get(
+                                    "planner_model",
+                                )
+                            )
+                        ),
+                        "planner_fallback": bool(
+                            node_update.get(
+                                "planner_fallback",
+                                False,
+                            )
+                        ),
+                        "planner_error": (
+                            OrchestratorService._optional_string(
+                                node_update.get(
+                                    "planner_error",
+                                )
+                            )
+                        ),
+                        "planner_latency_ms": (
+                            OrchestratorService._safe_float(
+                                node_update.get(
+                                    "planner_latency_ms",
+                                    0.0,
+                                ),
+                                minimum=0.0,
+                            )
+                        ),
+                        "planner_signals": (
+                            OrchestratorService._normalize_string_list(
+                                node_update.get(
+                                    "planner_signals",
+                                    [],
+                                )
+                            )
+                        ),
                         "approval_granted": bool(
                             node_update.get(
                                 "approval_granted",
@@ -412,6 +466,15 @@ class OrchestratorService:
                 user_id,
             ),
             "messages": messages,
+            "route": None,
+            "planner_reason": None,
+            "planner_confidence": 0.0,
+            "planner_provider": None,
+            "planner_model": None,
+            "planner_fallback": False,
+            "planner_error": None,
+            "planner_latency_ms": 0.0,
+            "planner_signals": [],
             "requires_human_review": False,
             "review_status": None,
             "review_reason": None,
@@ -515,6 +578,16 @@ class OrchestratorService:
                 "The workflow is being resumed after human "
                 f"approval for review '{review_id}'."
             ),
+            "planner_confidence": 1.0,
+            "planner_provider": "resume",
+            "planner_model": None,
+            "planner_fallback": False,
+            "planner_error": None,
+            "planner_latency_ms": 0.0,
+            "planner_signals": [
+                "human review approved",
+                "workflow resumed",
+            ],
             "requires_human_review": False,
             "review_status": "approved",
             "review_reason": None,
@@ -629,6 +702,13 @@ class OrchestratorService:
             "provider": result.provider,
             "route": result.route,
             "planner_reason": result.planner_reason,
+            "planner_confidence": result.planner_confidence,
+            "planner_provider": result.planner_provider,
+            "planner_model": result.planner_model,
+            "planner_fallback": result.planner_fallback,
+            "planner_error": result.planner_error,
+            "planner_latency_ms": result.planner_latency_ms,
+            "planner_signals": result.planner_signals,
             "usage": result.usage,
             "requires_human_review": (
                 result.requires_human_review
@@ -708,6 +788,68 @@ class OrchestratorService:
             )
             or ""
         ).strip()
+
+        planner_confidence = (
+            OrchestratorService._safe_float(
+                final_state.get(
+                    "planner_confidence",
+                    0.0,
+                ),
+                minimum=0.0,
+                maximum=1.0,
+            )
+        )
+
+        planner_provider = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "planner_provider",
+                )
+            )
+            or "unknown"
+        )
+
+        planner_model = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "planner_model",
+                )
+            )
+        )
+
+        planner_fallback = bool(
+            final_state.get(
+                "planner_fallback",
+                False,
+            )
+        )
+
+        planner_error = (
+            OrchestratorService._optional_string(
+                final_state.get(
+                    "planner_error",
+                )
+            )
+        )
+
+        planner_latency_ms = (
+            OrchestratorService._safe_float(
+                final_state.get(
+                    "planner_latency_ms",
+                    0.0,
+                ),
+                minimum=0.0,
+            )
+        )
+
+        planner_signals = (
+            OrchestratorService._normalize_string_list(
+                final_state.get(
+                    "planner_signals",
+                    [],
+                )
+            )
+        )
 
         usage = final_state.get(
             "usage",
@@ -865,6 +1007,13 @@ class OrchestratorService:
             provider=provider,
             route=route,
             planner_reason=planner_reason,
+            planner_confidence=planner_confidence,
+            planner_provider=planner_provider,
+            planner_model=planner_model,
+            planner_fallback=planner_fallback,
+            planner_error=planner_error,
+            planner_latency_ms=planner_latency_ms,
+            planner_signals=planner_signals,
             usage=usage,
             requires_human_review=requires_human_review,
             review_status=review_status,
@@ -877,6 +1026,74 @@ class OrchestratorService:
             reviewed_at=reviewed_at,
             reviewer_feedback=reviewer_feedback,
         )
+
+    @staticmethod
+    def _safe_float(
+        value: Any,
+        *,
+        minimum: float | None = None,
+        maximum: float | None = None,
+    ) -> float:
+        try:
+            numeric_value = float(
+                value,
+            )
+
+        except (
+            TypeError,
+            ValueError,
+        ):
+            numeric_value = 0.0
+
+        if minimum is not None:
+            numeric_value = max(
+                minimum,
+                numeric_value,
+            )
+
+        if maximum is not None:
+            numeric_value = min(
+                maximum,
+                numeric_value,
+            )
+
+        return numeric_value
+
+    @staticmethod
+    def _normalize_string_list(
+        value: Any,
+        *,
+        limit: int = 10,
+    ) -> list[str]:
+        if not isinstance(
+            value,
+            list,
+        ):
+            return []
+
+        normalized_values: list[str] = []
+
+        for item in value:
+            normalized_item = str(
+                item,
+            ).strip()
+
+            if not normalized_item:
+                continue
+
+            if normalized_item in normalized_values:
+                continue
+
+            normalized_values.append(
+                normalized_item,
+            )
+
+            if len(
+                normalized_values,
+            ) >= limit:
+                break
+
+        return normalized_values
 
     @staticmethod
     def _serialize_datetime(

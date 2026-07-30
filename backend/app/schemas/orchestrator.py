@@ -1,6 +1,10 @@
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+)
 
 
 class OrchestratorResult(BaseModel):
@@ -26,6 +30,32 @@ class OrchestratorResult(BaseModel):
 
     planner_reason: str = Field(
         min_length=1,
+    )
+
+    planner_confidence: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+    )
+
+    planner_provider: str = Field(
+        default="unknown",
+        min_length=1,
+    )
+
+    planner_model: str | None = None
+
+    planner_fallback: bool = False
+
+    planner_error: str | None = None
+
+    planner_latency_ms: float = Field(
+        default=0.0,
+        ge=0.0,
+    )
+
+    planner_signals: list[str] = Field(
+        default_factory=list,
     )
 
     usage: dict[str, Any] = Field(

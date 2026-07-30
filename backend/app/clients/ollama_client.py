@@ -1,5 +1,6 @@
 import json
 from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
 from pydantic import ValidationError
@@ -41,13 +42,22 @@ class OllamaClient:
         messages: list[OllamaChatMessage],
         *,
         stream: bool,
+        response_format: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
     ) -> OllamaChatRequest:
+        selected_temperature = (
+            settings.ollama_temperature
+            if temperature is None
+            else temperature
+        )
+
         return OllamaChatRequest(
             model=self.model,
             messages=messages,
             stream=stream,
+            format=response_format,
             options={
-                "temperature": settings.ollama_temperature,
+                "temperature": selected_temperature,
             },
         )
 
@@ -60,10 +70,15 @@ class OllamaClient:
     async def chat(
         self,
         messages: list[OllamaChatMessage],
+        *,
+        response_format: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
     ) -> OllamaChatResponse:
         request_data = self._build_chat_request(
             messages,
             stream=False,
+            response_format=response_format,
+            temperature=temperature,
         )
 
         try:
@@ -76,7 +91,6 @@ class OllamaClient:
                         exclude_none=True,
                     ),
                 )
-
                 response.raise_for_status()
 
         except httpx.ConnectError as exception:
@@ -91,12 +105,10 @@ class OllamaClient:
             ) from exception
 
         except httpx.HTTPStatusError as exception:
-            response_text = exception.response.text
-
             raise LLMInvalidResponseError(
                 "Ollama returned an unsuccessful response. "
                 f"Status: {exception.response.status_code}. "
-                f"Response: {response_text}"
+                f"Response: {exception.response.text}"
             ) from exception
 
         except httpx.RequestError as exception:
@@ -108,19 +120,12 @@ class OllamaClient:
             parsed_response = OllamaChatResponse.model_validate(
                 response.json(),
             )
-        except (
-            ValueError,
-            ValidationError,
-        ) as exception:
+        except (ValueError, ValidationError) as exception:
             raise LLMInvalidResponseError(
                 "Ollama returned an invalid JSON response."
             ) from exception
 
-        assistant_content = (
-            parsed_response.message.content.strip()
-        )
-
-        if not assistant_content:
+        if not parsed_response.message.content.strip():
             raise LLMInvalidResponseError(
                 "Ollama returned an empty assistant response."
             )
@@ -130,22 +135,15 @@ class OllamaClient:
     async def stream_chat(
         self,
         messages: list[OllamaChatMessage],
+        *,
+        response_format: str | dict[str, Any] | None = None,
+        temperature: float | None = None,
     ) -> AsyncIterator[str]:
-        """
-        Stream assistant response tokens from Ollama.
-
-        Ollama returns newline-delimited JSON objects. Each object may
-        contain a partial token in:
-
-            payload["message"]["content"]
-
-        Tokens are yielded without stripping whitespace because leading
-        spaces are significant when reconstructing the final response.
-        """
-
         request_data = self._build_chat_request(
             messages,
             stream=True,
+            response_format=response_format,
+            temperature=temperature,
         )
 
         received_content = False
@@ -177,7 +175,6 @@ class OllamaClient:
                             ) from exception
 
                         error_message = payload.get("error")
-
                         if error_message:
                             raise LLMInvalidResponseError(
                                 "Ollama returned a streaming error: "
@@ -218,20 +215,20 @@ class OllamaClient:
 
         except httpx.HTTPStatusError as exception:
             try:
-                response_text = await exception.response.aread()
-                decoded_response = response_text.decode(
+                response_bytes = await exception.response.aread()
+                response_text = response_bytes.decode(
                     "utf-8",
                     errors="replace",
                 )
             except Exception:
-                decoded_response = (
+                response_text = (
                     "Could not read the Ollama error response."
                 )
 
             raise LLMInvalidResponseError(
                 "Ollama returned an unsuccessful streaming response. "
                 f"Status: {exception.response.status_code}. "
-                f"Response: {decoded_response}"
+                f"Response: {response_text}"
             ) from exception
 
         except httpx.RequestError as exception:
@@ -260,7 +257,6 @@ class OllamaClient:
                 response = await client.get(
                     f"{self.base_url}/api/tags",
                 )
-
                 response.raise_for_status()
 
             response_data = response.json()
@@ -278,10 +274,7 @@ class OllamaClient:
                 installed_models=installed_models,
             )
 
-        except (
-            httpx.HTTPError,
-            ValueError,
-        ) as exception:
+        except (httpx.HTTPError, ValueError) as exception:
             return OllamaHealthResponse(
                 available=False,
                 base_url=self.base_url,

@@ -11,6 +11,13 @@ AgentRoute = Literal[
 ]
 
 
+PlannerProvider = Literal[
+    "ollama",
+    "rule_based",
+    "resume",
+]
+
+
 ReviewStatus = Literal[
     "pending",
     "approved",
@@ -26,7 +33,15 @@ class AgentState(TypedDict, total=False):
     messages: list[dict[str, str]]
 
     route: AgentRoute
+
     planner_reason: str
+    planner_confidence: float
+    planner_provider: PlannerProvider
+    planner_model: str | None
+    planner_fallback: bool
+    planner_error: str | None
+    planner_latency_ms: float
+    planner_signals: list[str]
 
     response_content: str
     model: str

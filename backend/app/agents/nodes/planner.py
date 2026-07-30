@@ -1,123 +1,17 @@
 from __future__ import annotations
 
+import logging
 import re
 from typing import Any
 
-from app.agents.state import AgentRoute, AgentState
-
-
-ROUTE_KEYWORDS: dict[AgentRoute, tuple[str, ...]] = {
-    "rag": (
-        "document",
-        "documents",
-        "pdf",
-        "file",
-        "files",
-        "knowledge base",
-        "knowledge-base",
-        "uploaded document",
-        "uploaded file",
-        "search my document",
-        "search the document",
-        "retrieve from",
-        "retrieval",
-        "vector database",
-        "vector store",
-        "embedding",
-        "embeddings",
-    ),
-    "sql": (
-        "sql",
-        "database query",
-        "query the database",
-        "query database",
-        "database table",
-        "database tables",
-        "postgresql",
-        "postgres",
-        "mysql",
-        "select from",
-        "insert into",
-        "update table",
-        "delete from",
-        "drop table",
-        "truncate table",
-    ),
-    "tool": (
-        "send an email",
-        "send email",
-        "email someone",
-        "create calendar event",
-        "calendar event",
-        "schedule a meeting",
-        "call an api",
-        "call api",
-        "use a tool",
-        "execute tool",
-        "github issue",
-        "create github",
-        "transfer money",
-        "wire money",
-        "approve invoice",
-        "purchase",
-        "buy",
-        "refund",
-    ),
-    "research": (
-        "research",
-        "web search",
-        "search the web",
-        "search online",
-        "browse the web",
-        "find online",
-        "latest news",
-        "current information",
-        "external sources",
-    ),
-    "human_review": (
-        "human review",
-        "human approval",
-        "manual approval",
-        "manager approval",
-        "review by a human",
-        "ask a human",
-        "escalate to human",
-        "human in the loop",
-        "human-in-the-loop",
-    ),
-}
-
-
-HIGH_RISK_PATTERNS: tuple[str, ...] = (
-    "drop table",
-    "truncate table",
-    "delete from",
-    "delete",
-    "remove",
-    "transfer money",
-    "wire money",
-    "payment",
-    "bank account",
-    "send email",
-    "send an email",
-    "email someone",
-    "approve invoice",
-    "purchase",
-    "buy",
-    "refund",
-    "create calendar event",
-    "schedule a meeting",
-    "create github issue",
+from app.agents.state import (
+    AgentRoute,
+    AgentState,
 )
+from app.services.planner_service import PlannerService
 
 
-ROUTE_PRIORITIES: tuple[AgentRoute, ...] = (
-    "human_review",
-    "tool",
-    "sql",
-    "rag",
-    "research",
-)
+logger = logging.getLogger(__name__)
 
 
 RESUMABLE_ROUTES: tuple[AgentRoute, ...] = (
@@ -126,6 +20,118 @@ RESUMABLE_ROUTES: tuple[AgentRoute, ...] = (
     "research",
     "tool",
     "sql",
+)
+
+
+EXECUTION_VERBS: tuple[str, ...] = (
+    "send",
+    "create",
+    "schedule",
+    "execute",
+    "run",
+    "delete",
+    "remove",
+    "drop",
+    "truncate",
+    "transfer",
+    "wire",
+    "pay",
+    "purchase",
+    "buy",
+    "refund",
+    "approve",
+    "update",
+    "insert",
+)
+
+
+INFORMATIONAL_PREFIXES: tuple[str, ...] = (
+    "what is",
+    "what are",
+    "how does",
+    "how do",
+    "how can",
+    "how would",
+    "why does",
+    "why do",
+    "explain",
+    "describe",
+    "tell me about",
+    "give me an example",
+    "show me an example",
+    "write an example",
+)
+
+
+HIGH_RISK_ACTION_PATTERNS: tuple[
+    tuple[str, str, AgentRoute],
+    ...,
+] = (
+    (
+        "drop_table",
+        r"\bdrop\s+(the\s+)?table\b",
+        "sql",
+    ),
+    (
+        "truncate_table",
+        r"\btruncate\s+(the\s+)?table\b",
+        "sql",
+    ),
+    (
+        "delete_database_records",
+        r"\bdelete\s+(the\s+)?"
+        r"(record|records|row|rows|data)\b",
+        "sql",
+    ),
+    (
+        "transfer_money",
+        r"\btransfer\s+(the\s+)?money\b",
+        "tool",
+    ),
+    (
+        "wire_money",
+        r"\bwire\s+(the\s+)?money\b",
+        "tool",
+    ),
+    (
+        "send_email",
+        r"\bsend\s+(an?\s+)?email\b",
+        "tool",
+    ),
+    (
+        "approve_invoice",
+        r"\bapprove\s+(the\s+|an?\s+)?invoice\b",
+        "tool",
+    ),
+    (
+        "execute_purchase",
+        r"\b(purchase|buy)\s+(the\s+|an?\s+)?"
+        r"(item|product|subscription|service)\b",
+        "tool",
+    ),
+    (
+        "execute_refund",
+        r"\b(issue|process|execute|send)\s+"
+        r"(the\s+|an?\s+)?refund\b",
+        "tool",
+    ),
+    (
+        "create_calendar_event",
+        r"\bcreate\s+(the\s+|an?\s+)?"
+        r"calendar\s+event\b",
+        "tool",
+    ),
+    (
+        "schedule_meeting",
+        r"\bschedule\s+(the\s+|an?\s+)?meeting\b",
+        "tool",
+    ),
+    (
+        "create_github_issue",
+        r"\bcreate\s+(the\s+|an?\s+)?"
+        r"github\s+issue\b",
+        "tool",
+    ),
 )
 
 
@@ -156,22 +162,7 @@ async def planner_node(
     )
 
     if latest_user_message is None:
-        return {
-            "route": "chat",
-            "planner_reason": (
-                "Selected the 'chat' route because no valid "
-                "user message was available."
-            ),
-            "requires_human_review": False,
-            "review_status": None,
-            "review_reason": None,
-            "review_id": None,
-            "approval_granted": False,
-            "approved_review_id": None,
-            "requested_action": None,
-            "request_content": None,
-            "action_payload": None,
-        }
+        return _build_default_chat_plan()
 
     normalized_message = _normalize_text(
         latest_user_message,
@@ -182,47 +173,90 @@ async def planner_node(
     )
 
     if high_risk_action is not None:
-        resume_route = _detect_resume_route(
-            normalized_message=normalized_message,
-            high_risk_action=high_risk_action,
-        )
+        (
+            requested_action,
+            resume_route,
+            matched_signal,
+        ) = high_risk_action
 
         reason = (
             "Selected the 'human_review' route because "
-            "the request contains the high-risk action "
-            f"'{high_risk_action}'."
+            "the request explicitly asks the system to "
+            f"execute the sensitive action "
+            f"'{requested_action}'."
         )
 
         return {
             "route": "human_review",
             "planner_reason": reason,
+            "planner_confidence": 1.0,
+            "planner_provider": "rule_based",
+            "planner_model": "safety-gate-v1",
+            "planner_fallback": False,
+            "planner_error": None,
+            "planner_latency_ms": 0.0,
+            "planner_signals": [
+                matched_signal,
+            ],
             "requires_human_review": True,
             "review_status": "pending",
             "review_reason": reason,
             "review_id": None,
             "approval_granted": False,
             "approved_review_id": None,
-            "requested_action": high_risk_action,
+            "requested_action": requested_action,
             "request_content": latest_user_message,
             "action_payload": {
                 "original_route": resume_route,
                 "resume_route": resume_route,
-                "requested_action": high_risk_action,
+                "requested_action": requested_action,
                 "request_content": latest_user_message,
                 "approval_required": True,
+                "safety_gate": "deterministic",
+                "matched_signal": matched_signal,
             },
         }
 
-    route, reason = _detect_route(
+    planner_result = await PlannerService.create_plan(
         latest_user_message,
     )
 
+    route = planner_result.plan.route
+    reason = planner_result.plan.reasoning
     requires_human_review = route == "human_review"
+
+    logger.info(
+        "Planner selected route | route=%s "
+        "confidence=%.2f provider=%s fallback=%s",
+        route,
+        planner_result.plan.confidence,
+        planner_result.provider,
+        planner_result.fallback_used,
+    )
 
     return {
         "route": route,
         "planner_reason": reason,
-        "requires_human_review": requires_human_review,
+        "planner_confidence": (
+            planner_result.plan.confidence
+        ),
+        "planner_provider": (
+            planner_result.provider
+        ),
+        "planner_model": planner_result.model,
+        "planner_fallback": (
+            planner_result.fallback_used
+        ),
+        "planner_error": planner_result.error,
+        "planner_latency_ms": (
+            planner_result.latency_ms
+        ),
+        "planner_signals": (
+            planner_result.plan.signals
+        ),
+        "requires_human_review": (
+            requires_human_review
+        ),
         "review_status": (
             "pending"
             if requires_human_review
@@ -255,10 +289,42 @@ async def planner_node(
                 ),
                 "request_content": latest_user_message,
                 "approval_required": True,
+                "planner_provider": (
+                    planner_result.provider
+                ),
+                "planner_confidence": (
+                    planner_result.plan.confidence
+                ),
             }
             if requires_human_review
             else None
         ),
+    }
+
+
+def _build_default_chat_plan() -> dict[str, object]:
+    return {
+        "route": "chat",
+        "planner_reason": (
+            "Selected the 'chat' route because no valid "
+            "user message was available."
+        ),
+        "planner_confidence": 1.0,
+        "planner_provider": "rule_based",
+        "planner_model": "deterministic-router-v1",
+        "planner_fallback": False,
+        "planner_error": None,
+        "planner_latency_ms": 0.0,
+        "planner_signals": [],
+        "requires_human_review": False,
+        "review_status": None,
+        "review_reason": None,
+        "review_id": None,
+        "approval_granted": False,
+        "approved_review_id": None,
+        "requested_action": None,
+        "request_content": None,
+        "action_payload": None,
     }
 
 
@@ -327,6 +393,15 @@ def _build_approved_plan(
             f"'{approved_review_id}' through the "
             f"'{resume_route}' route."
         ),
+        "planner_confidence": 1.0,
+        "planner_provider": "resume",
+        "planner_model": None,
+        "planner_fallback": False,
+        "planner_error": None,
+        "planner_latency_ms": 0.0,
+        "planner_signals": [
+            "approved human review",
+        ],
         "requires_human_review": False,
         "review_status": "approved",
         "review_reason": None,
@@ -337,6 +412,66 @@ def _build_approved_plan(
         "request_content": request_content,
         "action_payload": updated_action_payload,
     }
+
+
+def _detect_high_risk_action(
+    normalized_message: str,
+) -> tuple[str, AgentRoute, str] | None:
+    if _is_informational_request(
+        normalized_message,
+    ):
+        return None
+
+    if not _contains_execution_intent(
+        normalized_message,
+    ):
+        return None
+
+    for (
+        requested_action,
+        pattern,
+        resume_route,
+    ) in HIGH_RISK_ACTION_PATTERNS:
+        match = re.search(
+            pattern,
+            normalized_message,
+            flags=re.IGNORECASE,
+        )
+
+        if match is None:
+            continue
+
+        return (
+            requested_action,
+            resume_route,
+            match.group(0).strip(),
+        )
+
+    return None
+
+
+def _is_informational_request(
+    normalized_message: str,
+) -> bool:
+    return any(
+        normalized_message.startswith(
+            prefix,
+        )
+        for prefix in INFORMATIONAL_PREFIXES
+    )
+
+
+def _contains_execution_intent(
+    normalized_message: str,
+) -> bool:
+    for verb in EXECUTION_VERBS:
+        if re.search(
+            rf"\b{re.escape(verb)}\b",
+            normalized_message,
+        ):
+            return True
+
+    return False
 
 
 def _resolve_resume_route(
@@ -381,156 +516,25 @@ def _resolve_resume_route(
     )
 
     if requested_action:
-        return _route_from_requested_action(
+        normalized_action = _normalize_text(
             requested_action,
         )
 
-    request_content = (
-        _optional_string(
-            state.get(
-                "request_content",
+        if any(
+            database_signal in normalized_action
+            for database_signal in (
+                "table",
+                "database",
+                "record",
+                "row",
+                "sql",
             )
-        )
-        or _optional_string(
-            action_payload.get(
-                "request_content",
-            )
-        )
-        or _get_latest_user_message(
-            state,
-        )
-    )
+        ):
+            return "sql"
 
-    if request_content:
-        normalized_content = _normalize_text(
-            request_content,
-        )
-
-        return _detect_resume_route(
-            normalized_message=normalized_content,
-            high_risk_action="approved_action",
-        )
-
-    return "chat"
-
-
-def _detect_route(
-    user_message: str,
-) -> tuple[AgentRoute, str]:
-    normalized_message = _normalize_text(
-        user_message,
-    )
-
-    for route in ROUTE_PRIORITIES:
-        keywords = ROUTE_KEYWORDS.get(
-            route,
-            (),
-        )
-
-        matched_keyword = next(
-            (
-                keyword
-                for keyword in keywords
-                if keyword in normalized_message
-            ),
-            None,
-        )
-
-        if matched_keyword is None:
-            continue
-
-        return (
-            route,
-            (
-                f"Selected the '{route}' route because "
-                "the request matched the routing signal "
-                f"'{matched_keyword}'."
-            ),
-        )
-
-    return (
-        "chat",
-        (
-            "Selected the 'chat' route because no specialized "
-            "workflow signals were detected."
-        ),
-    )
-
-
-def _detect_resume_route(
-    *,
-    normalized_message: str,
-    high_risk_action: str,
-) -> AgentRoute:
-    sql_keywords = ROUTE_KEYWORDS[
-        "sql"
-    ]
-
-    if any(
-        keyword in normalized_message
-        for keyword in sql_keywords
-    ):
-        return "sql"
-
-    tool_keywords = ROUTE_KEYWORDS[
-        "tool"
-    ]
-
-    if any(
-        keyword in normalized_message
-        for keyword in tool_keywords
-    ):
         return "tool"
 
-    if high_risk_action in {
-        "transfer money",
-        "wire money",
-        "payment",
-        "bank account",
-        "send email",
-        "send an email",
-        "email someone",
-        "approve invoice",
-        "purchase",
-        "buy",
-        "refund",
-        "create calendar event",
-        "schedule a meeting",
-        "create github issue",
-    }:
-        return "tool"
-
-    if high_risk_action in {
-        "drop table",
-        "truncate table",
-        "delete from",
-    }:
-        return "sql"
-
     return "chat"
-
-
-def _route_from_requested_action(
-    requested_action: str,
-) -> AgentRoute:
-    normalized_action = _normalize_text(
-        requested_action,
-    )
-
-    return _detect_resume_route(
-        normalized_message=normalized_action,
-        high_risk_action=normalized_action,
-    )
-
-
-def _detect_high_risk_action(
-    normalized_message: str,
-) -> str | None:
-    for pattern in HIGH_RISK_PATTERNS:
-        if pattern in normalized_message:
-            return pattern
-
-    return None
 
 
 def _get_latest_user_message(
