@@ -47,7 +47,15 @@ The current version includes:
 - CORS configuration
 - Structured project architecture
 
-Human review approval and rejection APIs are currently under development.
+Human-in-the-Loop is fully implemented for the core workflow, including:
+
+- Human review persistence
+- Review listing and retrieval APIs
+- Approve and reject APIs
+- Workflow resume after approval
+- Duplicate resume protection
+
+Future work includes reviewer dashboards, advanced authorization, and additional audit capabilities.
 
 ---
 
@@ -197,16 +205,21 @@ rejected
 cancelled
 ```
 
-The next Human-in-the-Loop development phase includes:
+Implemented Human-in-the-Loop capabilities:
 
-- Listing pending reviews
-- Retrieving individual reviews
-- Approving requests
-- Rejecting requests
-- Adding reviewer feedback
-- Preventing duplicate decisions
-- Resuming approved workflows
-- Auditing review decisions
+- List reviews
+- Retrieve individual reviews
+- Approve requests
+- Reject requests
+- Reviewer feedback
+- Prevent duplicate workflow resumes
+- Resume approved workflows
+
+Future enhancements:
+
+- Human Review Dashboard
+- Reviewer roles and permissions
+- Extended audit logging
 
 ---
 
@@ -842,13 +855,13 @@ The current project is still under development and must be reviewed before use i
 - [x] Human review PostgreSQL table
 - [ ] Review schemas
 - [ ] Review repository
-- [ ] Review service
-- [ ] List pending reviews API
-- [ ] Review details API
-- [ ] Approve API
-- [ ] Reject API
+- [x] Review service
+- [x] List reviews API
+- [x] Review details API
+- [x] Approve API
+- [x] Reject API
 - [ ] Reviewer authorization
-- [ ] Workflow resume after approval
+- [x] Workflow resume after approval
 - [ ] Audit log
 
 ### Version 3 — Specialized Agents
@@ -935,6 +948,7 @@ GET  /api/v1/reviews
 GET  /api/v1/reviews/{review_id}
 POST /api/v1/reviews/{review_id}/approve
 POST /api/v1/reviews/{review_id}/reject
+POST /api/v1/reviews/{review_id}/resume
 ```
 
 Expected behavior:
