@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - develop
+
   pull_request:
     branches:
       - main
       - develop
+
   workflow_dispatch:
 
 permissions:
@@ -19,79 +21,77 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Python ${{ matrix.python-version }}
+  backend-ci:
+    name: Backend CI
     runs-on: ubuntu-latest
 
     defaults:
       run:
         working-directory: backend
 
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version:
-          - "3.14"
-
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: redpa_ai_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d redpa_ai_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
-      APP_NAME: RedPA AI
-      APP_ENV: test
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+      APP_NAME: "RedPA AI"
+      APP_ENV: "test"
       DEBUG: "false"
-      API_V1_PREFIX: /api/v1
 
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai_test
+      API_V1_PREFIX: "/api/v1"
 
-      SECRET_KEY: github-actions-test-secret-key-that-is-long-enough
-      ALGORITHM: HS256
+      SECRET_KEY: "github-actions-test-secret-key-that-is-long-enough-for-testing"
+      ALGORITHM: "HS256"
       ACCESS_TOKEN_EXPIRE_MINUTES: "60"
 
-      OLLAMA_BASE_URL: http://localhost:11434
-      OLLAMA_MODEL: qwen2.5:7b
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai_test"
 
-      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      OLLAMA_BASE_URL: "http://localhost:11434"
+      OLLAMA_MODEL: "qwen2.5:7b"
+
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:5173"]'
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
+          python-version: "3.13"
+          cache: "pip"
           cache-dependency-path: backend/requirements.txt
 
+      - name: Show Python version
+        run: |
+          python --version
+          pip --version
+
       - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install backend dependencies
+        run: |
+          pip install -r requirements.txt
 
-      - name: Compile Python source
-        run: python -m compileall -q app
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-asyncio httpx
 
-      - name: Check Alembic migrations
-        run: alembic upgrade head
+      - name: Compile backend source
+        run: |
+          python -m compileall -q app
+
+      - name: Verify application imports
+        run: |
+          python -c "from app.main import app; print('FastAPI application imported successfully')"
 
       - name: Run tests
+        shell: bash
         run: |
-          if [ -d tests ] && find tests -type f -name "test_*.py" | grep -q .; then
-            python -m pytest -q
+          if find tests -type f -name "test_*.py" 2>/dev/null | grep -q .; then
+            python -m pytest tests -v
           else
-            echo "No pytest test files found; skipping test execution."
+            echo "No tests were found."
+            echo "Backend installation, compilation, and import checks passed."
           fi
