@@ -383,6 +383,6 @@ This project is intended to be released under the MIT License. Add the repositor
 
 ## Author
 
-**Saeed Khalilian**
+**Saeid Khalilian**
 
 RedPA AI is developed as a portfolio-grade, production-oriented Agentic AI engineering project.
