@@ -556,7 +556,7 @@ Licensed under the MIT License.
 
 ## Author
 
-**Saeed Khalilian**  
+**Saeid Khalilian**  
 AI & Python Developer  
 Master's student in Computer Science at the University of Passau
 
