@@ -1,70 +1,33 @@
 # Roadmap
 
-## V1 — Platform Foundation
+## Completed
 
-- Authentication
+- FastAPI
+- PostgreSQL
+- JWT
 - Conversations and messages
-- Chat API
-- LangGraph integration
-- RAG and document ingestion
+- LangGraph
+- Ollama
+- RAG
+- Qdrant
+- Human Review
+- Workflow Resume
+- Tool Registry
+- Calculator Tool
+- DateTime Tool
 - Docker Compose
-- Metrics and dashboards
-- Human review
+- Prometheus
+- Grafana
 
-## V2 — Specialized Agents
+## Next
 
-- Research agent
-- Tool agent
-- SQL agent
-- Report agent
-- Agent registry
-- Better planner latency and routing evaluation
-
-## V3 — Tool Interoperability
-
-- MCP server
-- MCP client
-- Tool registry
-- Tool permissions and audit logs
-
-## V4 — Multi-Agent Communication
-
-- Agent-to-Agent protocol
-- Agent discovery
-- Task delegation
-- Structured inter-agent messages
-
-## V5 — Advanced Human Control
-
-- Reviewer roles
-- Review dashboard
-- Edited approvals
-- Escalation rules
-- Audit history
-
-## V6 — Long-Running Workflows
-
-- Durable execution
-- scheduled continuation;
-- wait for external data;
-- resume after callbacks or new input;
-- cancellation and timeout policies.
-
-## V7 — Memory
-
-- short-term conversational memory;
-- long-term user memory;
-- semantic memory;
-- memory retrieval and deletion controls.
-
-## V1.0 — Production Readiness
-
-- hardened deployment;
-- authorization model;
-- comprehensive tests;
-- stable API;
-- tracing;
-- backup and recovery;
-- performance benchmarks;
-- security review;
-- release documentation.
+1. Tool metrics
+2. Grafana tool dashboard
+3. Tool discovery endpoint
+4. Safe read-only tools
+5. Research agent
+6. SQL agent
+7. MCP
+8. Memory
+9. A2A
+10. Web frontend
