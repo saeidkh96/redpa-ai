@@ -105,6 +105,28 @@ ROUTE_PATTERNS: dict[
         r"\bexecute\s+(a\s+)?database\s+query\b",
     ),
     "tool": (
+        r"\bcalculate\b",
+        r"\bcalculator\b",
+        r"\bcompute\b",
+        r"\bevaluate\s+(this\s+)?expression\b",
+        r"\bsolve\s+(this\s+)?expression\b",
+        r"\bwhat\s+is\s+[-+()0-9.\s*/%]+\??$",
+        r"(?<![\w.])"
+        r"[-+]?(?:\d+(?:\.\d+)?|\.\d+)"
+        r"(?:\s*(?:\*\*|[+\-*/%])\s*"
+        r"(?:\d+(?:\.\d+)?|\.\d+))+"
+        r"(?![\w.])",
+        r"\bwhat\s+time\s+is\s+it\b",
+        r"\bcurrent\s+time\b",
+        r"\btime\s+now\b",
+        r"\btoday'?s\s+date\b",
+        r"\bcurrent\s+date\b",
+        r"\bwhat\s+date\s+is\s+it\b",
+        r"\bwhat\s+day\s+is\s+it\b",
+        r"\bdate\s+today\b",
+        r"\btime\s+(?:in|for)\s+[a-z_/\-\s]+\b",
+        r"\bdate\s+(?:in|for)\s+[a-z_/\-\s]+\b",
+        r"\bday\s+(?:in|for)\s+[a-z_/\-\s]+\b",
         r"\bsend\s+(an?\s+)?email\b",
         r"\bemail\s+(him|her|them|someone|the\s+user)\b",
         r"\bcreate\s+(a\s+)?calendar\s+event\b",
@@ -137,6 +159,37 @@ ROUTE_PRIORITY: tuple[AgentRoute, ...] = (
 )
 
 
+DETERMINISTIC_CALCULATOR_PATTERNS: tuple[str, ...] = (
+    r"\bcalculate\b",
+    r"\bcalculator\b",
+    r"\bcompute\b",
+    r"\bevaluate\s+(this\s+)?expression\b",
+    r"\bsolve\s+(this\s+)?expression\b",
+    r"\bwhat\s+is\s+[-+()0-9.\s*/%]+\??$",
+    r"(?<![\w.])"
+    r"[-+]?(?:\d+(?:\.\d+)?|\.\d+)"
+    r"(?:\s*(?:\*\*|[+\-*/%])\s*"
+    r"(?:\d+(?:\.\d+)?|\.\d+))+"
+    r"(?![\w.])",
+)
+
+
+DETERMINISTIC_DATETIME_PATTERNS: tuple[str, ...] = (
+    r"\bwhat\s+time\s+is\s+it(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bcurrent\s+time(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\btime\s+now(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bwhat\s+is\s+the\s+time(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bwhat\s+date\s+is\s+it(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bwhat\s+day\s+is\s+it(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\btoday'?s\s+date(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bcurrent\s+date(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\bdate\s+today(?:\s+(?:in|for)\s+.+)?\??$",
+    r"\btime\s+(?:in|for)\s+[a-z_/\-\s]+\??$",
+    r"\bdate\s+(?:in|for)\s+[a-z_/\-\s]+\??$",
+    r"\bday\s+(?:in|for)\s+[a-z_/\-\s]+\??$",
+)
+
+
 class PlannerService:
     @classmethod
     async def create_plan(
@@ -151,6 +204,35 @@ class PlannerService:
             )
 
         started_at = time.perf_counter()
+
+        deterministic_plan = cls._create_deterministic_plan(
+            user_message=cleaned_message,
+        )
+
+        if deterministic_plan is not None:
+            latency_ms = (
+                time.perf_counter() - started_at
+            ) * 1000
+
+            logger.info(
+                "Deterministic planner selected route "
+                "| route=%s confidence=%.2f signals=%s",
+                deterministic_plan.route,
+                deterministic_plan.confidence,
+                deterministic_plan.signals,
+            )
+
+            return PlannerExecutionResult(
+                plan=deterministic_plan,
+                provider="rule_based",
+                model="deterministic-router-v2",
+                fallback_used=False,
+                error=None,
+                latency_ms=round(
+                    latency_ms,
+                    2,
+                ),
+            )
 
         try:
             llm_plan = await cls._create_llm_plan(
@@ -172,7 +254,10 @@ class PlannerService:
                 model=settings.ollama_model,
                 fallback_used=False,
                 error=None,
-                latency_ms=round(latency_ms, 2),
+                latency_ms=round(
+                    latency_ms,
+                    2,
+                ),
             )
 
         except Exception as exception:
@@ -198,11 +283,74 @@ class PlannerService:
             return PlannerExecutionResult(
                 plan=fallback_plan,
                 provider="rule_based",
-                model="deterministic-router-v1",
+                model="deterministic-router-v2",
                 fallback_used=True,
                 error=error_message,
-                latency_ms=round(latency_ms, 2),
+                latency_ms=round(
+                    latency_ms,
+                    2,
+                ),
             )
+
+    @classmethod
+    def _create_deterministic_plan(
+        cls,
+        *,
+        user_message: str,
+    ) -> PlannerResult | None:
+        """
+        Handle requests that should not require an LLM decision.
+
+        Calculator and current date/time requests are deterministic,
+        cheaper, faster, and more reliable when routed directly.
+        """
+
+        normalized_message = cls._normalize_text(
+            user_message,
+        )
+
+        calculator_signal = cls._match_first_pattern(
+            value=normalized_message,
+            patterns=DETERMINISTIC_CALCULATOR_PATTERNS,
+        )
+
+        if calculator_signal is not None:
+            return PlannerResult(
+                route="tool",
+                confidence=1.0,
+                reasoning=(
+                    "Selected the 'tool' route because the request "
+                    "contains a mathematical expression that can be "
+                    "executed by the calculator tool."
+                ),
+                signals=[
+                    calculator_signal,
+                    "calculator",
+                ],
+            )
+
+        datetime_signal = cls._match_first_pattern(
+            value=normalized_message,
+            patterns=DETERMINISTIC_DATETIME_PATTERNS,
+        )
+
+        if datetime_signal is not None:
+            return PlannerResult(
+                route="tool",
+                confidence=1.0,
+                reasoning=(
+                    "Selected the 'tool' route because the request "
+                    "asks for the current date or time, which must "
+                    "be provided by the datetime tool instead of "
+                    "being guessed by the language model."
+                ),
+                signals=[
+                    datetime_signal,
+                    "datetime",
+                ],
+            )
+
+        return None
 
     @classmethod
     async def _create_llm_plan(
@@ -280,52 +428,92 @@ class PlannerService:
         user_message: str,
         plan: PlannerResult,
     ) -> PlannerResult:
-        if plan.route != "research":
-            return plan
-
         normalized_message = cls._normalize_text(
             user_message,
         )
 
-        has_explicit_research_signal = any(
-            re.search(
-                pattern,
-                normalized_message,
-                flags=re.IGNORECASE,
+        deterministic_plan = cls._create_deterministic_plan(
+            user_message=user_message,
+        )
+
+        if deterministic_plan is not None:
+            return deterministic_plan
+
+        if plan.route == "research":
+            has_explicit_research_signal = any(
+                re.search(
+                    pattern,
+                    normalized_message,
+                    flags=re.IGNORECASE,
+                )
+                is not None
+                for pattern in ROUTE_PATTERNS["research"]
             )
-            is not None
-            for pattern in ROUTE_PATTERNS["research"]
-        )
 
-        if has_explicit_research_signal:
-            return plan
+            if not has_explicit_research_signal:
+                logger.info(
+                    "Planner route normalized | original_route=research "
+                    "normalized_route=chat | reason=no explicit external "
+                    "research signal"
+                )
 
-        logger.info(
-            "Planner route normalized | original_route=research "
-            "normalized_route=chat | reason=no explicit external "
-            "research signal"
-        )
+                return plan.model_copy(
+                    update={
+                        "route": "chat",
+                        "confidence": max(
+                            0.90,
+                            plan.confidence,
+                        ),
+                        "reasoning": (
+                            "The request is a general explanation or "
+                            "knowledge question that can be answered by "
+                            "the chat workflow and does not explicitly "
+                            "require web browsing, current information, "
+                            "external sources, or citations."
+                        ),
+                        "signals": [
+                            "general explanation",
+                            "no explicit external research request",
+                        ],
+                    }
+                )
 
-        return plan.model_copy(
-            update={
-                "route": "chat",
-                "confidence": max(
-                    0.90,
-                    plan.confidence,
-                ),
-                "reasoning": (
-                    "The request is a general explanation or "
-                    "knowledge question that can be answered by "
-                    "the chat workflow and does not explicitly "
-                    "require web browsing, current information, "
-                    "external sources, or citations."
-                ),
-                "signals": [
-                    "general explanation",
-                    "no explicit external research request",
-                ],
-            }
-        )
+        if plan.route == "sql":
+            has_explicit_sql_signal = any(
+                re.search(
+                    pattern,
+                    normalized_message,
+                    flags=re.IGNORECASE,
+                )
+                is not None
+                for pattern in ROUTE_PATTERNS["sql"]
+            )
+
+            if not has_explicit_sql_signal:
+                logger.info(
+                    "Planner route normalized | original_route=sql "
+                    "normalized_route=chat | reason=no explicit SQL signal"
+                )
+
+                return plan.model_copy(
+                    update={
+                        "route": "chat",
+                        "confidence": max(
+                            0.90,
+                            plan.confidence,
+                        ),
+                        "reasoning": (
+                            "The request does not explicitly ask to execute "
+                            "SQL or query a database, so the SQL workflow "
+                            "was rejected."
+                        ),
+                        "signals": [
+                            "no explicit SQL request",
+                        ],
+                    }
+                )
+
+        return plan
 
     @staticmethod
     def create_rule_based_plan(
@@ -335,6 +523,13 @@ class PlannerService:
         normalized_message = PlannerService._normalize_text(
             user_message,
         )
+
+        deterministic_plan = PlannerService._create_deterministic_plan(
+            user_message=user_message,
+        )
+
+        if deterministic_plan is not None:
+            return deterministic_plan
 
         for route in ROUTE_PRIORITY:
             patterns = ROUTE_PATTERNS.get(
@@ -377,6 +572,24 @@ class PlannerService:
             ),
             signals=[],
         )
+
+    @staticmethod
+    def _match_first_pattern(
+        *,
+        value: str,
+        patterns: tuple[str, ...],
+    ) -> str | None:
+        for pattern in patterns:
+            match = re.search(
+                pattern,
+                value,
+                flags=re.IGNORECASE,
+            )
+
+            if match is not None:
+                return match.group(0).strip()
+
+        return None
 
     @staticmethod
     def _parse_json_response(

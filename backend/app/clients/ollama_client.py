@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import json
+import logging
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -17,6 +20,9 @@ from app.schemas.ollama import (
     OllamaChatResponse,
     OllamaHealthResponse,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class OllamaClient:
@@ -61,10 +67,39 @@ class OllamaClient:
             },
         )
 
-    def _create_timeout(self) -> httpx.Timeout:
+    def _create_timeout(
+        self,
+        *,
+        streaming: bool,
+    ) -> httpx.Timeout:
+        """
+        Build an HTTP timeout suitable for local LLM generation.
+
+        Streaming generation can legitimately take several minutes.
+        A finite read timeout can close the response before Ollama sends
+        its final ``done=true`` frame, so streaming reads are unlimited.
+        Connection, write, and pool waits remain bounded.
+        """
+
+        if streaming:
+            return httpx.Timeout(
+                connect=10.0,
+                read=None,
+                write=30.0,
+                pool=10.0,
+            )
+
         return httpx.Timeout(
             timeout=self.timeout_seconds,
             connect=10.0,
+        )
+
+    @staticmethod
+    def _create_limits() -> httpx.Limits:
+        return httpx.Limits(
+            max_connections=20,
+            max_keepalive_connections=10,
+            keepalive_expiry=30.0,
         )
 
     async def chat(
@@ -83,7 +118,10 @@ class OllamaClient:
 
         try:
             async with httpx.AsyncClient(
-                timeout=self._create_timeout(),
+                timeout=self._create_timeout(
+                    streaming=False,
+                ),
+                limits=self._create_limits(),
             ) as client:
                 response = await client.post(
                     f"{self.base_url}/api/chat",
@@ -120,6 +158,7 @@ class OllamaClient:
             parsed_response = OllamaChatResponse.model_validate(
                 response.json(),
             )
+
         except (ValueError, ValidationError) as exception:
             raise LLMInvalidResponseError(
                 "Ollama returned an invalid JSON response."
@@ -148,10 +187,14 @@ class OllamaClient:
 
         received_content = False
         stream_completed = False
+        final_done_reason: str | None = None
 
         try:
             async with httpx.AsyncClient(
-                timeout=self._create_timeout(),
+                timeout=self._create_timeout(
+                    streaming=True,
+                ),
+                limits=self._create_limits(),
             ) as client:
                 async with client.stream(
                     method="POST",
@@ -163,26 +206,54 @@ class OllamaClient:
                     response.raise_for_status()
 
                     async for line in response.aiter_lines():
-                        if not line:
+                        normalized_line = line.strip()
+
+                        if not normalized_line:
                             continue
 
                         try:
-                            payload = json.loads(line)
+                            payload = json.loads(
+                                normalized_line,
+                            )
+
                         except json.JSONDecodeError as exception:
                             raise LLMInvalidResponseError(
                                 "Ollama returned an invalid streaming "
                                 "JSON response."
                             ) from exception
 
-                        error_message = payload.get("error")
+                        if not isinstance(payload, dict):
+                            raise LLMInvalidResponseError(
+                                "Ollama returned an invalid streaming "
+                                "payload."
+                            )
+
+                        error_message = payload.get(
+                            "error",
+                        )
+
                         if error_message:
                             raise LLMInvalidResponseError(
                                 "Ollama returned a streaming error: "
                                 f"{error_message}"
                             )
 
-                        message = payload.get("message") or {}
-                        content = message.get("content")
+                        message = payload.get(
+                            "message",
+                        )
+
+                        if message is None:
+                            message = {}
+
+                        if not isinstance(message, dict):
+                            raise LLMInvalidResponseError(
+                                "Ollama returned an invalid streaming "
+                                "message object."
+                            )
+
+                        content = message.get(
+                            "content",
+                        )
 
                         if content is not None:
                             if not isinstance(content, str):
@@ -197,6 +268,14 @@ class OllamaClient:
 
                         if payload.get("done") is True:
                             stream_completed = True
+
+                            done_reason = payload.get(
+                                "done_reason",
+                            )
+
+                            if isinstance(done_reason, str):
+                                final_done_reason = done_reason
+
                             break
 
         except LLMInvalidResponseError:
@@ -220,6 +299,7 @@ class OllamaClient:
                     "utf-8",
                     errors="replace",
                 )
+
             except Exception:
                 response_text = (
                     "Could not read the Ollama error response."
@@ -237,15 +317,25 @@ class OllamaClient:
                 f"{exception}"
             ) from exception
 
-        if not stream_completed:
-            raise LLMInvalidResponseError(
-                "Ollama closed the stream before completing the response."
-            )
-
         if not received_content:
             raise LLMInvalidResponseError(
                 "Ollama returned an empty streaming response."
             )
+
+        if not stream_completed:
+            logger.warning(
+                "Ollama stream ended without a final done frame, "
+                "but assistant content was received; accepting the "
+                "received content | model=%s",
+                self.model,
+            )
+            return
+
+        logger.debug(
+            "Ollama stream completed | model=%s done_reason=%s",
+            self.model,
+            final_done_reason,
+        )
 
     async def health_check(
         self,
@@ -253,6 +343,7 @@ class OllamaClient:
         try:
             async with httpx.AsyncClient(
                 timeout=httpx.Timeout(10.0),
+                limits=self._create_limits(),
             ) as client:
                 response = await client.get(
                     f"{self.base_url}/api/tags",
@@ -263,7 +354,10 @@ class OllamaClient:
 
             installed_models = [
                 model.get("name", "")
-                for model in response_data.get("models", [])
+                for model in response_data.get(
+                    "models",
+                    [],
+                )
                 if model.get("name")
             ]
 

@@ -78,6 +78,11 @@ class ChatService:
                     ),
                     status=MessageStatus.COMPLETED,
                     agent_name="orchestrator",
+                    tool_name=(
+                        ChatService._resolve_tool_name(
+                            orchestrator_result
+                        )
+                    ),
                     extra_data=(
                         ChatService._build_message_metadata(
                             orchestrator_result=(
@@ -119,7 +124,6 @@ class ChatService:
                 session=session,
                 conversation=conversation,
             )
-
             raise
 
         except Exception:
@@ -194,10 +198,7 @@ class ChatService:
                     {},
                 )
 
-                if not isinstance(
-                    event_data,
-                    dict,
-                ):
+                if not isinstance(event_data, dict):
                     event_data = {
                         "value": event_data,
                     }
@@ -233,6 +234,11 @@ class ChatService:
                     ),
                     status=MessageStatus.COMPLETED,
                     agent_name="orchestrator",
+                    tool_name=(
+                        ChatService._resolve_tool_name(
+                            orchestrator_result
+                        )
+                    ),
                     extra_data=(
                         ChatService._build_message_metadata(
                             orchestrator_result=(
@@ -303,34 +309,13 @@ class ChatService:
                     "model": orchestrator_result.model,
                     "provider": orchestrator_result.provider,
                     "route": orchestrator_result.route,
+                    "tool_name": (
+                        ChatService._resolve_tool_name(
+                            orchestrator_result
+                        )
+                    ),
                     "planner_reason": (
                         orchestrator_result.planner_reason
-                    ),
-                    "planner_confidence": (
-                        orchestrator_result
-                        .planner_confidence
-                    ),
-                    "planner_provider": (
-                        orchestrator_result
-                        .planner_provider
-                    ),
-                    "planner_model": (
-                        orchestrator_result.planner_model
-                    ),
-                    "planner_fallback": (
-                        orchestrator_result
-                        .planner_fallback
-                    ),
-                    "planner_error": (
-                        orchestrator_result.planner_error
-                    ),
-                    "planner_latency_ms": (
-                        orchestrator_result
-                        .planner_latency_ms
-                    ),
-                    "planner_signals": (
-                        orchestrator_result
-                        .planner_signals
                     ),
                     "usage": orchestrator_result.usage,
                     "requires_human_review": (
@@ -366,7 +351,6 @@ class ChatService:
                 session=session,
                 conversation=conversation,
             )
-
             raise
 
         except Exception:
@@ -374,8 +358,30 @@ class ChatService:
                 session=session,
                 conversation=conversation,
             )
-
             raise
+
+    @staticmethod
+    def _resolve_tool_name(
+        orchestrator_result: OrchestratorResult,
+    ) -> str | None:
+        if orchestrator_result.route != "tool":
+            return None
+
+        usage = orchestrator_result.usage
+
+        if isinstance(usage, dict):
+            tool_name = ChatService._optional_string(
+                usage.get(
+                    "tool_name",
+                )
+            )
+
+            if tool_name:
+                return tool_name
+
+        return ChatService._optional_string(
+            orchestrator_result.model
+        )
 
     @staticmethod
     async def _create_human_review_if_required(
@@ -407,36 +413,13 @@ class ChatService:
             or "workflow_execution"
         )
 
-        action_payload = (
-            orchestrator_result.action_payload
-        )
+        action_payload = orchestrator_result.action_payload
 
         if action_payload is None:
             action_payload = {
                 "route": orchestrator_result.route,
                 "planner_reason": (
                     orchestrator_result.planner_reason
-                ),
-                "planner_confidence": (
-                    orchestrator_result.planner_confidence
-                ),
-                "planner_provider": (
-                    orchestrator_result.planner_provider
-                ),
-                "planner_model": (
-                    orchestrator_result.planner_model
-                ),
-                "planner_fallback": (
-                    orchestrator_result.planner_fallback
-                ),
-                "planner_error": (
-                    orchestrator_result.planner_error
-                ),
-                "planner_latency_ms": (
-                    orchestrator_result.planner_latency_ms
-                ),
-                "planner_signals": (
-                    orchestrator_result.planner_signals
                 ),
                 "user_message_id": str(
                     user_message.id
@@ -446,7 +429,7 @@ class ChatService:
                 ),
             }
 
-        human_review = await HumanReviewService.create(
+        return await HumanReviewService.create(
             session=session,
             user_id=conversation.user_id,
             conversation_id=conversation.id,
@@ -457,8 +440,6 @@ class ChatService:
             action_payload=action_payload,
             commit=True,
         )
-
-        return human_review
 
     @staticmethod
     async def _attach_review_to_message(
@@ -491,7 +472,7 @@ class ChatService:
 
         await session.commit()
         await session.refresh(
-            assistant_message
+            assistant_message,
         )
 
     @staticmethod
@@ -505,29 +486,13 @@ class ChatService:
             "model": orchestrator_result.model,
             "workflow": "langgraph",
             "route": orchestrator_result.route,
+            "tool_name": (
+                ChatService._resolve_tool_name(
+                    orchestrator_result
+                )
+            ),
             "planner_reason": (
                 orchestrator_result.planner_reason
-            ),
-            "planner_confidence": (
-                orchestrator_result.planner_confidence
-            ),
-            "planner_provider": (
-                orchestrator_result.planner_provider
-            ),
-            "planner_model": (
-                orchestrator_result.planner_model
-            ),
-            "planner_fallback": (
-                orchestrator_result.planner_fallback
-            ),
-            "planner_error": (
-                orchestrator_result.planner_error
-            ),
-            "planner_latency_ms": (
-                orchestrator_result.planner_latency_ms
-            ),
-            "planner_signals": (
-                orchestrator_result.planner_signals
             ),
             "usage": orchestrator_result.usage,
             "streamed": streamed,
@@ -552,45 +517,31 @@ class ChatService:
         response_content = ChatService._required_string(
             workflow_data,
             "response_content",
-            (
-                "The streamed agent workflow returned "
-                "an empty response."
-            ),
+            "The streamed agent workflow returned an empty response.",
         )
 
         model = ChatService._required_string(
             workflow_data,
             "model",
-            (
-                "The streamed agent workflow returned "
-                "no model name."
-            ),
+            "The streamed agent workflow returned no model name.",
         )
 
         provider = ChatService._required_string(
             workflow_data,
             "provider",
-            (
-                "The streamed agent workflow returned "
-                "no provider name."
-            ),
+            "The streamed agent workflow returned no provider name.",
         )
 
         route = ChatService._required_string(
             workflow_data,
             "route",
-            (
-                "The streamed planner returned no route."
-            ),
+            "The streamed planner returned no route.",
         )
 
         planner_reason = ChatService._required_string(
             workflow_data,
             "planner_reason",
-            (
-                "The streamed planner returned no "
-                "routing reason."
-            ),
+            "The streamed planner returned no routing reason.",
         )
 
         usage = workflow_data.get(
@@ -598,38 +549,15 @@ class ChatService:
             {},
         )
 
-        if not isinstance(
-            usage,
-            dict,
-        ):
+        if not isinstance(usage, dict):
             usage = {}
 
         action_payload = workflow_data.get(
-            "action_payload"
+            "action_payload",
         )
 
-        if not isinstance(
-            action_payload,
-            dict,
-        ):
+        if not isinstance(action_payload, dict):
             action_payload = None
-
-        planner_signals = workflow_data.get(
-            "planner_signals",
-            [],
-        )
-
-        if not isinstance(
-            planner_signals,
-            list,
-        ):
-            planner_signals = []
-
-        planner_signals = [
-            str(signal).strip()
-            for signal in planner_signals
-            if str(signal).strip()
-        ][:10]
 
         return OrchestratorResult(
             response_content=response_content,
@@ -637,54 +565,6 @@ class ChatService:
             provider=provider,
             route=route,
             planner_reason=planner_reason,
-            planner_confidence=(
-                ChatService._safe_float(
-                    workflow_data.get(
-                        "planner_confidence",
-                        0.0,
-                    ),
-                    minimum=0.0,
-                    maximum=1.0,
-                )
-            ),
-            planner_provider=(
-                ChatService._optional_string(
-                    workflow_data.get(
-                        "planner_provider"
-                    )
-                )
-                or "unknown"
-            ),
-            planner_model=(
-                ChatService._optional_string(
-                    workflow_data.get(
-                        "planner_model"
-                    )
-                )
-            ),
-            planner_fallback=bool(
-                workflow_data.get(
-                    "planner_fallback",
-                    False,
-                )
-            ),
-            planner_error=(
-                ChatService._optional_string(
-                    workflow_data.get(
-                        "planner_error"
-                    )
-                )
-            ),
-            planner_latency_ms=(
-                ChatService._safe_float(
-                    workflow_data.get(
-                        "planner_latency_ms",
-                        0.0,
-                    ),
-                    minimum=0.0,
-                )
-            ),
-            planner_signals=planner_signals,
             usage=usage,
             requires_human_review=bool(
                 workflow_data.get(
@@ -694,47 +574,43 @@ class ChatService:
             ),
             review_status=ChatService._optional_string(
                 workflow_data.get(
-                    "review_status"
+                    "review_status",
                 )
             ),
             review_reason=ChatService._optional_string(
                 workflow_data.get(
-                    "review_reason"
+                    "review_reason",
                 )
             ),
             review_id=ChatService._optional_string(
                 workflow_data.get(
-                    "review_id"
+                    "review_id",
                 )
             ),
-            requested_action=(
-                ChatService._optional_string(
-                    workflow_data.get(
-                        "requested_action"
-                    )
+            requested_action=ChatService._optional_string(
+                workflow_data.get(
+                    "requested_action",
                 )
             ),
             request_content=ChatService._optional_string(
                 workflow_data.get(
-                    "request_content"
+                    "request_content",
                 )
             ),
             action_payload=action_payload,
             reviewed_by=ChatService._optional_string(
                 workflow_data.get(
-                    "reviewed_by"
+                    "reviewed_by",
                 )
             ),
             reviewed_at=ChatService._optional_string(
                 workflow_data.get(
-                    "reviewed_at"
+                    "reviewed_at",
                 )
             ),
-            reviewer_feedback=(
-                ChatService._optional_string(
-                    workflow_data.get(
-                        "reviewer_feedback"
-                    )
+            reviewer_feedback=ChatService._optional_string(
+                workflow_data.get(
+                    "reviewer_feedback",
                 )
             ),
         )
@@ -777,36 +653,6 @@ class ChatService:
         return normalized_value
 
     @staticmethod
-    def _safe_float(
-        value: Any,
-        *,
-        minimum: float | None = None,
-        maximum: float | None = None,
-    ) -> float:
-        try:
-            numeric_value = float(value)
-
-        except (
-            TypeError,
-            ValueError,
-        ):
-            numeric_value = 0.0
-
-        if minimum is not None:
-            numeric_value = max(
-                minimum,
-                numeric_value,
-            )
-
-        if maximum is not None:
-            numeric_value = min(
-                maximum,
-                numeric_value,
-            )
-
-        return numeric_value
-
-    @staticmethod
     async def _store_failed_response(
         *,
         session: AsyncSession,
@@ -825,6 +671,7 @@ class ChatService:
                 ),
                 status=MessageStatus.FAILED,
                 agent_name="orchestrator",
+                tool_name=None,
                 extra_data={
                     "provider": "ollama",
                     "model": settings.ollama_model,

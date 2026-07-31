@@ -11,6 +11,7 @@ from app.agents.nodes.human_review import (
 from app.agents.nodes.planner import planner_node
 from app.agents.nodes.rag import rag_node
 from app.agents.nodes.response import response_node
+from app.agents.nodes.tool import tool_node
 from app.agents.router import route_after_planner
 from app.agents.state import AgentState
 
@@ -33,6 +34,11 @@ def create_agent_graph() -> CompiledStateGraph:
     graph_builder.add_node(
         "rag",
         rag_node,
+    )
+
+    graph_builder.add_node(
+        "tool",
+        tool_node,
     )
 
     graph_builder.add_node(
@@ -61,6 +67,7 @@ def create_agent_graph() -> CompiledStateGraph:
         {
             "chat": "chat",
             "rag": "rag",
+            "tool": "tool",
             "human_review": "human_review",
             "capability_unavailable": (
                 "capability_unavailable"
@@ -75,6 +82,11 @@ def create_agent_graph() -> CompiledStateGraph:
 
     graph_builder.add_edge(
         "rag",
+        "response",
+    )
+
+    graph_builder.add_edge(
+        "tool",
         "response",
     )
 

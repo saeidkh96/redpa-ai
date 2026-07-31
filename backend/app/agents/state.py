@@ -65,5 +65,13 @@ class AgentState(TypedDict, total=False):
     reviewed_at: str | None
     reviewer_feedback: str | None
 
+    selected_tool: str | None
+    tool_arguments: dict[str, Any] | None
+    tool_result: Any | None
+    tool_success: bool
+    tool_error: str | None
+    tool_execution_time_ms: float
+    tool_metadata: dict[str, Any] | None
+
     completed: bool
     error: str | None

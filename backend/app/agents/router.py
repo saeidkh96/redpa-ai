@@ -8,6 +8,7 @@ from app.agents.state import AgentRoute, AgentState
 GraphDestination = Literal[
     "chat",
     "rag",
+    "tool",
     "human_review",
     "capability_unavailable",
 ]
@@ -20,7 +21,7 @@ SUPPORTED_ROUTE_DESTINATIONS: dict[
     "chat": "chat",
     "rag": "rag",
     "research": "capability_unavailable",
-    "tool": "capability_unavailable",
+    "tool": "tool",
     "sql": "capability_unavailable",
     "human_review": "human_review",
 }
@@ -162,6 +163,8 @@ def _normalize_agent_route(
         "tool": "tool",
         "tool_execution": "tool",
         "execute_tool": "tool",
+        "calculator": "tool",
+        "calculate": "tool",
         "sql": "sql",
         "database": "sql",
         "database_query": "sql",
