@@ -169,19 +169,22 @@ The request is routed directly to the `datetime` tool instead of asking the LLM 
 
 ## RAG Pipeline
 
-```mermaid
-flowchart LR
-    Upload --> Extract
-    Extract --> Chunk
-    Chunk --> Embed
-    Embed --> Store[(Qdrant)]
+```text
+Document ingestion:
 
-    Question --> QueryEmbedding
-    QueryEmbedding --> Search
-    Store --> Search
-    Search --> ContextBuilder
-    ContextBuilder --> LLM
-    LLM --> Answer
+Upload
+  → Extract text
+  → Create chunks
+  → Generate embeddings
+  → Store vectors in Qdrant
+
+Question answering:
+
+User question
+  → Generate query embedding
+  → Search Qdrant
+  → Build grounded context
+  → Generate answer with the LLM
 ```
 
 Supported formats:
@@ -229,68 +232,29 @@ Ollama integration supports normal chat, streaming chat, structured response for
 
 ## Architecture
 
-```mermaid
-flowchart TB
-    Client[Client / Swagger / Future Frontend]
+```text
+Client / Swagger / Future Frontend
+                │
+                ▼
+          FastAPI API
+                │
+                ▼
+        Planner + LangGraph
+                │
+      ┌─────────┼─────────┬──────────────┐
+      ▼         ▼         ▼              ▼
+   Chat       RAG       Tools       Human Review
+      │         │         │              │
+      ▼         ▼         ▼              ▼
+   Ollama    Qdrant   Tool Registry   Pause/Resume
+                          │
+                    ┌─────┴─────┐
+                    ▼           ▼
+               Calculator   DateTime
 
-    subgraph API[FastAPI API]
-        Auth[Authentication]
-        Chat[Chat API]
-        Documents[Documents API]
-        Reviews[Human Reviews API]
-        Metrics[Metrics Endpoint]
-    end
-
-    subgraph Runtime[Agent Runtime]
-        Planner[Planner]
-        Router[Conditional Router]
-        Graph[LangGraph]
-        ChatNode[Chat Node]
-        RAGNode[RAG Node]
-        ToolNode[Tool Node]
-        ReviewNode[Human Review Node]
-    end
-
-    subgraph Tools[Tool Runtime]
-        Registry[Tool Registry]
-        ToolService[Tool Service]
-        Calculator[Calculator]
-        DateTime[DateTime]
-    end
-
-    subgraph Data[Data Layer]
-        PostgreSQL[(PostgreSQL)]
-        Qdrant[(Qdrant)]
-        Storage[(Document Storage)]
-    end
-
-    subgraph AI[AI Services]
-        Ollama[Ollama]
-    end
-
-    subgraph Obs[Observability]
-        Prometheus[Prometheus]
-        Grafana[Grafana]
-    end
-
-    Client --> API
-    Chat --> Planner
-    Planner --> Router
-    Router --> Graph
-    Graph --> ChatNode
-    Graph --> RAGNode
-    Graph --> ToolNode
-    Graph --> ReviewNode
-    ToolNode --> ToolService
-    ToolService --> Registry
-    Registry --> Calculator
-    Registry --> DateTime
-    ChatNode --> Ollama
-    RAGNode --> Qdrant
-    RAGNode --> Ollama
-    API --> PostgreSQL
-    Metrics --> Prometheus
-    Prometheus --> Grafana
+Persistence: PostgreSQL
+Documents: Local storage + Qdrant
+Observability: Prometheus + Grafana
 ```
 
 ## Technology Stack
@@ -556,7 +520,7 @@ Licensed under the MIT License.
 
 ## Author
 
-**Saeid Khalilian**  
+**Saeed Khalilian**  
 AI & Python Developer  
 Master's student in Computer Science at the University of Passau
 
