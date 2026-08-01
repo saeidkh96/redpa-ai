@@ -1,266 +1,99 @@
 # RedPA AI
 
-> An open-source Agentic AI Platform for building secure, observable, tool-using, and human-supervised AI applications.
+> A production-oriented Agentic AI Platform for secure, observable, tool-using, and human-supervised AI workflows.
 
 **FastAPI · LangGraph · PostgreSQL · Qdrant · Ollama · Docker · Prometheus · Grafana**
 
 ## Overview
 
-RedPA AI is a production-oriented backend platform for agentic AI systems. It can plan and route requests, answer general questions with a local LLM, retrieve knowledge from uploaded documents, execute registered tools, pause sensitive actions for human approval, resume approved workflows, persist execution metadata, and expose operational metrics.
+RedPA AI is an extensible backend platform for building agentic applications. It supports:
 
-RedPA is designed as a reusable platform rather than a single-purpose chatbot.
+- structured planning and deterministic routing;
+- conversational AI through Ollama;
+- retrieval-augmented generation over uploaded documents;
+- safe internal and external tools;
+- human review and workflow resume;
+- persistent users, conversations, messages, and reviews;
+- Prometheus metrics and Grafana dashboards;
+- Docker-based local deployment.
 
-Typical use cases include:
+RedPA is designed as a reusable agent platform rather than a single-purpose chatbot.
 
-- internal knowledge assistants;
-- document-aware copilots;
-- developer assistants;
-- customer-support automation;
-- enterprise workflow automation;
-- tool-using agents;
-- human-supervised AI systems;
-- future research, SQL, MCP, memory, and multi-agent workflows.
+## Current Capabilities
+
+- JWT authentication
+- User management
+- Conversations and messages
+- LangGraph workflow orchestration
+- LLM planner with deterministic fallback
+- Chat workflow
+- RAG document pipeline
+- Human review queue
+- Approve, reject, and resume
+- Tool registry
+- Tool discovery API
+- Safe calculator
+- DateTime tool
+- Weather tool
+- Currency tool
+- GitHub repository tool
+- Hacker News tool
+- Brave web-search tool
+- External HTTP client
+- Retry and timeout handling
+- Tool response formatters
+- HTTP and tool metrics
+- Prometheus
+- Grafana
+- Docker Compose
+- GitHub Actions CI
 
 ## Why RedPA Is More Than a Chatbot
-
-A basic chatbot usually follows:
-
-```text
-User message → LLM → Response
-```
-
-RedPA uses a controlled workflow:
 
 ```text
 User Request
     ↓
 Authentication and Conversation Context
     ↓
-Planner and Deterministic Safety Checks
+Planner and Deterministic Safety Rules
     ↓
-┌───────────────┬───────────────┬────────────────┬──────────────────┐
-│ Chat Workflow │ RAG Workflow  │ Tool Runtime   │ Human Review     │
-│ Local LLM     │ Qdrant        │ Tool Registry  │ Pause / Resume   │
-└───────────────┴───────────────┴────────────────┴──────────────────┘
+┌──────────────┬──────────────┬───────────────┬─────────────────┐
+│ Chat         │ RAG          │ Tool Runtime  │ Human Review    │
+│ Ollama       │ Qdrant       │ Registry      │ Pause / Resume  │
+└──────────────┴──────────────┴───────────────┴─────────────────┘
     ↓
 Persisted Response, Metadata, Logs, and Metrics
 ```
 
-Clear requests such as calculations and current-time lookups are routed directly to deterministic tools. Sensitive actions can be blocked until a human approves them.
+## Built-in Tools
 
-## Current Status
+| Tool | Purpose |
+|---|---|
+| Calculator | Safe arithmetic without `eval` |
+| DateTime | Time-zone-aware current date and time |
+| Weather | Current weather through Open-Meteo |
+| Currency | Currency conversion through Frankfurter |
+| GitHub | Public repository metadata |
+| News | Latest Hacker News stories |
+| Web Search | Brave Search integration |
 
-RedPA AI is under active development.
-
-### Implemented
-
-- JWT authentication
-- User, conversation, and message persistence
-- Chat API and streaming workflow support
-- LangGraph orchestration
-- LLM planner
-- Deterministic routing and rule-based fallback
-- Planner confidence, reasoning, and signals
-- RAG document pipeline
-- PDF, TXT, Markdown, and DOCX extraction
-- Chunking and embeddings
-- Qdrant vector storage and retrieval
-- Tool registry and tool service
-- Safe calculator tool
-- DateTime tool with IANA time zones
-- Human review queue
-- Approve and reject decisions
-- Approved-workflow resume
-- PostgreSQL and Alembic migrations
-- Docker Compose
-- Prometheus metrics endpoint
-- Grafana service
-- GitHub Actions CI
-- Request IDs and processing-time headers
-- Improved Ollama stream handling
-
-### Planned
-
-- Tool-specific Prometheus metrics
-- Grafana tool dashboards
-- Research agent
-- Read-only SQL agent
-- MCP client and server
-- Agent-to-agent communication
-- Long-running durable workflows
-- Short-term and long-term memory
-- Fine-grained permissions
-- Audit policies
-- Web frontend
-
-## Routes
-
-| Route | Status | Purpose |
-|---|---:|---|
-| `chat` | Implemented | General explanations and conversations |
-| `rag` | Implemented | Answers grounded in uploaded documents |
-| `tool` | Implemented | Registered tool execution |
-| `human_review` | Implemented | Human approval for sensitive actions |
-| `research` | Planned | External-source research |
-| `sql` | Planned | Controlled database querying |
-
-## Tool Runtime
-
-```text
-Planner
-   ↓ route=tool
-Tool Node
-   ↓
-Tool Registry
-   ↓
-Tool Service
-   ↓
-Registered Tool
-   ↓
-Structured Tool Result
-```
-
-### Calculator Tool
-
-The calculator:
-
-- supports basic arithmetic, parentheses, modulo, floor division, and powers;
-- uses Python AST parsing;
-- does not use `eval`;
-- rejects imports, function calls, attribute access, and arbitrary code;
-- limits expression length, exponent size, and result magnitude.
-
-Example:
+## Tool Request Examples
 
 ```text
 Calculate 25 * 18
-```
-
-Response:
-
-```text
-The result of 25 * 18 is 450.
-```
-
-A malicious request such as:
-
-```text
-Calculate __import__('os').system('dir')
-```
-
-is rejected without executing a command.
-
-### DateTime Tool
-
-The DateTime tool:
-
-- returns the current date and time;
-- supports IANA time zones;
-- supports aliases such as Berlin, Germany, Passau, Tehran, Tokyo, London, and New York;
-- returns date, time, weekday, ISO datetime, and UTC offset.
-
-Example:
-
-```text
 What time is it in Berlin?
-```
-
-The request is routed directly to the `datetime` tool instead of asking the LLM to guess.
-
-## RAG Pipeline
-
-```text
-Document ingestion:
-
-Upload
-  → Extract text
-  → Create chunks
-  → Generate embeddings
-  → Store vectors in Qdrant
-
-Question answering:
-
-User question
-  → Generate query embedding
-  → Search Qdrant
-  → Build grounded context
-  → Generate answer with the LLM
-```
-
-Supported formats:
-
-- PDF
-- TXT
-- Markdown
-- DOCX
-
-The pipeline includes file validation, text extraction, chunk creation, embedding generation through Ollama, vector storage in Qdrant, similarity search, source metadata, user and conversation filtering, and grounded answer generation.
-
-## Human-in-the-Loop
-
-Sensitive requests can be paused before execution.
-
-```text
-User Request
-    ↓
-Deterministic Safety Gate
-    ↓
-Human Review Created
-    ↓
-Approve or Reject
-    ↓
-Resume Approved Workflow
-```
-
-The review system stores the reason, requested action, original request, action payload, reviewer, decision, feedback, timestamps, and resume metadata.
-
-## Local AI
-
-Current chat model:
-
-```text
-qwen2.5:7b
-```
-
-Current embedding model:
-
-```text
-nomic-embed-text:latest
-```
-
-Ollama integration supports normal chat, streaming chat, structured response formats, configurable temperature, health checks, error handling, and graceful handling when content is received without a final stream frame.
-
-## Architecture
-
-```text
-Client / Swagger / Future Frontend
-                │
-                ▼
-          FastAPI API
-                │
-                ▼
-        Planner + LangGraph
-                │
-      ┌─────────┼─────────┬──────────────┐
-      ▼         ▼         ▼              ▼
-   Chat       RAG       Tools       Human Review
-      │         │         │              │
-      ▼         ▼         ▼              ▼
-   Ollama    Qdrant   Tool Registry   Pause/Resume
-                          │
-                    ┌─────┴─────┐
-                    ▼           ▼
-               Calculator   DateTime
-
-Persistence: PostgreSQL
-Documents: Local storage + Qdrant
-Observability: Prometheus + Grafana
+What is the weather in Munich?
+Convert 100 USD to EUR
+Show GitHub repository saeidkh96/redpa-ai
+Show the latest Hacker News stories
+Search the web for LangGraph durable execution
 ```
 
 ## Technology Stack
 
 ### Backend
-- Python
+
+- Python 3.13
 - FastAPI
 - Pydantic
 - SQLAlchemy Async
@@ -268,13 +101,15 @@ Observability: Prometheus + Grafana
 - LangGraph
 
 ### AI and Retrieval
+
 - Ollama
 - Qwen 2.5 7B
 - Nomic Embed Text
 - Qdrant
-- RAG
+- Retrieval-Augmented Generation
 
 ### Infrastructure
+
 - PostgreSQL
 - Docker
 - Docker Compose
@@ -294,10 +129,10 @@ redpa-ai/
 │   │   ├── clients/
 │   │   ├── core/
 │   │   ├── database/
+│   │   ├── formatters/
 │   │   ├── middleware/
 │   │   ├── models/
 │   │   ├── monitoring/
-│   │   ├── prompts/
 │   │   ├── repositories/
 │   │   ├── schemas/
 │   │   ├── services/
@@ -319,11 +154,9 @@ redpa-ai/
 
 ### Prerequisites
 
-- Docker Desktop
 - Git
+- Docker Desktop
 - Ollama
-
-Recommended: at least 16 GB RAM and GPU acceleration when available.
 
 ### Clone
 
@@ -339,195 +172,115 @@ ollama pull qwen2.5:7b
 ollama pull nomic-embed-text
 ```
 
-### Environment
+### Configure Environment
 
-At minimum:
+```bash
+cp .env.example .env
+```
+
+Set at least:
 
 ```env
 JWT_SECRET_KEY=replace-with-a-long-random-secret
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
-QDRANT_URL=http://qdrant:6333
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_MODEL=qwen2.5:7b
+BRAVE_SEARCH_API_KEY=
+GITHUB_TOKEN=
 ```
 
-Never commit real secrets.
-
-### Start
+### Start the Stack
 
 ```bash
 docker compose up -d --build
 ```
 
-### Migrations
+### Apply Migrations
 
 ```bash
 docker compose exec backend alembic -c alembic.ini upgrade head
 ```
 
-### Services
+## Services
 
 | Service | URL |
 |---|---|
-| Swagger | `http://localhost:8000/docs` |
+| Swagger UI | `http://localhost:8000/docs` |
+| ReDoc | `http://localhost:8000/redoc` |
 | OpenAPI | `http://localhost:8000/openapi.json` |
 | Prometheus | `http://localhost:9090` |
 | Grafana | `http://localhost:3000` |
 | Qdrant | `http://localhost:6333` |
 
-## Development Commands
-
-```bash
-python -m compileall backend/app
-docker compose up -d --build backend
-docker compose logs -f backend
-docker compose exec backend python -m compileall app
-docker compose exec backend alembic -c alembic.ini upgrade head
-```
-
-## Example Requests
-
-### Chat
-
-```text
-Explain what Python decorators are.
-```
-
-### Calculator
-
-```text
-Calculate 25 * 18
-```
-
-### Security Validation
-
-```text
-Calculate __import__('os').system('dir')
-```
-
-### DateTime
-
-```text
-What time is it in Berlin?
-```
-
-### RAG
-
-```text
-Search my uploaded documents for information about LangGraph.
-```
-
-### Human Review
-
-```text
-Send an email to the project manager.
-```
-
-## Security Principles
-
-- no production secrets in source control;
-- JWT authentication;
-- user-scoped resources;
-- deterministic approval gates;
-- safe calculator parsing without `eval`;
-- no arbitrary shell tool;
-- structured tool registration;
-- controlled workflow resume;
-- file type and size validation;
-- environment-based service configuration.
-
-Before production, add HTTPS, rate limiting, strict CORS, secret management, backups, centralized logs, fine-grained authorization, dependency scanning, and container scanning.
-
-## Testing Checklist
-
-Before pushing major changes, verify:
-
-- general chat;
-- calculator;
-- malicious calculator input;
-- DateTime;
-- document upload and RAG;
-- human review;
-- approve or reject;
-- workflow resume;
-- Docker health;
-- database migrations.
-
 ## Documentation
 
 - [Architecture](docs/architecture.md)
-- [Workflows](docs/workflows.md)
+- [API](docs/api.md)
+- [Agent Workflows](docs/workflows.md)
+- [RAG](docs/rag.md)
 - [Tool System](docs/tools.md)
-- [Deployment and Troubleshooting](docs/operations.md)
+- [Human Review](docs/human-review.md)
+- [Monitoring](docs/monitoring.md)
+- [Deployment](docs/deployment.md)
+- [Development](docs/development.md)
+- [Troubleshooting](docs/troubleshooting.md)
 - [Roadmap](docs/roadmap.md)
 
 ## Roadmap
 
-### V1 — Foundation
-- [x] FastAPI
-- [x] PostgreSQL
-- [x] JWT
-- [x] Conversations and messages
-- [x] LangGraph
-- [x] Ollama
+### Completed
+
+- [x] FastAPI backend
+- [x] PostgreSQL persistence
+- [x] JWT authentication
+- [x] LangGraph orchestration
+- [x] Ollama integration
 - [x] RAG
+- [x] Human review
+- [x] Workflow resume
+- [x] Tool registry
+- [x] Tool discovery API
+- [x] Internal tools
+- [x] External tools
+- [x] Tool response formatters
+- [x] Prometheus and Grafana
 - [x] Docker Compose
 
-### V2 — Planning and Tools
-- [x] Structured planner
-- [x] Deterministic routing
-- [x] Tool registry
-- [x] Safe calculator
-- [x] DateTime tool
-- [ ] Tool metrics
-- [ ] Tool discovery endpoint
+### Planned
 
-### V3 — Human Supervision
-- [x] Human review persistence
-- [x] Approve and reject
-- [x] Workflow resume
-- [ ] Review dashboard
-- [ ] Approval policies
-- [ ] Audit timeline
-
-### V4 — Advanced Agents
 - [ ] Research agent
-- [ ] SQL agent
-- [ ] Report agent
-- [ ] Memory
-- [ ] Long-running workflows
-
-### V5 — Interoperability
-- [ ] MCP server
+- [ ] Read-only SQL agent
 - [ ] MCP client
-- [ ] Agent-to-agent communication
-
-### V6 — Production Hardening
-- [ ] Fine-grained authorization
-- [ ] Rate limiting
-- [ ] Distributed tracing
-- [ ] Centralized logs
-- [ ] Load testing
+- [ ] MCP server
+- [ ] Agent memory
+- [ ] A2A workflows
 - [ ] Web frontend
+- [ ] Production hardening
+
+## Security
+
+RedPA currently includes:
+
+- JWT authentication;
+- user-scoped resources;
+- safe calculator parsing;
+- deterministic approval gates;
+- structured tools;
+- blocked private-network HTTP targets;
+- environment-based secrets;
+- no arbitrary shell-execution tool.
+
+See [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## License
-
-Licensed under the MIT License.
-
 ## Author
 
-**Saeid Khalilian**  
+**Saeed Khalilian**  
 AI & Python Developer  
 Master's student in Computer Science at the University of Passau
 
-GitHub: [saeidkh96](https://github.com/saeidkh96)
+GitHub: https://github.com/saeidkh96
 
-## Vision
+## License
 
-RedPA AI aims to become a reusable open-source foundation for production-oriented agentic applications with planning, retrieval, tools, human supervision, memory, interoperability, and observability.
-
-The goal is not to build another chatbot. The goal is to build an extensible runtime for trustworthy AI workflows.
+MIT License

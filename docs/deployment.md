@@ -2,15 +2,15 @@
 
 ## Local Docker Topology
 
-The current Compose stack contains:
+The Compose stack contains:
 
 - PostgreSQL 17;
 - Qdrant;
-- RedPA AI backend;
+- RedPA backend;
 - Prometheus;
 - Grafana.
 
-Ollama runs on the host and is reached by the backend container through:
+Ollama runs on the host and is reached through:
 
 ```text
 http://host.docker.internal:11434
@@ -19,29 +19,29 @@ http://host.docker.internal:11434
 ## Start
 
 ```bash
-docker compose up --build
-```
-
-Detached mode:
-
-```bash
 docker compose up -d --build
 ```
 
-Inspect:
+## Inspect
 
 ```bash
 docker compose ps
 docker compose logs -f backend
 ```
 
-Stop:
+## Migrations
+
+```bash
+docker compose exec backend alembic -c alembic.ini upgrade head
+```
+
+## Stop
 
 ```bash
 docker compose down
 ```
 
-Remove local volumes only when data loss is acceptable:
+Remove volumes only when data loss is acceptable:
 
 ```bash
 docker compose down -v
@@ -49,7 +49,7 @@ docker compose down -v
 
 ## Ports
 
-| Component | Host port |
+| Component | Port |
 |---|---:|
 | Backend | 8000 |
 | PostgreSQL | 5432 |
@@ -60,35 +60,15 @@ docker compose down -v
 
 ## Production Hardening
 
-The current configuration is development-oriented. For production:
-
 - do not embed secrets in Compose;
 - rotate JWT and database credentials;
 - set `DEBUG=false`;
-- restrict CORS to real application origins;
-- do not publish PostgreSQL or Qdrant unless required;
-- add TLS through a reverse proxy or ingress;
-- pin image versions rather than using `latest`;
-- enforce CPU and memory limits;
-- define restart and health policies;
-- use managed or backed-up volumes;
-- add database and Qdrant backup procedures;
+- restrict CORS;
+- avoid publishing PostgreSQL and Qdrant;
+- add TLS;
+- pin image versions;
+- define resource limits;
+- configure backups;
 - secure Grafana and Prometheus;
-- use centralized logs;
-- use a production ASGI process model;
-- define migration execution as a controlled deployment step.
-
-## Ollama Deployment Options
-
-1. **Host-based local development:** current setup.
-2. **Separate GPU host:** configure `OLLAMA_BASE_URL`.
-3. **Containerized Ollama:** add a service and GPU configuration.
-4. **Cloud LLM provider:** implement another provider behind the LLM service abstraction.
-
-## Secret Generation
-
-Example JWT secret generation:
-
-```bash
-python -c "import secrets; print(secrets.token_urlsafe(64))"
-```
+- centralize logs;
+- control migration execution.

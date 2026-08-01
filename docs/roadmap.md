@@ -5,7 +5,7 @@
 - FastAPI
 - PostgreSQL
 - JWT
-- Conversations and messages
+- conversations and messages
 - LangGraph
 - Ollama
 - RAG
@@ -13,21 +13,27 @@
 - Human Review
 - Workflow Resume
 - Tool Registry
-- Calculator Tool
-- DateTime Tool
-- Docker Compose
+- Tool Discovery API
+- Calculator
+- DateTime
+- Weather
+- Currency
+- GitHub
+- News
+- Web Search
+- Response Formatters
+- Tool Metrics
 - Prometheus
 - Grafana
+- Docker Compose
 
 ## Next
 
-1. Tool metrics
-2. Grafana tool dashboard
-3. Tool discovery endpoint
-4. Safe read-only tools
-5. Research agent
-6. SQL agent
-7. MCP
-8. Memory
-9. A2A
-10. Web frontend
+1. Research agent
+2. Read-only SQL agent
+3. MCP client
+4. MCP server
+5. Agent memory
+6. A2A workflows
+7. Web frontend
+8. Production hardening

@@ -2,10 +2,10 @@
 
 ## Stack
 
-- Application metrics endpoint
-- Prometheus scraping
-- Grafana data-source provisioning
-- Provisioned RedPA API overview dashboard
+- application metrics endpoint;
+- Prometheus;
+- Grafana;
+- provisioned dashboards.
 
 ## Access
 
@@ -14,7 +14,7 @@ Prometheus: http://localhost:9090
 Grafana:    http://localhost:3000
 ```
 
-Current development credentials:
+Development credentials:
 
 ```text
 admin / admin
@@ -22,40 +22,31 @@ admin / admin
 
 Change them outside local development.
 
-## Recommended Metrics
+## HTTP Metrics
 
-### HTTP
+- `redpa_http_requests_total`
+- `redpa_http_request_duration_seconds`
+- `redpa_http_requests_in_progress`
+- `redpa_http_exceptions_total`
+- `redpa_http_response_size_bytes`
 
-- request count by method, route, and status;
-- request duration histogram;
-- requests in progress;
-- validation and server errors.
+## Tool Metrics
 
-### AI
+- `redpa_tool_executions_total`
+- `redpa_tool_errors_total`
+- `redpa_tool_execution_duration_seconds`
+
+## Recommended AI and Workflow Metrics
 
 - LLM request count;
 - model latency;
 - generation failures;
-- prompt and completion token estimates where available;
 - planner route distribution;
 - RAG retrieval latency;
-- empty retrieval count.
-
-### Workflows
-
 - workflow starts and completions;
-- failed and paused workflows;
-- human-review queue size;
-- approval, rejection, and retry counts;
-- workflow resume latency.
-
-### Infrastructure
-
-- database connectivity;
-- Qdrant connectivity;
-- Ollama availability;
-- process memory and CPU;
-- container restart count.
+- paused workflows;
+- pending review count;
+- approval and rejection count.
 
 ## Logging
 
@@ -64,20 +55,9 @@ Logs should include:
 - timestamp;
 - level;
 - request ID;
-- authenticated user identifier when appropriate;
 - route and method;
-- workflow or conversation identifier;
+- workflow or conversation ID;
 - duration;
 - normalized exception category.
 
-Never log passwords, tokens, JWT secrets, full authorization headers, or sensitive document contents.
-
-## Alert Ideas
-
-- elevated 5xx rate;
-- Ollama unavailable;
-- Qdrant unavailable;
-- PostgreSQL unavailable;
-- p95 latency above threshold;
-- growing pending-review queue;
-- repeated workflow failures.
+Never log passwords, tokens, secrets, authorization headers, or document contents.

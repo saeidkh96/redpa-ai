@@ -15,7 +15,8 @@ Planner → RAG Node → Retriever → Context Builder → LLM → Response
 ## Tool
 
 ```text
-Planner → Tool Node → Registry → Tool Service → Tool → Response
+Planner → Tool Node → Registry → Tool Service → Tool
+        → Response Formatter → Response
 ```
 
 ## Human Review
@@ -24,4 +25,6 @@ Planner → Tool Node → Registry → Tool Service → Tool → Response
 Safety Gate → Human Review → Approve or Reject → Resume
 ```
 
-`research` and `sql` remain planned capabilities and must not pretend to complete unsupported actions.
+## Planned Routes
+
+`research` and `sql` remain planned capabilities and should return clear unsupported-capability responses until implemented.

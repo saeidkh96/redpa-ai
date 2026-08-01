@@ -2,74 +2,108 @@
 
 ## Interactive Documentation
 
-After starting the backend:
-
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 - OpenAPI schema: `http://localhost:8000/openapi.json`
 
-The generated OpenAPI document is the authoritative source because endpoint paths and schemas can change during development.
+The generated OpenAPI document is the authoritative source.
 
 ## Authentication
 
-Protected endpoints expect a JWT access token:
+Protected endpoints expect:
 
 ```http
 Authorization: Bearer <token>
 ```
 
-A typical client flow is:
+Typical flow:
 
-1. register a user if registration is enabled;
-2. log in using the OAuth2-compatible login endpoint;
-3. copy the returned access token;
+1. register a user when registration is enabled;
+2. log in;
+3. copy the access token;
 4. send it as a Bearer token.
 
 ## Main API Domains
-
-Based on the current application structure, the API is organized around:
 
 - health and service status;
 - authentication and users;
 - conversations;
 - messages and chat;
 - Ollama / LLM status;
-- planner and orchestrator execution;
-- document upload and retrieval;
-- human-review decisions;
-- monitoring metrics.
+- documents and retrieval;
+- human reviews;
+- tool discovery;
+- metrics.
 
-## Example Health Request
+## Tool Discovery
 
-```bash
-curl http://localhost:8000/api/v1/health
+```http
+GET /api/v1/tools
+GET /api/v1/tools/{tool_name}
 ```
 
-## Example Authenticated Request
+Example:
 
-```bash
-curl \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  http://localhost:8000/api/v1/conversations
+```json
+{
+  "items": [
+    {
+      "name": "calculator",
+      "description": "Safely evaluates basic mathematical expressions.",
+      "version": "1.0.0",
+      "requires_approval": false
+    }
+  ],
+  "total": 1
+}
+```
+
+## Chat Request
+
+```json
+{
+  "conversation_id": "YOUR_CONVERSATION_UUID",
+  "content": "What is the weather in Munich?"
+}
+```
+
+The response may include:
+
+- user message;
+- assistant message;
+- route;
+- planner reasoning;
+- provider;
+- model;
+- tool name;
+- usage;
+- review metadata.
+
+## Human Review
+
+Typical operations:
+
+```text
+GET    /api/v1/reviews
+GET    /api/v1/reviews/{review_id}
+POST   /api/v1/reviews/{review_id}/decision
+POST   /api/v1/reviews/{review_id}/resume
 ```
 
 ## Error Model
 
-Clients should expect standard HTTP status codes:
-
 | Code | Meaning |
 |---|---|
-| 200 | Successful read or operation |
+| 200 | Successful operation |
 | 201 | Resource created |
 | 400 | Invalid operation |
 | 401 | Missing or invalid authentication |
-| 403 | Authenticated but not authorized |
+| 403 | Not authorized |
 | 404 | Resource not found |
 | 409 | State conflict |
-| 422 | Request validation failed |
-| 500 | Unexpected server error |
-| 503 | External dependency unavailable |
+| 422 | Validation failure |
+| 500 | Unexpected error |
+| 503 | Dependency unavailable |
 
 ## Request Tracing
 
@@ -79,19 +113,3 @@ Responses may expose:
 X-Request-ID
 X-Process-Time-Ms
 ```
-
-Log the request ID on the client side when reporting backend failures.
-
-## Streaming
-
-Streaming chat endpoints should be consumed incrementally rather than buffered until completion. The exact media type and event schema should be taken from Swagger/OpenAPI and the route implementation.
-
-## Human Review
-
-Human-review endpoints should enforce:
-
-- ownership or reviewer authorization;
-- valid state transitions;
-- idempotent decision behavior;
-- conflict responses when a review was already decided;
-- audit-friendly storage of decisions and timestamps.

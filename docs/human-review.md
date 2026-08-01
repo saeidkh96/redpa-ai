@@ -2,49 +2,47 @@
 
 ## Purpose
 
-Human review provides an explicit control point when a workflow is uncertain, sensitive, or requires accountability.
+Human review provides an explicit control point when a workflow is sensitive, uncertain, or requires accountability.
 
-## Review Lifecycle
+## Lifecycle
 
-```mermaid
-stateDiagram-v2
-    [*] --> Pending
-    Pending --> Approved
-    Pending --> Rejected
-    Pending --> Retry
-    Approved --> Resumed
-    Retry --> Resumed
-    Rejected --> Closed
+```text
+Pending
+  ├── Approved → Resumed
+  ├── Rejected → Closed
+  └── Cancelled
 ```
 
 ## Reviewer Actions
 
 A reviewer can:
 
-- approve the proposed output;
-- reject it;
-- submit an edited or replacement answer;
-- request a retry;
-- add feedback for the resumed workflow.
+- approve;
+- reject;
+- add feedback;
+- resume an approved workflow.
 
 ## Safety Properties
 
-The review implementation should guarantee:
+The implementation should guarantee:
 
-- a review belongs to the authenticated user's accessible workflow;
+- ownership or reviewer authorization;
 - only pending reviews can be decided;
-- a second decision returns a conflict rather than overwriting history;
+- a second decision returns a conflict;
 - timestamps and reviewer identity are stored;
-- the resumed workflow receives the exact approved decision;
-- retries are bounded.
+- resume uses the approved decision;
+- a review cannot be resumed twice.
 
-## Dashboard Contract
+## Stored Data
 
-A future frontend dashboard can use the API to:
-
-- list pending and completed reviews;
-- filter by status and date;
-- inspect workflow context;
-- edit the proposed response;
-- approve, reject, or retry;
-- display the resumed workflow result.
+- user;
+- conversation;
+- message;
+- reason;
+- requested action;
+- request content;
+- action payload;
+- reviewer;
+- feedback;
+- timestamps;
+- resume metadata.

@@ -2,47 +2,45 @@
 
 ## Pipeline
 
-```mermaid
-flowchart LR
-    File[Uploaded File] --> Extract[Extract Text]
-    Extract --> Persist[Persist Content]
-    Persist --> Chunk[Create Chunks]
-    Chunk --> Embed[Generate Embeddings]
-    Embed --> Qdrant[(Qdrant)]
+```text
+Uploaded File
+  → Extract Text
+  → Persist Content
+  → Create Chunks
+  → Generate Embeddings
+  → Store in Qdrant
 
-    Question[User Question] --> QEmbed[Embed Query]
-    QEmbed --> Search[Vector Search]
-    Qdrant --> Search
-    Search --> Filter[Filter and Rank]
-    Filter --> Context[Build Context]
-    Context --> LLM[Generate Answer]
+User Question
+  → Embed Query
+  → Vector Search
+  → Filter and Rank
+  → Build Context
+  → Generate Grounded Answer
 ```
 
 ## Components
 
-- **Document service:** lifecycle and metadata.
-- **Document extractor:** converts supported files into text.
-- **Chunking service:** creates retrieval-sized text units.
-- **Embedding service:** produces vectors.
-- **Vector store service:** writes, deletes, and queries vector points.
-- **Retriever service:** selects relevant chunks.
-- **Context builder:** formats retrieved material for the LLM.
-- **RAG service:** coordinates retrieval and generation.
+- document service;
+- document extractor;
+- chunking service;
+- embedding service;
+- vector store service;
+- retriever service;
+- context builder;
+- RAG service.
 
 ## Data Integrity
 
-Each vector point should include identifiers that connect it to:
+Each vector point should connect to:
 
-- the user or tenant;
-- the source document;
-- the relational chunk;
+- user or tenant;
+- source document;
+- relational chunk;
 - optional page or section metadata.
 
-Retrieval filters must prevent one user's documents from appearing in another user's context.
+Retrieval filters must prevent cross-user access.
 
 ## Quality Controls
-
-Useful controls include:
 
 - chunk overlap;
 - similarity threshold;
@@ -51,16 +49,14 @@ Useful controls include:
 - source deduplication;
 - context-length limits;
 - empty-retrieval fallback;
-- source references in generated answers.
+- source references.
 
 ## Deletion
 
 Deleting a document should remove or invalidate:
 
-- stored files;
-- document metadata;
+- stored file;
+- metadata;
 - extracted content;
 - chunks;
-- corresponding Qdrant points.
-
-Partial deletion creates stale retrieval results and should be treated as an error requiring cleanup.
+- Qdrant points.

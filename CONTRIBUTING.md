@@ -22,7 +22,7 @@ Include:
 ## Commit Examples
 
 ```text
-feat(tools): add datetime tool
-fix(ollama): improve stream completion handling
-docs: update architecture
+feat(tools): add weather tool
+fix(planner): normalize unsupported route
+docs: update API guide
 ```

@@ -1,80 +1,76 @@
 # Troubleshooting
 
-## Backend Cannot Reach Ollama
+## Backend Restarting
 
-Check:
+```bash
+docker compose ps
+docker compose logs --tail=200 backend
+```
+
+Common causes:
+
+- import errors;
+- syntax errors;
+- circular imports;
+- missing environment variables;
+- database connection failures;
+- invalid module paths.
+
+## Ollama
 
 ```bash
 ollama serve
 ollama list
+ollama ps
 ```
 
-The Docker backend expects Ollama at:
+The backend expects:
 
 ```text
 http://host.docker.internal:11434
 ```
 
-Confirm the model exists:
+## PostgreSQL
 
 ```bash
-ollama pull qwen2.5:7b
-```
-
-## PostgreSQL Timeout
-
-```bash
-docker compose ps
 docker compose logs postgres
 ```
 
-Confirm the database is healthy and that the backend uses the Compose hostname `postgres`, not `localhost`.
+The backend should use the Compose hostname `postgres`, not `localhost`.
 
-## Qdrant Unavailable
+## Qdrant
 
 ```bash
 docker compose logs qdrant
-curl http://localhost:6333/healthz
 ```
 
-Inside the Compose network, the backend should use `http://qdrant:6333`.
+The backend should use:
+
+```text
+http://qdrant:6333
+```
+
+## Brave Search
+
+Check without printing the key:
+
+```bash
+docker compose exec backend python -c "import os; print('configured' if os.getenv('BRAVE_SEARCH_API_KEY') else 'missing')"
+```
 
 ## Migration Failure
 
-Check migration state:
-
 ```bash
-alembic current
-alembic history
+docker compose exec backend alembic -c alembic.ini current
+docker compose exec backend alembic -c alembic.ini history
+docker compose exec backend alembic -c alembic.ini upgrade head
 ```
 
-Apply:
+## Git Push Rejected
 
 ```bash
-alembic upgrade head
+git pull --rebase origin main
+git push origin main
 ```
 
-Do not delete migration files after they have been shared or deployed.
-
-## Unauthorized
-
-- authenticate again;
-- ensure the header starts with `Bearer `;
-- check token expiry;
-- ensure all running instances share the same JWT secret.
-
-## Planner Produces an Invalid Route
-
-- inspect the raw planner output;
-- validate it against the planner schema;
-- normalize route aliases;
-- apply a deterministic fallback;
-- log the planner decision without logging sensitive prompts.
-
-## Grafana Has No Data
-
-- open Prometheus targets;
-- confirm the backend metrics target is `UP`;
-- check the configured scrape path;
-- verify Grafana's provisioned Prometheus URL;
-- generate some API traffic.
+Avoid force push unless the consequences are fully understood.

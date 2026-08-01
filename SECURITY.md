@@ -1,15 +1,27 @@
 # Security Policy
 
-RedPA currently includes JWT authentication, user-scoped resources, deterministic review gates, structured tools, safe calculator parsing, and no arbitrary shell tool.
+## Current Controls
 
-Before production, add:
+- JWT authentication
+- user-scoped resources
+- deterministic approval gates
+- safe calculator parsing without `eval`
+- structured tool registry
+- blocked local and private network targets
+- environment-based secrets
+- no arbitrary shell-execution tool
+
+## Production Requirements
+
+Before production deployment, add:
 
 - managed secrets;
 - HTTPS;
-- rate limiting;
 - strict CORS;
+- rate limiting;
 - fine-grained authorization;
-- centralized audit logs;
 - encrypted backups;
+- centralized logs;
 - dependency scanning;
-- container scanning.
+- container scanning;
+- audit retention.

@@ -2,29 +2,79 @@
 
 ## Components
 
-- `BaseTool`: common asynchronous interface.
-- `ToolMetadata`: name, description, version, and approval requirement.
-- `ToolRegistry`: centralized registration and lookup.
-- `ToolService`: execution, logging, and structured results.
-- `Tool Node`: selection, arguments, execution, and response formatting.
+- `BaseTool`
+- `ToolMetadata`
+- `ToolExecutionResult`
+- `ToolRegistry`
+- `ToolService`
+- Tool node
+- deterministic intent detection
+- response formatters
+- Prometheus metrics
+- external HTTP client
 
 ## Current Tools
 
 ### Calculator
 
-Uses AST parsing and an allowlist of operations. It does not use `eval` and does not support arbitrary Python execution.
+Safe AST-based arithmetic without `eval`.
 
 ### DateTime
 
-Uses `zoneinfo.ZoneInfo` and supports IANA time zones.
+IANA time-zone-aware date and time.
+
+### Weather
+
+Current weather through Open-Meteo.
+
+### Currency
+
+Currency conversion through Frankfurter.
+
+### GitHub
+
+Public repository metadata.
+
+### News
+
+Top Hacker News stories.
+
+### Web Search
+
+Brave Search integration.
+
+## Execution Flow
+
+```text
+Planner
+  → route=tool
+  → Tool Node
+  → Tool Registry
+  → Tool Service
+  → Tool
+  → Response Formatter
+  → Persisted Assistant Message
+```
+
+## External HTTP Controls
+
+- HTTPS-only requests;
+- host allowlists;
+- private-network blocking;
+- retry;
+- timeout;
+- response-size limits;
+- JSON validation;
+- optional API authentication;
+- metrics.
 
 ## Adding a Tool
 
 1. Create a class under `backend/app/tools/`.
 2. Inherit from `BaseTool`.
-3. Implement `metadata`.
+3. Implement metadata.
 4. Implement `execute`.
-5. Register it in `registry.py`.
-6. Add selection and argument extraction.
-7. Add deterministic planner patterns when appropriate.
+5. Register it.
+6. Add deterministic intent detection when appropriate.
+7. Add a formatter.
 8. Add tests.
