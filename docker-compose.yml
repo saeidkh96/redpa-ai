@@ -1,5 +1,3 @@
-name: redpa-ai
-
 services:
   postgres:
     image: postgres:17-alpine
@@ -7,29 +5,30 @@ services:
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: redpa_ai
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-redpa_ai}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
 
     ports:
       - "5432:5432"
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - redpa-postgres-data:/var/lib/postgresql/data
 
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U postgres -d redpa_ai"
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-redpa_ai}",
         ]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 5s
 
     networks:
       - redpa-network
+
 
   qdrant:
     image: qdrant/qdrant:latest
@@ -41,77 +40,70 @@ services:
       - "6334:6334"
 
     volumes:
-      - qdrant_data:/qdrant/storage
+      - redpa-qdrant-data:/qdrant/storage
 
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "bash -c ':> /dev/tcp/127.0.0.1/6333'"
+          "timeout 5 bash -c '</dev/tcp/127.0.0.1/6333'",
         ]
       interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 10s
+      start_period: 5s
 
     networks:
       - redpa-network
 
-  backend:
-    container_name: redpa-backend
-    restart: unless-stopped
 
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
 
+    image: redpa-ai-backend
+    container_name: redpa-backend
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      APP_NAME: ${APP_NAME:-RedPA AI}
+      APP_VERSION: ${APP_VERSION:-0.2.0}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+
+      API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8000}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai}
+
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      QDRANT_COLLECTION_NAME: ${QDRANT_COLLECTION_NAME:-redpa_documents}
+
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text:latest}
+      OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-120}
+      OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE:-0.2}
+
+      BRAVE_SEARCH_API_KEY: ${BRAVE_SEARCH_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
+      STORAGE_DIRECTORY: ${STORAGE_DIRECTORY:-/app/backend/storage}
+
     ports:
       - "8000:8000"
 
-    environment:
-      APP_NAME: "RedPA AI"
-      APP_VERSION: "0.1.0"
-      ENVIRONMENT: "development"
-      DEBUG: "true"
-
-      API_V1_PREFIX: "/api/v1"
-
-      HOST: "0.0.0.0"
-      PORT: "8000"
-      LOG_LEVEL: "INFO"
-
-      JWT_SECRET_KEY: "replace-this-development-secret-before-production"
-      JWT_ALGORITHM: "HS256"
-      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
-
-      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai"
-
-      DATABASE_HOST: "postgres"
-      DATABASE_PORT: "5432"
-      DATABASE_NAME: "redpa_ai"
-      DATABASE_USER: "postgres"
-      DATABASE_PASSWORD: "postgres"
-      DATABASE_ECHO: "false"
-      DATABASE_POOL_SIZE: "10"
-      DATABASE_MAX_OVERFLOW: "20"
-      DATABASE_POOL_TIMEOUT: "30"
-      DATABASE_POOL_RECYCLE: "1800"
-
-      QDRANT_URL: "http://qdrant:6333"
-      QDRANT_HOST: "qdrant"
-      QDRANT_PORT: "6333"
-
-      OLLAMA_BASE_URL: "http://host.docker.internal:11434"
-      OLLAMA_MODEL: "qwen2.5:7b"
-
-      CORS_ALLOWED_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"]'
-      CORS_ALLOWED_METHODS: '["GET","POST","PUT","PATCH","DELETE","OPTIONS"]'
-      CORS_ALLOWED_HEADERS: '["*"]'
-      CORS_EXPOSED_HEADERS: '["X-Request-ID","X-Process-Time-Ms"]'
-      CORS_ALLOW_CREDENTIALS: "true"
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./backend/storage:/app/backend/storage
 
     depends_on:
       postgres:
@@ -120,11 +112,12 @@ services:
       qdrant:
         condition: service_healthy
 
-    volumes:
-      - ./backend/storage:/app/backend/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     networks:
       - redpa-network
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -141,54 +134,46 @@ services:
 
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - redpa-prometheus-data:/prometheus
 
     depends_on:
-      backend:
-        condition: service_started
+      - backend
 
     networks:
       - redpa-network
+
 
   grafana:
     image: grafana/grafana:latest
     container_name: redpa-grafana
     restart: unless-stopped
 
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+
     ports:
       - "3000:3000"
 
-    environment:
-      GF_SECURITY_ADMIN_USER: "admin"
-      GF_SECURITY_ADMIN_PASSWORD: "admin"
-      GF_USERS_ALLOW_SIGN_UP: "false"
-      GF_AUTH_ANONYMOUS_ENABLED: "false"
-      
-
     volumes:
-      - grafana_data:/var/lib/grafana
+      - redpa-grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
 
     depends_on:
-      prometheus:
-        condition: service_started
+      - prometheus
 
     networks:
       - redpa-network
 
+
 volumes:
-  postgres_data:
-    name: redpa-postgres-data
+  redpa-postgres-data:
+  redpa-qdrant-data:
+  redpa-prometheus-data:
+  redpa-grafana-data:
 
-  qdrant_data:
-    name: redpa-qdrant-data
-
-  prometheus_data:
-    name: redpa-prometheus-data
-
-  grafana_data:
-    name: redpa-grafana-data
 
 networks:
   redpa-network:

@@ -5,6 +5,9 @@ import re
 from typing import Any
 
 from app.agents.state import AgentState
+from app.formatters.tool_formatter import (
+    format_tool_response,
+)
 from app.services.tool_service import ToolService
 from app.tools.intent import detect_external_tool_intent
 
@@ -68,7 +71,7 @@ async def tool_node(state: AgentState) -> dict[str, object]:
         "tool_error": execution_result.error,
         "tool_execution_time_ms": execution_result.execution_time_ms,
         "tool_metadata": execution_result.metadata,
-        "response_content": _build_tool_response(
+        "response_content": format_tool_response(
             tool_name=selected_tool,
             success=execution_result.success,
             result=execution_result.result,
@@ -236,62 +239,6 @@ def _extract_timezone(text: str) -> str:
     match = re.search(r"\b([A-Za-z_]+/[A-Za-z_+\-]+)\b", text)
     return match.group(1) if match else "UTC"
 
-
-def _build_tool_response(
-    *,
-    tool_name: str,
-    success: bool,
-    result: Any,
-    error: str | None,
-    arguments: dict[str, Any],
-) -> str:
-    if not success:
-        return (
-            f"The '{tool_name}' tool could not complete the request. "
-            f"Error: {error or 'Unknown tool error.'}"
-        )
-
-    if tool_name == "calculator":
-        return (
-            f"The result of {arguments.get('expression', '')} "
-            f"is {result}."
-        )
-
-    if tool_name == "datetime" and isinstance(result, dict):
-        return (
-            f"The current time in {result.get('timezone', 'UTC')} is "
-            f"{result.get('time', '')} on {result.get('date', '')}. "
-            f"It is {result.get('weekday', '')}."
-        )
-
-    if tool_name == "weather" and isinstance(result, dict):
-        location = result.get("location", {})
-        return (
-            f"The current weather in {location.get('name', '')}, "
-            f"{location.get('country', '')} is "
-            f"{result.get('condition', '')}, "
-            f"{result.get('temperature')} "
-            f"{result.get('temperature_unit', '')}. "
-            f"It feels like {result.get('apparent_temperature')} "
-            f"{result.get('temperature_unit', '')}."
-        )
-
-    if tool_name == "currency" and isinstance(result, dict):
-        return (
-            f"{result.get('amount')} {result.get('from_currency')} "
-            f"is {result.get('converted_amount')} "
-            f"{result.get('to_currency')} using the reference rate "
-            f"{result.get('rate')}."
-        )
-
-    if tool_name == "github" and isinstance(result, dict):
-        return (
-            f"GitHub repository {result.get('full_name')} has "
-            f"{result.get('stars')} stars, {result.get('forks')} forks, "
-            f"and uses {result.get('language') or 'no primary language'}."
-        )
-
-    return f"The '{tool_name}' tool completed successfully. Result: {result}"
 
 
 def _optional_string(value: Any) -> str | None:
