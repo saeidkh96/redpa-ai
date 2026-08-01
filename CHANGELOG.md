@@ -1,24 +1,13 @@
-# Phase 3.2 Changelog
+# RedPA Research 3.2.2
 
 ## Added
-
-- deterministic evidence ranking;
-- duplicate removal;
-- domain-aware source scoring;
-- evidence selection;
-- confidence estimation;
-- Python response formatter;
-- deterministic citation generation;
-- research quality metrics;
-- fallback summary generation.
+- dedicated evidence cleaner;
+- strict prompt builder;
+- grounded-summary validator;
+- prompt-injection filtering;
+- lexical grounding validation.
 
 ## Changed
-
-- the LLM now generates summary text only;
-- the LLM no longer generates citations, Sources, Markdown structure,
-  confidence, or JSON;
-- only ranked evidence is included in the final response.
-
-## Compatibility
-
-Compatible with the existing Phase 3.1 Research Node and result schema.
+- ResearchService delegates prompt construction and validation;
+- dirty search snippets are cleaned before ranking and summarization;
+- invalid LLM summaries use deterministic fallback output.

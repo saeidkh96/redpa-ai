@@ -1,0 +1,29 @@
+REDPA PYTEST IMPORT FIX
+
+Problem:
+Tests run from the repository root, while the `app` package is located at:
+
+backend/app
+
+As a result, CI raises:
+
+ModuleNotFoundError: No module named 'app'
+
+Install:
+Copy these files into the repository root:
+
+pytest.ini
+tests/conftest.py
+
+Then run locally:
+
+pytest -v
+
+Commit:
+
+git add pytest.ini tests/conftest.py
+git commit -m "fix(ci): expose backend package to pytest"
+git pull --rebase origin main
+git push origin main
+
+The fix works in both local development and GitHub Actions.
