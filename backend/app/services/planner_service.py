@@ -84,6 +84,9 @@ ROUTE_PATTERNS: dict[
         r"\bvector\s+(database|store)\b",
     ),
     "research": (
+        r"^\s*research\b",
+        r"\bresearch\s+(the\s+)?latest\b",
+        r"\bresearch\s+.+",
         r"\bsearch\s+the\s+web\b",
         r"\bsearch\s+online\b",
         r"\bbrowse\s+the\s+web\b",
@@ -159,6 +162,18 @@ ROUTE_PRIORITY: tuple[AgentRoute, ...] = (
     "sql",
     "rag",
     "research",
+)
+
+
+DETERMINISTIC_RESEARCH_PATTERNS: tuple[str, ...] = (
+    r"^\s*research\b",
+    r"\bsearch\s+the\s+web\b.*"
+    r"\b(summarize|summarise|analyze|analyse|compare|report|research)\b",
+    r"\bsearch\s+online\b.*"
+    r"\b(summarize|summarise|analyze|analyse|compare|report|research)\b",
+    r"\b(latest|recent|current)\s+"
+    r"(developments|updates|trends|research|news)\b",
+    r"\bprovide\s+(a\s+)?research\s+(summary|report|overview)\b",
 )
 
 
@@ -304,13 +319,35 @@ class PlannerService:
         """
         Handle requests that should not require an LLM decision.
 
-        Calculator and current date/time requests are deterministic,
-        cheaper, faster, and more reliable when routed directly.
+        Research, calculator, and current date/time requests with
+        explicit intent are deterministic, cheaper, faster, and more
+        reliable when routed directly.
         """
 
         normalized_message = cls._normalize_text(
             user_message,
         )
+
+        research_signal = cls._match_first_pattern(
+            value=normalized_message,
+            patterns=DETERMINISTIC_RESEARCH_PATTERNS,
+        )
+
+        if research_signal is not None:
+            return PlannerResult(
+                route="research",
+                confidence=1.0,
+                reasoning=(
+                    "Selected the 'research' route because the request "
+                    "explicitly asks for research, synthesis, or a "
+                    "source-grounded summary using current web evidence."
+                ),
+                signals=[
+                    research_signal,
+                    "research",
+                    "web evidence",
+                ],
+            )
 
         external_tool_plan = create_external_tool_plan(
             user_message,

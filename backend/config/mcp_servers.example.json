@@ -1,0 +1,15 @@
+{
+  "servers": [
+    {
+      "name": "example-remote",
+      "transport": "streamable_http",
+      "url": "https://example.com/mcp",
+      "enabled": false,
+      "description": "Replace with a trusted remote MCP endpoint.",
+      "headers": {},
+      "timeout_seconds": 30,
+      "requires_approval": true,
+      "allowed_tools": null
+    }
+  ]
+}

@@ -73,5 +73,13 @@ class AgentState(TypedDict, total=False):
     tool_execution_time_ms: float
     tool_metadata: dict[str, Any] | None
 
+    research_query: str | None
+    research_evidence: list[dict[str, Any]]
+    research_sources: list[dict[str, Any]]
+    research_summary: str | None
+    research_provider: str | None
+    research_error: str | None
+    research_execution_time_ms: float
+
     completed: bool
     error: str | None

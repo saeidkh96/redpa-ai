@@ -13,6 +13,8 @@ from app.api.v1.reviews import router as reviews_router
 from app.api.v1.tools import router as tools_router
 from app.api.v1.users import router as users_router
 
+from app.api.v1.mcp import router as mcp_router
+from app.api.v1.unified_tools import router as unified_tools_router
 
 api_router = APIRouter()
 
@@ -45,4 +47,11 @@ api_router.include_router(
 )
 api_router.include_router(
     tools_router,
+)
+api_router.include_router(
+    mcp_router,
+)
+
+api_router.include_router(
+    unified_tools_router,
 )

@@ -1,30 +1,24 @@
-# Changelog
+# Phase 3.2 Changelog
 
-All notable changes to RedPA AI will be documented here.
+## Added
 
-The format follows Keep a Changelog principles, and the project intends to use semantic versioning after the public API stabilizes.
+- deterministic evidence ranking;
+- duplicate removal;
+- domain-aware source scoring;
+- evidence selection;
+- confidence estimation;
+- Python response formatter;
+- deterministic citation generation;
+- research quality metrics;
+- fallback summary generation.
 
-## [Unreleased]
+## Changed
 
-### Added
+- the LLM now generates summary text only;
+- the LLM no longer generates citations, Sources, Markdown structure,
+  confidence, or JSON;
+- only ranked evidence is included in the final response.
 
-- Agentic AI platform foundation
-- FastAPI backend
-- JWT authentication
-- Conversation and message persistence
-- Planner and orchestration services
-- LangGraph workflows
-- RAG document pipeline
-- Qdrant integration
-- Human review and workflow resume
-- Docker Compose stack
-- Prometheus and Grafana monitoring
-- GitHub Actions CI
+## Compatibility
 
-### Changed
-
-- Project positioning clarified as a general Agentic AI Platform.
-
-## [0.1.0] - TBD
-
-Initial public development release.
+Compatible with the existing Phase 3.1 Research Node and result schema.

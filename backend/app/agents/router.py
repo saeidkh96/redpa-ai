@@ -8,6 +8,7 @@ from app.agents.state import AgentRoute, AgentState
 GraphDestination = Literal[
     "chat",
     "rag",
+    "research",
     "tool",
     "human_review",
     "capability_unavailable",
@@ -20,7 +21,7 @@ SUPPORTED_ROUTE_DESTINATIONS: dict[
 ] = {
     "chat": "chat",
     "rag": "rag",
-    "research": "capability_unavailable",
+    "research": "research",
     "tool": "tool",
     "sql": "capability_unavailable",
     "human_review": "human_review",
