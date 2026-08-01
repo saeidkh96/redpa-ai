@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import (
@@ -11,9 +12,20 @@ from pydantic import (
 )
 
 
-class MCPServerConfig(BaseModel):
-    """Configuration for one remote MCP server."""
+MCPServerStatus = Literal[
+    "connected",
+    "unavailable",
+    "disabled",
+]
 
+MCPPlatformStatus = Literal[
+    "healthy",
+    "degraded",
+    "unavailable",
+]
+
+
+class MCPServerConfig(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
         str_strip_whitespace=True,
@@ -24,30 +36,22 @@ class MCPServerConfig(BaseModel):
         max_length=100,
         pattern=r"^[a-zA-Z0-9_.-]+$",
     )
-
     transport: Literal["streamable_http"] = "streamable_http"
-
     url: HttpUrl
-
     enabled: bool = True
-
     description: str | None = Field(
         default=None,
         max_length=500,
     )
-
     headers: dict[str, str] = Field(
         default_factory=dict,
     )
-
     timeout_seconds: float = Field(
         default=30.0,
         gt=0.0,
         le=300.0,
     )
-
     requires_approval: bool = True
-
     allowed_tools: list[str] | None = None
 
     @field_validator("headers")
@@ -65,8 +69,12 @@ class MCPServerConfig(BaseModel):
         normalized_headers: dict[str, str] = {}
 
         for raw_name, raw_value in value.items():
-            name = str(raw_name).strip()
-            header_value = str(raw_value).strip()
+            name = str(
+                raw_name,
+            ).strip()
+            header_value = str(
+                raw_value,
+            ).strip()
 
             if not name or not header_value:
                 raise ValueError(
@@ -87,7 +95,6 @@ class MCPServerListConfig(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-
     servers: list[MCPServerConfig] = Field(
         default_factory=list,
     )
@@ -100,6 +107,7 @@ class MCPToolInfo(BaseModel):
 
     server_name: str
     name: str
+    qualified_name: str | None = None
     title: str | None = None
     description: str | None = None
     input_schema: dict[str, Any] = Field(
@@ -119,6 +127,79 @@ class MCPServerInfo(BaseModel):
     url: str
     enabled: bool
     requires_approval: bool
+
+
+class MCPServerHealth(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    name: str
+    enabled: bool
+    status: MCPServerStatus
+    tool_count: int = Field(
+        ge=0,
+    )
+    latency_ms: float = Field(
+        ge=0.0,
+    )
+    error: str | None = None
+    checked_at: datetime
+
+
+class MCPHealthResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    status: MCPPlatformStatus
+    configured_servers: int = Field(
+        ge=0,
+    )
+    enabled_servers: int = Field(
+        ge=0,
+    )
+    connected_servers: int = Field(
+        ge=0,
+    )
+    unavailable_servers: int = Field(
+        ge=0,
+    )
+    total_tools: int = Field(
+        ge=0,
+    )
+    checked_at: datetime
+    servers: list[MCPServerHealth] = Field(
+        default_factory=list,
+    )
+
+
+class MCPToolCatalogResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    items: list[MCPToolInfo] = Field(
+        default_factory=list,
+    )
+    total: int = Field(
+        ge=0,
+    )
+    server_errors: dict[str, str] = Field(
+        default_factory=dict,
+    )
+    cached: bool = False
+
+
+class MCPReloadResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    configured_servers: int = Field(
+        ge=0,
+    )
+    message: str
 
 
 class MCPToolCallResult(BaseModel):
@@ -147,3 +228,22 @@ class MCPToolCallRequest(BaseModel):
     arguments: dict[str, Any] = Field(
         default_factory=dict,
     )
+    approval_granted: bool = False
+
+
+class MCPQualifiedToolCallRequest(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    qualified_name: str = Field(
+        min_length=7,
+        max_length=500,
+        examples=[
+            "mcp:example-remote:search",
+        ],
+    )
+    arguments: dict[str, Any] = Field(
+        default_factory=dict,
+    )
+    approval_granted: bool = False

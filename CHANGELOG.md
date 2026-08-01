@@ -1,13 +1,23 @@
-# RedPA Research 3.2.2
+# Phase 4.1 Remaining Patches
 
 ## Added
-- dedicated evidence cleaner;
-- strict prompt builder;
-- grounded-summary validator;
-- prompt-injection filtering;
-- lexical grounding validation.
 
-## Changed
-- ResearchService delegates prompt construction and validation;
-- dirty search snippets are cleaned before ranking and summarization;
-- invalid LLM summaries use deterministic fallback output.
+- MCP discovery cache;
+- qualified names;
+- qualified-tool lookup;
+- unified MCP execution endpoint;
+- deterministic permission evaluation;
+- approval-required response;
+- allowlist enforcement;
+- tool-call metrics;
+- cache metrics;
+- tests.
+
+## Deferred
+
+- persistent HumanReview creation for MCP calls;
+- stdio transport;
+- filesystem MCP;
+- Planner-driven automatic MCP selection.
+
+These belong to later Phase 4 releases.
