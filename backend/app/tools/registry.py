@@ -2,30 +2,27 @@ from __future__ import annotations
 
 from app.tools.base import BaseTool
 from app.tools.calculator import CalculatorTool
+from app.tools.currency import CurrencyTool
 from app.tools.datetime_tool import DateTimeTool
+from app.tools.github import GitHubTool
+from app.tools.news import NewsTool
 from app.tools.schemas import ToolMetadata
+from app.tools.weather import WeatherTool
+from app.tools.web_search import WebSearchTool
 
 
 class ToolNotFoundError(Exception):
-    """
-    Raised when a requested tool is not registered.
-    """
+    """Raised when a requested tool is not registered."""
 
 
 class ToolAlreadyRegisteredError(Exception):
-    """
-    Raised when a duplicate tool name is registered.
-    """
+    """Raised when a duplicate tool name is registered."""
 
 
 class ToolRegistry:
-    """
-    Central registry for RedPA tools.
-    """
+    """Central registry for all RedPA tools."""
 
-    def __init__(
-        self,
-    ) -> None:
+    def __init__(self) -> None:
         self._tools: dict[str, BaseTool] = {}
 
     def register(
@@ -84,7 +81,7 @@ class ToolRegistry:
         self,
     ) -> list[str]:
         return sorted(
-            self._tools.keys()
+            self._tools.keys(),
         )
 
     @staticmethod
@@ -108,7 +105,21 @@ tool_registry = ToolRegistry()
 tool_registry.register(
     CalculatorTool(),
 )
-
 tool_registry.register(
     DateTimeTool(),
+)
+tool_registry.register(
+    WeatherTool(),
+)
+tool_registry.register(
+    CurrencyTool(),
+)
+tool_registry.register(
+    GitHubTool(),
+)
+tool_registry.register(
+    WebSearchTool(),
+)
+tool_registry.register(
+    NewsTool(),
 )

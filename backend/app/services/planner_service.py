@@ -20,6 +20,9 @@ from app.schemas.planner import (
     PlannerExecutionResult,
     PlannerResult,
 )
+from app.services.external_tool_planner import (
+    create_external_tool_plan,
+)
 from app.services.llm_service import llm_service
 
 
@@ -308,6 +311,13 @@ class PlannerService:
         normalized_message = cls._normalize_text(
             user_message,
         )
+
+        external_tool_plan = create_external_tool_plan(
+            user_message,
+        )
+
+        if external_tool_plan is not None:
+            return external_tool_plan
 
         calculator_signal = cls._match_first_pattern(
             value=normalized_message,
