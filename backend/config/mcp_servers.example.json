@@ -1,15 +1,33 @@
 {
   "servers": [
     {
-      "name": "example-remote",
+      "name": "redpa-filesystem",
+      "transport": "streamable_http",
+      "url": "http://filesystem-mcp:8010/mcp",
+      "enabled": true,
+      "description": "Read-only sandboxed access to RedPA backend, docs, and README files.",
+      "headers": {},
+      "timeout_seconds": 20,
+      "requires_approval": false,
+      "allowed_tools": [
+        "list_files",
+        "read_file",
+        "search_files",
+        "file_info"
+      ],
+      "allow_private_network": true
+    },
+    {
+      "name": "example-public-server",
       "transport": "streamable_http",
       "url": "https://example.com/mcp",
       "enabled": false,
-      "description": "Replace with a trusted remote MCP endpoint.",
+      "description": "Replace with a trusted public MCP endpoint.",
       "headers": {},
       "timeout_seconds": 30,
       "requires_approval": true,
-      "allowed_tools": null
+      "allowed_tools": null,
+      "allow_private_network": false
     }
   ]
 }

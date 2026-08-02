@@ -1,23 +1,24 @@
-# Phase 4.1 Remaining Patches
+# Phase 4.3 Changelog
 
 ## Added
 
-- MCP discovery cache;
-- qualified names;
-- qualified-tool lookup;
-- unified MCP execution endpoint;
-- deterministic permission evaluation;
-- approval-required response;
-- allowlist enforcement;
-- tool-call metrics;
-- cache metrics;
-- tests.
+- deterministic Filesystem MCP intent extraction;
+- dynamic tool-availability verification through UnifiedToolService;
+- Planner-driven MCP tool routing;
+- MCP execution through the LangGraph Tool Node;
+- Python formatting for filesystem MCP responses;
+- MCP execution metadata in chat results;
+- planner and formatter tests.
+
+## Supported chat requests
+
+- list project files;
+- read a project text file;
+- search project source text;
+- retrieve safe file metadata.
 
 ## Deferred
 
-- persistent HumanReview creation for MCP calls;
-- stdio transport;
-- filesystem MCP;
-- Planner-driven automatic MCP selection.
-
-These belong to later Phase 4 releases.
+- generic LLM selection across arbitrary MCP servers;
+- multi-tool plans;
+- persistent HumanReview creation for MCP write tools.

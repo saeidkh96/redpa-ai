@@ -53,6 +53,7 @@ class MCPServerConfig(BaseModel):
     )
     requires_approval: bool = True
     allowed_tools: list[str] | None = None
+    allow_private_network: bool = False
 
     @field_validator("headers")
     @classmethod
@@ -240,7 +241,7 @@ class MCPQualifiedToolCallRequest(BaseModel):
         min_length=7,
         max_length=500,
         examples=[
-            "mcp:example-remote:search",
+            "mcp:redpa-filesystem:read_file",
         ],
     )
     arguments: dict[str, Any] = Field(

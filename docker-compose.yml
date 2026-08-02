@@ -3,18 +3,14 @@ services:
     image: postgres:17-alpine
     container_name: redpa-postgres
     restart: unless-stopped
-
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-redpa_ai}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-
     ports:
       - "5432:5432"
-
     volumes:
       - redpa-postgres-data:/var/lib/postgresql/data
-
     healthcheck:
       test:
         [
@@ -25,23 +21,18 @@ services:
       timeout: 5s
       retries: 10
       start_period: 5s
-
     networks:
       - redpa-network
-
 
   qdrant:
     image: qdrant/qdrant:latest
     container_name: redpa-qdrant
     restart: unless-stopped
-
     ports:
       - "6333:6333"
       - "6334:6334"
-
     volumes:
       - redpa-qdrant-data:/qdrant/storage
-
     healthcheck:
       test:
         [
@@ -52,128 +43,137 @@ services:
       timeout: 5s
       retries: 10
       start_period: 5s
-
     networks:
       - redpa-network
 
+  filesystem-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-filesystem-mcp
+    restart: unless-stopped
+    command:
+      [
+        "python",
+        "-m",
+        "app.mcp_servers.filesystem_server",
+      ]
+    environment:
+      FILESYSTEM_MCP_HOST: 0.0.0.0
+      FILESYSTEM_MCP_PORT: 8010
+      FILESYSTEM_MCP_ROOT: /workspace
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./backend:/workspace/backend:ro
+      - ./docs:/workspace/docs:ro
+      - ./README.md:/workspace/README.md:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s=socket.create_connection(('127.0.0.1',8010),3); s.close()",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - redpa-network
 
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-
     image: redpa-ai-backend
     container_name: redpa-backend
     restart: unless-stopped
-
     env_file:
       - .env
-
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
       APP_VERSION: ${APP_VERSION:-0.2.0}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DEBUG: ${DEBUG:-true}
-
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
       HOST: ${HOST:-0.0.0.0}
       PORT: ${PORT:-8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
-
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
-
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai}
-
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION_NAME: ${QDRANT_COLLECTION_NAME:-redpa_documents}
-
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
       OLLAMA_EMBEDDING_MODEL: ${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text:latest}
       OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-120}
       OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE:-0.2}
-
       BRAVE_SEARCH_API_KEY: ${BRAVE_SEARCH_API_KEY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
-
       STORAGE_DIRECTORY: ${STORAGE_DIRECTORY:-/app/backend/storage}
-
+      MCP_SERVERS_CONFIG_PATH: ${MCP_SERVERS_CONFIG_PATH:-config/mcp_servers.json}
     ports:
       - "8000:8000"
-
     volumes:
       - ./backend/storage:/app/backend/storage
-
     depends_on:
       postgres:
         condition: service_healthy
-
       qdrant:
         condition: service_healthy
-
+      filesystem-mcp:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     networks:
       - redpa-network
-
 
   prometheus:
     image: prom/prometheus:latest
     container_name: redpa-prometheus
     restart: unless-stopped
-
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--web.enable-lifecycle"
-
     ports:
       - "9090:9090"
-
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - redpa-prometheus-data:/prometheus
-
     depends_on:
       - backend
-
     networks:
       - redpa-network
-
 
   grafana:
     image: grafana/grafana:latest
     container_name: redpa-grafana
     restart: unless-stopped
-
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_USERS_ALLOW_SIGN_UP: "false"
-
     ports:
       - "3000:3000"
-
     volumes:
       - redpa-grafana-data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-
     depends_on:
       - prometheus
-
     networks:
       - redpa-network
-
 
 volumes:
   redpa-postgres-data:
   redpa-qdrant-data:
   redpa-prometheus-data:
   redpa-grafana-data:
-
 
 networks:
   redpa-network:

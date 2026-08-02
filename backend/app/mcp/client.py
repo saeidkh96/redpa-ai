@@ -4,7 +4,11 @@ import time
 from typing import Any
 
 import anyio
+import httpx2
 from mcp import Client
+from mcp.client.streamable_http import (
+    streamable_http_client,
+)
 from mcp.types import TextContent
 
 from app.mcp.exceptions import (
@@ -20,10 +24,11 @@ from app.mcp.schemas import (
 
 class RedPAMCPClient:
     """
-    Short-lived MCP client for remote Streamable HTTP servers.
+    Short-lived MCP v2 client for Streamable HTTP servers.
 
-    A fresh protocol client is created for each operation. This keeps
-    lifecycle handling predictable in the current FastAPI deployment.
+    MCP SDK v2 no longer accepts headers directly on Client().
+    HTTP headers and timeouts are configured on an httpx2 client and
+    passed through streamable_http_client().
     """
 
     @classmethod
@@ -35,54 +40,70 @@ class RedPAMCPClient:
             with anyio.fail_after(
                 server.timeout_seconds,
             ):
-                async with Client(
-                    str(server.url),
-                    headers=server.headers or None,
-                ) as client:
-                    tools: list[MCPToolInfo] = []
-                    cursor: str | None = None
+                async with cls._create_http_client(
+                    server,
+                ) as http_client:
+                    transport = streamable_http_client(
+                        str(
+                            server.url,
+                        ),
+                        http_client=http_client,
+                    )
 
-                    while True:
-                        page = await client.list_tools(
-                            cursor=cursor,
-                        )
+                    async with Client(
+                        transport,
+                    ) as client:
+                        tools: list[MCPToolInfo] = []
+                        cursor: str | None = None
 
-                        for tool in page.tools:
-                            if (
-                                server.allowed_tools is not None
-                                and tool.name not in server.allowed_tools
-                            ):
-                                continue
-
-                            tools.append(
-                                MCPToolInfo(
-                                    server_name=server.name,
-                                    name=tool.name,
-                                    title=tool.title,
-                                    description=tool.description,
-                                    input_schema=tool.input_schema,
-                                    requires_approval=(
-                                        server.requires_approval
-                                    ),
-                                )
+                        while True:
+                            page = await client.list_tools(
+                                cursor=cursor,
                             )
 
-                        if page.next_cursor is None:
-                            break
+                            for tool in page.tools:
+                                if (
+                                    server.allowed_tools is not None
+                                    and tool.name
+                                    not in server.allowed_tools
+                                ):
+                                    continue
 
-                        cursor = page.next_cursor
+                                tools.append(
+                                    MCPToolInfo(
+                                        server_name=server.name,
+                                        name=tool.name,
+                                        title=getattr(
+                                            tool,
+                                            "title",
+                                            None,
+                                        ),
+                                        description=tool.description,
+                                        input_schema=tool.input_schema,
+                                        requires_approval=(
+                                            server.requires_approval
+                                        ),
+                                    )
+                                )
 
-                    return tools
+                            if page.next_cursor is None:
+                                break
+
+                            cursor = page.next_cursor
+
+                        return tools
 
         except TimeoutError as exception:
             raise MCPConnectionError(
                 f"MCP server '{server.name}' timed out."
             ) from exception
+
         except MCPConnectionError:
             raise
+
         except Exception as exception:
             raise MCPConnectionError(
-                f"Could not connect to MCP server "
+                "Could not connect to MCP server "
                 f"'{server.name}': {exception}"
             ) from exception
 
@@ -109,21 +130,32 @@ class RedPAMCPClient:
             with anyio.fail_after(
                 server.timeout_seconds,
             ):
-                async with Client(
-                    str(server.url),
-                    headers=server.headers or None,
-                ) as client:
-                    result = await client.call_tool(
-                        tool_name,
-                        arguments,
+                async with cls._create_http_client(
+                    server,
+                ) as http_client:
+                    transport = streamable_http_client(
+                        str(
+                            server.url,
+                        ),
+                        http_client=http_client,
                     )
+
+                    async with Client(
+                        transport,
+                    ) as client:
+                        result = await client.call_tool(
+                            tool_name,
+                            arguments,
+                        )
 
         except TimeoutError as exception:
             raise MCPRequestError(
                 f"MCP tool '{tool_name}' timed out."
             ) from exception
+
         except MCPRequestError:
             raise
+
         except Exception as exception:
             raise MCPRequestError(
                 f"MCP tool '{tool_name}' request failed: "
@@ -151,7 +183,9 @@ class RedPAMCPClient:
                 None,
             )
 
-            if callable(model_dump):
+            if callable(
+                model_dump,
+            ):
                 content.append(
                     model_dump(
                         mode="json",
@@ -160,8 +194,12 @@ class RedPAMCPClient:
             else:
                 content.append(
                     {
-                        "type": type(block).__name__,
-                        "value": str(block),
+                        "type": type(
+                            block,
+                        ).__name__,
+                        "value": str(
+                            block,
+                        ),
                     }
                 )
 
@@ -182,4 +220,19 @@ class RedPAMCPClient:
             content=content,
             structured_content=result.structured_content,
             execution_time_ms=execution_time_ms,
+        )
+
+    @staticmethod
+    def _create_http_client(
+        server: MCPServerConfig,
+    ) -> httpx2.AsyncClient:
+        return httpx2.AsyncClient(
+            headers=(
+                server.headers
+                or None
+            ),
+            timeout=httpx2.Timeout(
+                server.timeout_seconds,
+            ),
+            follow_redirects=True,
         )

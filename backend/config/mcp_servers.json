@@ -1,3 +1,21 @@
 {
-  "servers": []
+  "servers": [
+    {
+      "name": "redpa-filesystem",
+      "transport": "streamable_http",
+      "url": "http://filesystem-mcp:8010/mcp",
+      "enabled": true,
+      "description": "Read-only sandboxed access to RedPA backend, docs, and README files.",
+      "headers": {},
+      "timeout_seconds": 20,
+      "requires_approval": false,
+      "allowed_tools": [
+        "list_files",
+        "read_file",
+        "search_files",
+        "file_info"
+      ],
+      "allow_private_network": true
+    }
+  ]
 }

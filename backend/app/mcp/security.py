@@ -17,18 +17,42 @@ BLOCKED_HOSTNAMES = {
 
 def validate_remote_mcp_url(
     url: str,
+    *,
+    allow_private_network: bool = False,
 ) -> str:
     """
-    Accept only HTTPS MCP endpoints on public networks.
+    Validate an MCP Streamable HTTP endpoint.
 
-    Local development endpoints are deliberately excluded from this
-    first production-oriented phase.
+    Public endpoints:
+    - HTTPS is mandatory.
+    - Private, loopback, reserved, and link-local addresses are blocked.
+
+    Explicitly trusted internal endpoints:
+    - HTTP or HTTPS is accepted.
+    - Intended only for Docker-network services configured with
+      allow_private_network=true.
+    - Metadata and host-gateway names remain blocked.
     """
 
-    normalized_url = str(url).strip()
-    parsed = urlparse(normalized_url)
+    normalized_url = str(
+        url,
+    ).strip()
 
-    if parsed.scheme.casefold() != "https":
+    parsed = urlparse(
+        normalized_url,
+    )
+
+    scheme = parsed.scheme.casefold()
+
+    if allow_private_network:
+        if scheme not in {
+            "http",
+            "https",
+        }:
+            raise MCPConfigurationError(
+                "Trusted internal MCP URLs must use HTTP or HTTPS."
+            )
+    elif scheme != "https":
         raise MCPConfigurationError(
             "Remote MCP server URLs must use HTTPS."
         )
@@ -43,9 +67,35 @@ def validate_remote_mcp_url(
             "MCP server URL must contain a hostname."
         )
 
+    if parsed.username or parsed.password:
+        raise MCPConfigurationError(
+            "Credentials must not be embedded in MCP URLs."
+        )
+
+    if hostname in {
+        "metadata.google.internal",
+        "host.docker.internal",
+    }:
+        raise MCPConfigurationError(
+            f"MCP host '{hostname}' is blocked."
+        )
+
+    if allow_private_network:
+        if hostname in {
+            "localhost",
+            "localhost.localdomain",
+        }:
+            raise MCPConfigurationError(
+                "Use the Docker service name instead of localhost."
+            )
+
+        return normalized_url
+
     if (
         hostname in BLOCKED_HOSTNAMES
-        or hostname.endswith(".local")
+        or hostname.endswith(
+            ".local",
+        )
     ):
         raise MCPConfigurationError(
             f"MCP host '{hostname}' is blocked."

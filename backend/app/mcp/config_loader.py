@@ -26,7 +26,9 @@ def load_mcp_server_configs(
         config_path
         or os.getenv(
             "MCP_SERVERS_CONFIG_PATH",
-            str(DEFAULT_CONFIG_PATH),
+            str(
+                DEFAULT_CONFIG_PATH,
+            ),
         )
     )
 
@@ -69,10 +71,17 @@ def load_mcp_server_configs(
                 f"Duplicate MCP server name '{server.name}'."
             )
 
-        seen_names.add(normalized_name)
+        seen_names.add(
+            normalized_name,
+        )
 
         validate_remote_mcp_url(
-            str(server.url),
+            str(
+                server.url,
+            ),
+            allow_private_network=(
+                server.allow_private_network
+            ),
         )
 
         validated_servers.append(

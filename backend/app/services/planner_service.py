@@ -24,6 +24,7 @@ from app.services.external_tool_planner import (
     create_external_tool_plan,
 )
 from app.services.llm_service import llm_service
+from app.services.mcp_planner_service import MCPPlannerService
 
 
 logger = logging.getLogger(__name__)
@@ -222,6 +223,37 @@ class PlannerService:
             )
 
         started_at = time.perf_counter()
+
+        mcp_plan_result = await MCPPlannerService.create_plan(
+            cleaned_message,
+        )
+
+        if mcp_plan_result is not None:
+            mcp_plan, _ = mcp_plan_result
+
+            latency_ms = (
+                time.perf_counter()
+                - started_at
+            ) * 1000
+
+            logger.info(
+                "MCP planner selected tool route "
+                "| confidence=%.2f signals=%s",
+                mcp_plan.confidence,
+                mcp_plan.signals,
+            )
+
+            return PlannerExecutionResult(
+                plan=mcp_plan,
+                provider="rule_based",
+                model="mcp-capability-router-v1",
+                fallback_used=False,
+                error=None,
+                latency_ms=round(
+                    latency_ms,
+                    2,
+                ),
+            )
 
         deterministic_plan = cls._create_deterministic_plan(
             user_message=cleaned_message,
