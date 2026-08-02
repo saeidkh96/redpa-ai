@@ -1,94 +1,136 @@
-# Architecture
+# RedPA AI Architecture
 
-RedPA AI separates API, orchestration, services, persistence, retrieval, tools, AI providers, and observability.
+## Overview
 
-## Main Layers
+RedPA AI is structured as a modular agent platform. FastAPI exposes the public API, LangGraph coordinates workflows, service classes implement business logic, PostgreSQL persists application state, Qdrant supports semantic retrieval, and MCP servers expose external capabilities through explicit contracts.
+
+## Layers
 
 ### API Layer
 
-Handles:
+Located under:
+
+```text
+backend/app/api/v1
+```
+
+Responsibilities:
 
 - authentication;
-- users;
-- conversations;
-- messages;
-- chat;
-- documents;
-- human reviews;
-- tool discovery;
-- metrics.
+- request validation;
+- response schemas;
+- dependency injection;
+- route composition;
+- status-code mapping.
 
-### Agent Runtime
+### Orchestration Layer
 
-Contains:
+Located under:
 
-- explicit `AgentState`;
-- planner;
-- conditional routing;
-- LangGraph nodes;
-- response validation;
-- workflow resume.
+```text
+backend/app/agents
+```
+
+Responsibilities:
+
+- workflow state;
+- planner execution;
+- route transitions;
+- node execution;
+- interruption and resume;
+- final response assembly.
 
 ### Service Layer
 
-Coordinates:
+Located under:
 
-- chat;
-- LLM access;
-- planning;
-- retrieval;
-- documents;
-- tools;
-- human review;
-- persistence.
+```text
+backend/app/services
+```
 
-### Data Layer
+Responsibilities:
 
-- PostgreSQL for relational application state;
-- Qdrant for vectors;
-- local storage for uploaded documents.
+- chat generation;
+- planner behavior;
+- research;
+- RAG;
+- human-review logic;
+- MCP management;
+- unified tool execution.
 
-### AI Layer
+### Persistence Layer
 
-Ollama provides chat inference and embeddings.
+Located under:
 
-### Observability
+```text
+backend/app/database
+backend/app/models
+backend/app/repositories
+```
 
-Prometheus collects metrics and Grafana presents dashboards.
+Responsibilities:
+
+- async database sessions;
+- ORM models;
+- repository queries;
+- migrations;
+- persisted workflow records.
+
+### Tool Layer
+
+Located under:
+
+```text
+backend/app/tools
+backend/app/mcp
+backend/app/mcp_servers
+```
+
+Responsibilities:
+
+- internal tools;
+- MCP discovery;
+- MCP execution;
+- tool permissions;
+- tool formatting;
+- external service isolation.
 
 ## Request Lifecycle
 
-```text
-HTTP Request
-  ↓
-Authentication
-  ↓
-Conversation Validation
-  ↓
-Message Persistence
-  ↓
-LangGraph Initial State
-  ↓
-Planner
-  ↓
-Conditional Route
-  ↓
-Capability Node
-  ↓
-Response Validation
-  ↓
-Assistant Message Persistence
-  ↓
-HTTP Response
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant API as FastAPI
+    participant O as Orchestrator
+    participant P as Planner
+    participant N as Workflow Node
+    participant T as Tool Runtime
+    participant DB as PostgreSQL
+
+    C->>API: Request
+    API->>DB: Persist user message
+    API->>O: Run workflow
+    O->>P: Select route
+    P-->>O: Structured plan
+    O->>N: Execute route
+    alt Tool route
+        N->>T: Execute qualified tool
+        T-->>N: Structured result
+    end
+    N-->>O: Final state
+    O->>DB: Persist assistant message
+    O-->>API: Response
+    API-->>C: JSON
 ```
 
 ## Design Principles
 
-- explicit workflow state;
-- deterministic routing where possible;
-- structured planner output;
-- safe tools;
-- human approval for sensitive actions;
-- user-scoped data;
+- explicit state;
+- typed boundaries;
+- minimal global state;
+- deterministic fallback;
+- read-only defaults;
+- isolated external integrations;
 - observable execution;
-- extensible services and registries.
+- reversible workflow decisions;
+- testable services.

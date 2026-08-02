@@ -1,93 +1,418 @@
 # RedPA AI
 
-> A production-oriented Agentic AI Platform for secure, observable, tool-using, and human-supervised AI workflows.
+> **Production-ready Agentic AI Platform with MCP, RAG, Human Review and Multi-Agent Workflows**
 
-**FastAPI · LangGraph · PostgreSQL · Qdrant · Ollama · Docker · Prometheus · Grafana**
+RedPA AI is a production-oriented backend platform for building secure, observable, tool-using, and human-supervised AI systems. It combines **FastAPI**, **LangGraph**, **PostgreSQL**, **Qdrant**, **Ollama**, **Model Context Protocol (MCP)**, **Prometheus**, **Grafana**, and **Docker Compose** in a modular architecture designed for real agentic workflows.
 
-## Overview
+RedPA is not a single-purpose chatbot. It is an extensible agent platform that supports planning, routing, retrieval, research, tool execution, workflow interruption, human approval, persistence, monitoring, and resumable execution.
 
-RedPA AI is an extensible backend platform for building agentic applications. It supports:
+<p align="center">
+  <strong>FastAPI · LangGraph · MCP · PostgreSQL · Qdrant · Ollama · Docker · Prometheus · Grafana</strong>
+</p>
 
-- structured planning and deterministic routing;
-- conversational AI through Ollama;
-- retrieval-augmented generation over uploaded documents;
-- safe internal and external tools;
-- human review and workflow resume;
-- persistent users, conversations, messages, and reviews;
-- Prometheus metrics and Grafana dashboards;
-- Docker-based local deployment.
+---
 
-RedPA is designed as a reusable agent platform rather than a single-purpose chatbot.
+## Project Status
 
-## Current Capabilities
+RedPA AI currently includes:
 
-- JWT authentication
-- User management
-- Conversations and messages
-- LangGraph workflow orchestration
-- LLM planner with deterministic fallback
-- Chat workflow
-- RAG document pipeline
-- Human review queue
-- Approve, reject, and resume
-- Tool registry
-- Tool discovery API
-- Safe calculator
-- DateTime tool
-- Weather tool
-- Currency tool
-- GitHub repository tool
-- Hacker News tool
-- Brave web-search tool
-- External HTTP client
-- Retry and timeout handling
-- Tool response formatters
-- HTTP and tool metrics
-- Prometheus
-- Grafana
-- Docker Compose
-- GitHub Actions CI
+- JWT authentication and user management
+- Persistent conversations and messages
+- LangGraph-based orchestration
+- Planner-driven routing
+- Conversational AI through Ollama
+- Retrieval-augmented generation with Qdrant
+- Web research with ranked evidence
+- Internal tool runtime
+- Dynamic MCP tool discovery and execution
+- Human review with approve, reject, and resume
+- Read-only Filesystem, GitHub, PostgreSQL, and Docker MCP servers
+- Prometheus metrics and Grafana dashboards
+- Docker Compose deployment
+- GitHub Actions continuous integration
+- A test suite covering routing, security, MCP compatibility, formatting, and tool behavior
 
-## Why RedPA Is More Than a Chatbot
+The next major development phase is **Agent-to-Agent (A2A) coordination**.
 
-```text
-User Request
-    ↓
-Authentication and Conversation Context
-    ↓
-Planner and Deterministic Safety Rules
-    ↓
-┌──────────────┬──────────────┬───────────────┬─────────────────┐
-│ Chat         │ RAG          │ Tool Runtime  │ Human Review    │
-│ Ollama       │ Qdrant       │ Registry      │ Pause / Resume  │
-└──────────────┴──────────────┴───────────────┴─────────────────┘
-    ↓
-Persisted Response, Metadata, Logs, and Metrics
+---
+
+## Why RedPA AI?
+
+Many LLM applications stop at prompt-response interaction. RedPA AI focuses on the infrastructure required for dependable agentic systems:
+
+- deterministic routing around LLM decisions;
+- explicit state management;
+- durable workflow boundaries;
+- structured tool contracts;
+- human approval for sensitive actions;
+- read-only security policies for infrastructure tools;
+- persistent application data;
+- observable execution;
+- modular integration of external capabilities.
+
+The architecture is designed to make capabilities replaceable and independently testable.
+
+---
+
+## High-Level Architecture
+
+```mermaid
+flowchart TD
+    U[User or API Client] --> API[FastAPI API Layer]
+    API --> AUTH[JWT Authentication]
+    AUTH --> ORCH[LangGraph Orchestrator]
+
+    ORCH --> PLAN[Planner]
+    PLAN --> CHAT[Chat Workflow]
+    PLAN --> RESEARCH[Research Workflow]
+    PLAN --> RAG[RAG Workflow]
+    PLAN --> TOOLS[Unified Tool Runtime]
+    PLAN --> REVIEW[Human Review]
+
+    TOOLS --> INTERNAL[Internal Tools]
+    TOOLS --> MCP[MCP Runtime]
+
+    MCP --> FS[Filesystem MCP]
+    MCP --> GH[GitHub MCP]
+    MCP --> PG[PostgreSQL MCP]
+    MCP --> DK[Docker MCP]
+
+    RAG --> QD[Qdrant]
+    CHAT --> OL[Ollama]
+    RESEARCH --> WEB[Web Search]
+
+    ORCH --> DB[(PostgreSQL)]
+    ORCH --> METRICS[Prometheus Metrics]
+    METRICS --> GRAFANA[Grafana]
 ```
 
-## Built-in Tools
+---
+
+## Core Capabilities
+
+### Authentication and Persistence
+
+- OAuth2 password flow
+- JWT access tokens
+- persistent users
+- persistent conversations
+- persistent user and assistant messages
+- persistent human-review records
+- async SQLAlchemy
+- Alembic migrations
+- PostgreSQL storage
+
+### LangGraph Orchestration
+
+RedPA uses LangGraph as its workflow runtime. The orchestrator coordinates:
+
+- planning;
+- route selection;
+- chat generation;
+- RAG retrieval;
+- web research;
+- tool execution;
+- human-review interruption;
+- workflow continuation after approval.
+
+### Planner
+
+The planner combines structured LLM planning with deterministic fallback rules. It can route requests to:
+
+- `chat`
+- `rag`
+- `research`
+- `tool`
+- `human_review`
+
+For MCP requests, the planner can use deterministic intent extraction or dynamic catalog-based tool selection.
+
+### Retrieval-Augmented Generation
+
+The RAG pipeline supports:
+
+- document ingestion;
+- text extraction;
+- chunking;
+- embedding generation;
+- Qdrant storage;
+- semantic retrieval;
+- source-grounded response generation.
+
+### Research Workflow
+
+The research workflow supports:
+
+- current web search;
+- evidence collection;
+- deduplication;
+- ranking;
+- source-aware synthesis;
+- research metadata;
+- failure isolation between search and generation.
+
+### Human Review
+
+Sensitive workflows can be interrupted and persisted for human approval.
+
+Supported lifecycle:
+
+```text
+Request
+  → Planner
+  → Approval required
+  → Human review created
+  → Approve or reject
+  → Resume workflow
+  → Tool execution or safe termination
+```
+
+---
+
+## MCP Platform
+
+RedPA includes a unified MCP runtime with:
+
+- server configuration;
+- transport validation;
+- health checks;
+- tool discovery;
+- qualified tool names;
+- input-schema discovery;
+- allowlists;
+- approval policies;
+- cache management;
+- unified internal and MCP tool catalog;
+- dynamic planner selection;
+- structured execution metadata.
+
+Qualified names use the following format:
+
+```text
+mcp:<server-name>:<tool-name>
+```
+
+Example:
+
+```text
+mcp:redpa-github:commits
+```
+
+### Filesystem MCP
+
+A sandboxed, read-only filesystem server.
 
 | Tool | Purpose |
 |---|---|
-| Calculator | Safe arithmetic without `eval` |
-| DateTime | Time-zone-aware current date and time |
-| Weather | Current weather through Open-Meteo |
-| Currency | Currency conversion through Frankfurter |
-| GitHub | Public repository metadata |
-| News | Latest Hacker News stories |
-| Web Search | Brave Search integration |
+| `list_files` | List visible files and directories |
+| `read_file` | Read safe UTF-8 text files |
+| `search_files` | Search text content |
+| `file_info` | Return safe file metadata |
 
-## Tool Request Examples
+Security controls include:
+
+- strict sandbox boundaries;
+- path normalization;
+- parent-traversal rejection;
+- blocked credential files;
+- binary-file rejection;
+- read-only operation.
+
+### GitHub MCP
+
+A read-only server for public GitHub repository data.
+
+| Tool | Purpose |
+|---|---|
+| `repository` | Repository metadata |
+| `branches` | Branch listing |
+| `commits` | Recent commits |
+| `issues` | Repository issues |
+| `pull_requests` | Pull requests |
+
+Authentication through `GITHUB_TOKEN` is optional and used only to improve API limits.
+
+### PostgreSQL MCP
+
+A strictly read-only PostgreSQL server.
+
+| Tool | Purpose |
+|---|---|
+| `list_schemas` | List user-visible schemas |
+| `list_tables` | List tables and views |
+| `describe_table` | Inspect columns, constraints, and indexes |
+| `query` | Run one validated read-only query |
+| `explain` | Return a JSON execution plan without `ANALYZE` |
+
+The SQL security layer allows only:
+
+- `SELECT`
+- `WITH`
+- `VALUES`
+
+It rejects:
+
+- `INSERT`
+- `UPDATE`
+- `DELETE`
+- `MERGE`
+- `COPY`
+- DDL
+- administrative operations
+- multiple statements
+- SQL comments
+- row-locking queries
+- unsafe PostgreSQL filesystem and administration functions
+
+Every database operation runs inside a read-only transaction with row and timeout limits.
+
+### Docker MCP
+
+A read-only Docker Engine integration.
+
+| Tool | Purpose |
+|---|---|
+| `list_containers` | List running or stopped containers |
+| `inspect_container` | Return safe container metadata |
+| `container_logs` | Read recent logs |
+| `list_images` | List images |
+| `system_info` | Return Docker Engine information |
+
+RedPA does **not** expose tools for:
+
+- start;
+- stop;
+- restart;
+- kill;
+- remove;
+- create;
+- exec;
+- image mutation;
+- volume mutation;
+- network mutation.
+
+---
+
+## Internal Tools
+
+The built-in tool runtime currently includes:
+
+| Tool | Purpose |
+|---|---|
+| Calculator | Safe arithmetic evaluation |
+| DateTime | Time-zone-aware date and time |
+| Weather | Current weather using Open-Meteo |
+| Currency | Currency conversion using Frankfurter |
+| GitHub | Public repository metadata |
+| News | Hacker News stories |
+| Web Search | Public web search through DDGS |
+
+Internal and MCP tools are exposed through a unified catalog.
+
+---
+
+## Example Requests
+
+### Filesystem
 
 ```text
-Calculate 25 * 18
-What time is it in Berlin?
-What is the weather in Munich?
-Convert 100 USD to EUR
-Show GitHub repository saeidkh96/redpa-ai
-Show the latest Hacker News stories
-Search the web for LangGraph durable execution
+Show files inside backend/app/mcp
+Read backend/app/main.py
+Search for MCPManager in backend/app
+Show file info for README.md
 ```
+
+### GitHub
+
+```text
+Show repository langchain-ai/langgraph
+Show latest 5 commits of saeidkh96/redpa-ai
+List open issues of langchain-ai/langgraph
+List branches of openai/openai-python
+```
+
+### PostgreSQL
+
+```text
+List database schemas
+Show database tables
+Describe table users
+Run query SELECT COUNT(*) AS user_count FROM users
+Explain SELECT * FROM messages
+```
+
+### Docker
+
+```text
+Show Docker containers
+List running Docker containers
+Show last 50 logs for redpa-backend
+Inspect Docker container redpa-postgres
+List Docker images
+Show Docker system info
+```
+
+### Research
+
+```text
+Research LangGraph durable execution.
+Search the web and summarize recent developments in agentic AI.
+Research the latest developments in automotive AI.
+```
+
+---
+
+## API Overview
+
+The FastAPI application exposes versioned endpoints under:
+
+```text
+/api/v1
+```
+
+Main API groups include:
+
+- Health
+- Authentication
+- Users
+- Conversations
+- Messages
+- Chat
+- LLM
+- Documents
+- Human Reviews
+- Internal Tools
+- MCP
+- Metrics
+
+Interactive documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+OpenAPI schema:
+
+```text
+http://localhost:8000/openapi.json
+```
+
+---
+
+## MCP API Overview
+
+```text
+GET  /api/v1/mcp/servers
+POST /api/v1/mcp/servers/reload
+GET  /api/v1/mcp/health
+GET  /api/v1/mcp/tools
+GET  /api/v1/mcp/tools/{qualified_name}
+POST /api/v1/mcp/tools/execute
+GET  /api/v1/mcp/servers/{server_name}/tools
+POST /api/v1/mcp/servers/{server_name}/tools/{tool_name}/call
+```
+
+---
 
 ## Technology Stack
 
@@ -98,24 +423,40 @@ Search the web for LangGraph durable execution
 - Pydantic
 - SQLAlchemy Async
 - Alembic
+- asyncpg
+- HTTPX
+
+### AI and Orchestration
+
 - LangGraph
-
-### AI and Retrieval
-
+- LangChain
 - Ollama
 - Qwen 2.5 7B
 - Nomic Embed Text
+- structured prompting
+- deterministic routing
+- retrieval-augmented generation
+
+### Data and Infrastructure
+
+- PostgreSQL 17
 - Qdrant
-- Retrieval-Augmented Generation
-
-### Infrastructure
-
-- PostgreSQL
 - Docker
 - Docker Compose
 - Prometheus
 - Grafana
-- GitHub Actions
+
+### Protocols and Integrations
+
+- Model Context Protocol
+- GitHub REST API
+- Docker Engine API
+- Open-Meteo
+- Frankfurter
+- Hacker News API
+- DDGS
+
+---
 
 ## Project Structure
 
@@ -125,38 +466,48 @@ redpa-ai/
 │   ├── alembic/
 │   ├── app/
 │   │   ├── agents/
+│   │   │   └── nodes/
 │   │   ├── api/v1/
 │   │   ├── clients/
 │   │   ├── core/
 │   │   ├── database/
+│   │   ├── exceptions/
 │   │   ├── formatters/
+│   │   ├── mcp/
+│   │   ├── mcp_servers/
 │   │   ├── middleware/
 │   │   ├── models/
 │   │   ├── monitoring/
+│   │   ├── prompts/
 │   │   ├── repositories/
 │   │   ├── schemas/
 │   │   ├── services/
 │   │   ├── tools/
-│   │   └── main.py
-│   ├── tests/
-│   └── alembic.ini
+│   │   └── utils/
+│   ├── config/
+│   └── storage/
 ├── docs/
 ├── monitoring/
-├── .github/
+│   ├── grafana/
+│   └── prometheus/
+├── tests/
 ├── docker-compose.yml
 ├── Dockerfile
+├── pytest.ini
 ├── requirements.txt
-├── LICENSE
 └── README.md
 ```
 
-## Quick Start
+---
 
-### Prerequisites
+## Local Development
 
-- Git
+### Requirements
+
 - Docker Desktop
-- Ollama
+- Docker Compose
+- Python 3.13+
+- Git
 
 ### Clone
 
@@ -165,122 +516,228 @@ git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
 ```
 
-### Pull Models
+### Environment
 
-```bash
-ollama pull qwen2.5:7b
-ollama pull nomic-embed-text
-```
+Create a `.env` file based on the project configuration.
 
-### Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-Set at least:
+Important values include:
 
 ```env
-JWT_SECRET_KEY=replace-with-a-long-random-secret
-BRAVE_SEARCH_API_KEY=
+APP_NAME=RedPA AI
+APP_VERSION=0.4.0
+ENVIRONMENT=development
+DEBUG=true
+
+DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
+QDRANT_URL=http://qdrant:6333
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+
 GITHUB_TOKEN=
 ```
 
-### Start the Stack
+Never commit real credentials.
+
+### Run
 
 ```bash
 docker compose up -d --build
 ```
 
-### Apply Migrations
+### Check Services
 
 ```bash
-docker compose exec backend alembic -c alembic.ini upgrade head
+docker compose ps
 ```
 
-## Services
+### Logs
 
-| Service | URL |
-|---|---|
-| Swagger UI | `http://localhost:8000/docs` |
-| ReDoc | `http://localhost:8000/redoc` |
-| OpenAPI | `http://localhost:8000/openapi.json` |
-| Prometheus | `http://localhost:9090` |
-| Grafana | `http://localhost:3000` |
-| Qdrant | `http://localhost:6333` |
+```bash
+docker compose logs --tail=150 backend
+docker compose logs --tail=150 filesystem-mcp
+docker compose logs --tail=150 github-mcp
+docker compose logs --tail=150 postgres-mcp
+docker compose logs --tail=150 docker-mcp
+```
 
-## Documentation
+---
 
-- [Architecture](docs/architecture.md)
-- [API](docs/api.md)
-- [Agent Workflows](docs/workflows.md)
-- [RAG](docs/rag.md)
-- [Tool System](docs/tools.md)
-- [Human Review](docs/human-review.md)
-- [Monitoring](docs/monitoring.md)
-- [Deployment](docs/deployment.md)
-- [Development](docs/development.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Roadmap](docs/roadmap.md)
+## Testing
+
+Run the full test suite:
+
+```bash
+python -m pytest tests -v
+```
+
+Compile all backend modules:
+
+```bash
+python -m compileall backend/app
+```
+
+Validate Docker Compose:
+
+```bash
+docker compose config
+```
+
+The suite covers:
+
+- MCP naming;
+- registry behavior;
+- tool discovery;
+- MCP v2 compatibility;
+- private-network policy;
+- filesystem sandboxing;
+- GitHub parsing and formatting;
+- PostgreSQL SQL validation;
+- Docker argument validation;
+- planner intent detection;
+- dynamic MCP selection;
+- unified tool behavior;
+- research ranking.
+
+---
+
+## Monitoring
+
+### Prometheus
+
+```text
+http://localhost:9090
+```
+
+### Grafana
+
+```text
+http://localhost:3000
+```
+
+Metrics include:
+
+- HTTP request count;
+- HTTP latency;
+- response status;
+- internal-tool execution;
+- MCP-tool execution;
+- execution duration;
+- workflow behavior.
+
+---
+
+## Security Model
+
+RedPA applies security at several layers:
+
+1. **Authentication**
+   - JWT access control
+   - current-user boundaries
+
+2. **Planner**
+   - deterministic safety rules
+   - explicit route selection
+
+3. **Human Review**
+   - approval gates
+   - persisted decisions
+   - resumable execution
+
+4. **Tool Runtime**
+   - qualified tool names
+   - allowlists
+   - input schemas
+   - permission checks
+
+5. **Filesystem MCP**
+   - sandboxing
+   - traversal prevention
+   - blocked files
+
+6. **PostgreSQL MCP**
+   - read-only transactions
+   - SQL validation
+   - row and timeout limits
+
+7. **Docker MCP**
+   - fixed GET-only operations
+   - no mutation tools
+   - safe identifier validation
+
+8. **Infrastructure**
+   - isolated Docker services
+   - health checks
+   - observable execution
+
+See [SECURITY.md](SECURITY.md) for reporting guidance.
+
+---
 
 ## Roadmap
 
 ### Completed
 
-- [x] FastAPI backend
-- [x] PostgreSQL persistence
+- [x] Core FastAPI backend
+- [x] Async PostgreSQL persistence
 - [x] JWT authentication
+- [x] Conversations and messages
 - [x] LangGraph orchestration
-- [x] Ollama integration
-- [x] RAG
+- [x] Chat workflow
+- [x] RAG pipeline
+- [x] Research workflow
 - [x] Human review
-- [x] Workflow resume
-- [x] Tool registry
-- [x] Tool discovery API
-- [x] Internal tools
-- [x] External tools
-- [x] Tool response formatters
+- [x] Approve, reject, and resume
+- [x] Internal tool runtime
 - [x] Prometheus and Grafana
 - [x] Docker Compose
+- [x] GitHub Actions CI
+- [x] MCP platform foundation
+- [x] Filesystem MCP
+- [x] GitHub MCP
+- [x] PostgreSQL MCP
+- [x] Docker MCP
+- [x] Dynamic MCP tool selection
 
 ### Planned
 
-- [ ] Research agent
-- [ ] Read-only SQL agent
-- [ ] MCP client
-- [ ] MCP server
+- [ ] Agent Registry
+- [ ] Agent Cards
+- [ ] Agent discovery
+- [ ] A2A task delegation
+- [ ] Coordinator Agent
+- [ ] Multi-agent workflows
+- [ ] Shared agent context
+- [ ] Long-running workflows
+- [ ] Durable background execution
 - [ ] Agent memory
-- [ ] A2A workflows
-- [ ] Web frontend
-- [ ] Production hardening
+- [ ] Cloud deployment
 
-## Security
+Detailed planning is available in [docs/ROADMAP.md](docs/ROADMAP.md).
 
-RedPA currently includes:
+---
 
-- JWT authentication;
-- user-scoped resources;
-- safe calculator parsing;
-- deterministic approval gates;
-- structured tools;
-- blocked private-network HTTP targets;
-- environment-based secrets;
-- no arbitrary shell-execution tool.
+## Documentation
 
-See [SECURITY.md](SECURITY.md).
+- [Architecture](docs/ARCHITECTURE.md)
+- [MCP Platform](docs/MCP_PLATFORM.md)
+- [API Reference](docs/API_REFERENCE.md)
+- [Deployment](docs/DEPLOYMENT.md)
+- [Security](SECURITY.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Contributing](CONTRIBUTING.md)
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+---
 
 ## Author
 
-**Saeid Khalilian**  
-AI & Python Developer  
-Master's student in Computer Science at the University of Passau
+**Saeid Khalilian**
 
-GitHub: https://github.com/saeidkh96
+- GitHub: `saeidkh96`
+- Email: `saeedkhalilian75@gmail.com`
+
+---
 
 ## License
 
-MIT License
+RedPA AI is licensed under the MIT License.
+
+See [LICENSE](LICENSE).

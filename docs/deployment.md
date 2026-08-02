@@ -1,74 +1,73 @@
 # Deployment
 
-## Local Docker Topology
-
-The Compose stack contains:
-
-- PostgreSQL 17;
-- Qdrant;
-- RedPA backend;
-- Prometheus;
-- Grafana.
-
-Ollama runs on the host and is reached through:
-
-```text
-http://host.docker.internal:11434
-```
-
-## Start
+## Local Docker Compose
 
 ```bash
 docker compose up -d --build
 ```
 
-## Inspect
+## Services
+
+Typical services include:
+
+- backend;
+- PostgreSQL;
+- Qdrant;
+- Filesystem MCP;
+- GitHub MCP;
+- PostgreSQL MCP;
+- Docker MCP;
+- Prometheus;
+- Grafana.
+
+## Validation
 
 ```bash
+docker compose config
 docker compose ps
-docker compose logs -f backend
 ```
 
-## Migrations
+## Health
 
-```bash
-docker compose exec backend alembic -c alembic.ini upgrade head
+Application:
+
+```text
+http://localhost:8000/api/v1/health
 ```
 
-## Stop
+MCP:
 
-```bash
-docker compose down
+```text
+http://localhost:8000/api/v1/mcp/health
 ```
 
-Remove volumes only when data loss is acceptable:
+Prometheus:
 
-```bash
-docker compose down -v
+```text
+http://localhost:9090
 ```
 
-## Ports
+Grafana:
 
-| Component | Port |
-|---|---:|
-| Backend | 8000 |
-| PostgreSQL | 5432 |
-| Qdrant HTTP | 6333 |
-| Qdrant gRPC | 6334 |
-| Prometheus | 9090 |
-| Grafana | 3000 |
+```text
+http://localhost:3000
+```
 
-## Production Hardening
+## Production Considerations
 
-- do not embed secrets in Compose;
-- rotate JWT and database credentials;
-- set `DEBUG=false`;
+Before production deployment:
+
+- disable debug mode;
+- rotate JWT secrets;
+- use managed secrets;
 - restrict CORS;
-- avoid publishing PostgreSQL and Qdrant;
-- add TLS;
+- use TLS;
+- remove unnecessary published ports;
+- use non-default database credentials;
+- add network policies;
+- back up PostgreSQL and Qdrant;
 - pin image versions;
-- define resource limits;
-- configure backups;
-- secure Grafana and Prometheus;
-- centralize logs;
-- control migration execution.
+- configure log retention;
+- protect Grafana;
+- review Docker socket exposure;
+- use least-privilege service accounts.
