@@ -1,3 +1,13 @@
+<p align="center">
+  <img src="docs/assets/logo.png" width="220" alt="RedPA AI Logo">
+</p>
+
+<h1 align="center">RedPA AI</h1>
+
+<p align="center">
+Production-ready Agentic AI Platform with MCP, RAG, Human Review and Multi-Agent Workflows.
+</p>
+
 # RedPA AI
 
 > **Production-ready Agentic AI Platform with MCP, RAG, Human Review and Multi-Agent Workflows**
