@@ -84,6 +84,120 @@ services:
     networks:
       - redpa-network
 
+
+  github-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-github-mcp
+    restart: unless-stopped
+    command:
+      [
+        "python",
+        "-m",
+        "app.mcp_servers.github_server",
+      ]
+    environment:
+      GITHUB_MCP_HOST: 0.0.0.0
+      GITHUB_MCP_PORT: 8020
+      GITHUB_MCP_TIMEOUT_SECONDS: 20
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    ports:
+      - "8020:8020"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s=socket.create_connection(('127.0.0.1',8020),3); s.close()",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - redpa-network
+
+
+  postgres-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-postgres-mcp
+    restart: unless-stopped
+    command:
+      [
+        "python",
+        "-m",
+        "app.mcp_servers.postgres_server",
+      ]
+    environment:
+      POSTGRES_MCP_HOST: 0.0.0.0
+      POSTGRES_MCP_PORT: 8030
+      POSTGRES_MCP_STATEMENT_TIMEOUT_MS: 5000
+      POSTGRES_MCP_MAX_ROWS: 200
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai}
+    ports:
+      - "8030:8030"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s=socket.create_connection(('127.0.0.1',8030),3); s.close()",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - redpa-network
+
+
+  docker-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-docker-mcp
+    restart: unless-stopped
+    command:
+      [
+        "python",
+        "-m",
+        "app.mcp_servers.docker_server",
+      ]
+    environment:
+      DOCKER_MCP_HOST: 0.0.0.0
+      DOCKER_MCP_PORT: 8040
+      DOCKER_MCP_TIMEOUT_SECONDS: 15
+      DOCKER_SOCKET_PATH: /var/run/docker.sock
+    ports:
+      - "8040:8040"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import socket; s=socket.create_connection(('127.0.0.1',8040),3); s.close()",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - redpa-network
+
   backend:
     build:
       context: .
@@ -126,6 +240,12 @@ services:
       qdrant:
         condition: service_healthy
       filesystem-mcp:
+        condition: service_healthy
+      github-mcp:
+        condition: service_healthy
+      postgres-mcp:
+        condition: service_healthy
+      docker-mcp:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"

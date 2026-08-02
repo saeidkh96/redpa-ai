@@ -18,16 +18,58 @@
       "allow_private_network": true
     },
     {
-      "name": "example-public-server",
+      "name": "redpa-github",
       "transport": "streamable_http",
-      "url": "https://example.com/mcp",
-      "enabled": false,
-      "description": "Replace with a trusted public MCP endpoint.",
+      "url": "http://github-mcp:8020/mcp",
+      "enabled": true,
+      "description": "Read-only access to public GitHub repositories, branches, commits, issues, and pull requests.",
       "headers": {},
       "timeout_seconds": 30,
-      "requires_approval": true,
-      "allowed_tools": null,
-      "allow_private_network": false
+      "requires_approval": false,
+      "allowed_tools": [
+        "repository",
+        "branches",
+        "commits",
+        "issues",
+        "pull_requests"
+      ],
+      "allow_private_network": true
+    },
+    {
+      "name": "redpa-postgres",
+      "transport": "streamable_http",
+      "url": "http://postgres-mcp:8030/mcp",
+      "enabled": true,
+      "description": "Strictly read-only access to PostgreSQL schemas, tables, metadata, SELECT queries, and EXPLAIN plans.",
+      "headers": {},
+      "timeout_seconds": 30,
+      "requires_approval": false,
+      "allowed_tools": [
+        "list_schemas",
+        "list_tables",
+        "describe_table",
+        "query",
+        "explain"
+      ],
+      "allow_private_network": true
+    },
+    {
+      "name": "redpa-docker",
+      "transport": "streamable_http",
+      "url": "http://docker-mcp:8040/mcp",
+      "enabled": true,
+      "description": "Read-only Docker Engine access for containers, logs, images, and system information.",
+      "headers": {},
+      "timeout_seconds": 30,
+      "requires_approval": false,
+      "allowed_tools": [
+        "list_containers",
+        "inspect_container",
+        "container_logs",
+        "list_images",
+        "system_info"
+      ],
+      "allow_private_network": true
     }
   ]
 }

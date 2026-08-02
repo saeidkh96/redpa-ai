@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
 from typing import Any
@@ -387,6 +388,16 @@ def _resolve_tool_arguments(
         ) and payload_arguments:
             return payload_arguments
 
+    signal_arguments = _extract_signal_arguments(
+        state.get(
+            "planner_signals",
+            [],
+        )
+    )
+
+    if signal_arguments is not None:
+        return signal_arguments
+
     request_content = (
         _get_request_content(
             state,
@@ -443,6 +454,50 @@ def _resolve_tool_arguments(
         }
 
     return {}
+
+
+
+def _extract_signal_arguments(
+    raw_signals: Any,
+) -> dict[str, Any] | None:
+    if not isinstance(
+        raw_signals,
+        list,
+    ):
+        return None
+
+    prefix = "tool_arguments_json:"
+
+    for raw_signal in raw_signals:
+        signal = str(
+            raw_signal,
+        ).strip()
+
+        if not signal.startswith(
+            prefix,
+        ):
+            continue
+
+        raw_json = signal[
+            len(prefix):
+        ]
+
+        try:
+            parsed = json.loads(
+                raw_json,
+            )
+        except json.JSONDecodeError:
+            return None
+
+        if isinstance(
+            parsed,
+            dict,
+        ):
+            return parsed
+
+        return None
+
+    return None
 
 
 def _get_request_content(

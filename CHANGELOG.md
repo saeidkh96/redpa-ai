@@ -1,24 +1,25 @@
-# Phase 4.3 Changelog
+# Phase 4.7 Changelog
 
 ## Added
 
-- deterministic Filesystem MCP intent extraction;
-- dynamic tool-availability verification through UnifiedToolService;
-- Planner-driven MCP tool routing;
-- MCP execution through the LangGraph Tool Node;
-- Python formatting for filesystem MCP responses;
-- MCP execution metadata in chat results;
-- planner and formatter tests.
+- read-only Docker MCP v2 server;
+- Docker Engine Unix-socket client;
+- container listing;
+- container inspection;
+- container logs;
+- image listing;
+- system information;
+- Docker Chat intent extraction;
+- Docker result formatting;
+- Docker Compose service;
+- MCP server registration;
+- security, planner, formatter, and server tests.
 
-## Supported chat requests
+## Security
 
-- list project files;
-- read a project text file;
-- search project source text;
-- retrieve safe file metadata.
-
-## Deferred
-
-- generic LLM selection across arbitrary MCP servers;
-- multi-tool plans;
-- persistent HumanReview creation for MCP write tools.
+- fixed GET-only Docker endpoints;
+- no generic Docker API proxy;
+- no container mutation tools;
+- no image, volume, or network mutation;
+- safe container-name validation;
+- maximum 2,000 log lines.
