@@ -1,23 +1,22 @@
+# Pull Request
+
 ## Summary
 
-Describe the change and why it is needed.
+## Motivation
 
 ## Changes
 
-- 
+## Tests
 
-## Verification
+## Documentation
+
+- [ ] Updated docs
+
+## Security Impact
+
+## Checklist
 
 - [ ] Tests pass
-- [ ] Linting/formatting pass
 - [ ] Documentation updated
-- [ ] No secrets or private data included
-- [ ] Migration added when the database schema changed
-
-## API / Database Impact
-
-Describe breaking changes, new endpoints, schema updates, or migrations.
-
-## Screenshots or Logs
-
-Add relevant evidence, with sensitive data removed.
+- [ ] No secrets committed
+- [ ] Backward compatibility considered

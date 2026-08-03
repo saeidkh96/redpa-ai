@@ -2,135 +2,97 @@
 
 ## Overview
 
-RedPA AI is structured as a modular agent platform. FastAPI exposes the public API, LangGraph coordinates workflows, service classes implement business logic, PostgreSQL persists application state, Qdrant supports semantic retrieval, and MCP servers expose external capabilities through explicit contracts.
+RedPA AI is a modular Agentic AI platform built around FastAPI, LangGraph, PostgreSQL, Qdrant, MCP, and the Google Agent-to-Agent protocol.
 
-## Layers
+## Main Layers
 
-### API Layer
+- **API:** authentication, validation, dependency injection, and OpenAPI.
+- **Orchestration:** planner, LangGraph routes, interruption, resume, and response assembly.
+- **A2A:** Agent Registry, Agent Cards, protocol server, Remote Agents, delegation, Multi-Agent execution, approval, and metrics.
+- **Services:** Chat, RAG, Research, Human Review, MCP, tools, and A2A delegation.
+- **Persistence:** PostgreSQL models, repositories, migrations, messages, and reviews.
+- **Tooling:** internal tools and isolated read-only MCP servers.
 
-Located under:
-
-```text
-backend/app/api/v1
-```
-
-Responsibilities:
-
-- authentication;
-- request validation;
-- response schemas;
-- dependency injection;
-- route composition;
-- status-code mapping.
-
-### Orchestration Layer
-
-Located under:
+## Supported Routes
 
 ```text
-backend/app/agents
+chat
+rag
+research
+a2a
+tool
+sql
+human_review
 ```
 
-Responsibilities:
-
-- workflow state;
-- planner execution;
-- route transitions;
-- node execution;
-- interruption and resume;
-- final response assembly.
-
-### Service Layer
-
-Located under:
-
-```text
-backend/app/services
-```
-
-Responsibilities:
-
-- chat generation;
-- planner behavior;
-- research;
-- RAG;
-- human-review logic;
-- MCP management;
-- unified tool execution.
-
-### Persistence Layer
-
-Located under:
-
-```text
-backend/app/database
-backend/app/models
-backend/app/repositories
-```
-
-Responsibilities:
-
-- async database sessions;
-- ORM models;
-- repository queries;
-- migrations;
-- persisted workflow records.
-
-### Tool Layer
-
-Located under:
-
-```text
-backend/app/tools
-backend/app/mcp
-backend/app/mcp_servers
-```
-
-Responsibilities:
-
-- internal tools;
-- MCP discovery;
-- MCP execution;
-- tool permissions;
-- tool formatting;
-- external service isolation.
-
-## Request Lifecycle
+## High-Level Flow
 
 ```mermaid
-sequenceDiagram
-    participant C as Client
-    participant API as FastAPI
-    participant O as Orchestrator
-    participant P as Planner
-    participant N as Workflow Node
-    participant T as Tool Runtime
-    participant DB as PostgreSQL
-
-    C->>API: Request
-    API->>DB: Persist user message
-    API->>O: Run workflow
-    O->>P: Select route
-    P-->>O: Structured plan
-    O->>N: Execute route
-    alt Tool route
-        N->>T: Execute qualified tool
-        T-->>N: Structured result
-    end
-    N-->>O: Final state
-    O->>DB: Persist assistant message
-    O-->>API: Response
-    API-->>C: JSON
+flowchart TD
+    C[Client] --> API[FastAPI]
+    API --> G[LangGraph Orchestrator]
+    G --> P[Planner]
+    P --> CHAT[Chat]
+    P --> RAG[RAG]
+    P --> RES[Research]
+    P --> TOOL[Tool Runtime]
+    P --> REVIEW[Human Review]
+    P --> A2A[A2A Runtime]
+    TOOL --> MCP[MCP Runtime]
+    MCP --> FS[Filesystem MCP]
+    MCP --> GH[GitHub MCP]
+    MCP --> PG[PostgreSQL MCP]
+    MCP --> DK[Docker MCP]
+    A2A --> RR[Remote Agent Registry]
+    RR --> COORD[Coordinator Agent]
+    COORD --> DISC[Capability Discovery]
+    COORD --> MULTI[Multi-Agent Workflow]
+    MULTI --> APPROVAL[Approval Gate]
+    MULTI --> AGG[Result Aggregation]
+    G --> DB[(PostgreSQL)]
+    RAG --> Q[Qdrant]
+    CHAT --> O[Ollama]
+    RES --> W[Web Search]
+    G --> M[Prometheus]
+    M --> GF[Grafana]
 ```
 
-## Design Principles
+## A2A Lifecycle
 
-- explicit state;
-- typed boundaries;
-- minimal global state;
-- deterministic fallback;
-- read-only defaults;
-- isolated external integrations;
-- observable execution;
-- reversible workflow decisions;
-- testable services.
+```text
+User request
+  → deterministic A2A intent
+  → a2a LangGraph node
+  → Remote Agent Registry
+  → Agent Card ranking
+  → SendMessageRequest
+  → JSON-RPC remote task
+  → completed task and artifact
+  → persisted Chat response
+```
+
+## Multi-Agent Lifecycle
+
+```text
+Request
+  → approval policy
+  → subtask generation
+  → bounded parallel delegation
+  → per-subtask results
+  → aggregation
+  → metrics
+```
+
+## Security Boundaries
+
+- JWT and current-user boundaries
+- deterministic route and safety rules
+- read-only MCP capabilities
+- validated Remote Agent URLs and Agent Cards
+- bounded timeouts
+- no sensitive distributed execution before approval
+- observable task metadata and Prometheus metrics
+
+## Current Limitation
+
+The Phase 5 Coordinator currently focuses on capability discovery and coordination. Independent specialist Remote Agent services that directly execute Research, Docker, SQL, or other tasks are planned.

@@ -1,100 +1,53 @@
 # Roadmap
 
 ## Phase 1 — Core Platform
+**Status: Complete**
 
-- FastAPI
-- PostgreSQL
-- JWT
-- users
-- conversations
-- messages
-- Docker
-
-Status: Complete
+FastAPI, PostgreSQL, JWT, users, conversations, messages, and Docker.
 
 ## Phase 2 — Agent Workflows
+**Status: Complete**
 
-- LangGraph
-- planner
-- chat
-- RAG
-- document ingestion
-
-Status: Complete
+LangGraph, planner, Chat, RAG, and document ingestion.
 
 ## Phase 3 — Research and Review
+**Status: Complete**
 
-- web research
-- evidence ranking
-- source synthesis
-- human review
-- approval and rejection
-- workflow resume
-- monitoring
-
-Status: Complete
+Web research, evidence ranking, source synthesis, Human Review, resume, and monitoring.
 
 ## Phase 4 — MCP Platform
+**Status: Complete**
 
-- MCP manager
-- MCP registry
-- MCP catalog
-- dynamic selection
-- Filesystem MCP
-- GitHub MCP
-- PostgreSQL MCP
-- Docker MCP
-- planner integration
-- security policies
+MCP manager, registry, catalog, dynamic selection, four read-only MCP servers, planner integration, and security policies.
 
-Status: Complete
+## Phase 5 — Agent-to-Agent Platform
+**Status: Complete**
 
-## Phase 5 — Agent-to-Agent
-
-Planned:
-
-- Agent Registry
-- Agent Cards
+- Agent Registry and Agent Cards
 - capability discovery
+- official A2A Protocol 1.0 server
+- public Agent Card endpoint
 - Coordinator Agent
-- task delegation
-- task lifecycle
-- shared context
-- agent result aggregation
+- Remote Agent Registry
+- JSON-RPC task delegation
+- Chat-level A2A routing
+- automatic Agent Selection
+- parallel Multi-Agent workflows
+- result aggregation
 - A2A metrics
-- human review between agents
+- Human Approval Gate
 
 ## Phase 6 — Long-Running Workflows
+**Status: Planned**
 
-Planned:
-
-- durable background tasks
-- scheduled execution
-- retry policies
-- workflow leases
-- continuation tokens
-- cancellation
-- recovery
+Durable background tasks, retry policies, leases, cancellation, recovery, persisted remote task state, and resumable Multi-Agent workflows.
 
 ## Phase 7 — Memory
+**Status: Planned**
 
-Planned:
-
-- short-term memory
-- user memory
-- conversation summaries
-- semantic memory
-- memory policies
-- retention controls
+Short-term memory, user memory, summaries, semantic memory, episodic memory, policies, and retention controls.
 
 ## Phase 8 — Production Deployment
+**Status: Planned**
 
-Planned:
-
-- cloud deployment
-- managed PostgreSQL
-- managed vector database
-- secret manager
-- autoscaling
-- distributed tracing
-- deployment documentation
+Cloud deployment, managed data services, secret management, autoscaling, tracing, centralized logs, and production A2A network policies.
