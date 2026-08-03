@@ -173,6 +173,27 @@ jobs:
             echo "No pytest test files were found."
             echo "Dependency installation, compilation, and application import passed."
           fi
+ 
+      - name: Create CI .env
+        shell: bash
+        run: |
+            cat > .env << EOF
+            APP_NAME=RedPA AI
+            APP_VERSION=1.0.0
+            ENVIRONMENT=development
+            DEBUG=false
+            API_V1_PREFIX=/api/v1
+
+            DATABASE_URL=postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai_test
+            REDIS_URL=redis://localhost:6379/0
+            QDRANT_URL=http://localhost:6333
+
+            JWT_SECRET_KEY=github-actions-test-jwt-secret-key
+            SECRET_KEY=github-actions-secret-key
+            ACCESS_TOKEN_EXPIRE_MINUTES=60
+            EOF    
+
+
 
       - name: Validate Docker Compose
         shell: bash
