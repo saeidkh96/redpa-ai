@@ -1,10 +1,12 @@
 # RedPA AI
 
-> **Production-oriented Agentic AI Platform with MCP, RAG, A2A, Human Review, and Multi-Agent Workflows**
+> **Production-oriented Agentic AI Platform with LangGraph, MCP, A2A, RAG, Human Review, and Multi-Agent Workflows**
 
-RedPA AI is a production-oriented backend platform for building secure, observable, tool-using, and human-supervised AI systems. It combines **FastAPI**, **LangGraph**, **PostgreSQL**, **Qdrant**, **Ollama**, **Model Context Protocol (MCP)**, **Agent-to-Agent (A2A)**, **Prometheus**, **Grafana**, and **Docker Compose** in a modular architecture designed for real agentic workflows.
+RedPA AI is a modular backend platform for building secure, observable, tool-using, and human-supervised AI systems.
 
-RedPA is not a single-purpose chatbot. It is an extensible agent platform that supports planning, routing, retrieval, research, tool execution, workflow interruption, human approval, persistence, monitoring, and resumable execution.
+It combines **FastAPI**, **LangGraph**, **PostgreSQL**, **Qdrant**, **Ollama**, the **Model Context Protocol (MCP)**, the **Google Agent-to-Agent (A2A) Protocol**, **Prometheus**, **Grafana**, and **Docker Compose** in one extensible architecture.
+
+RedPA AI is not a single-purpose chatbot. It is an agent platform that supports planning, deterministic routing, retrieval, research, internal and external tools, remote agent delegation, workflow interruption, human approval, persistence, monitoring, and multi-agent coordination.
 
 <p align="center">
   <strong>FastAPI · LangGraph · MCP · A2A · PostgreSQL · Qdrant · Ollama · Docker · Prometheus · Grafana</strong>
@@ -17,47 +19,61 @@ RedPA is not a single-purpose chatbot. It is an extensible agent platform that s
 RedPA AI currently includes:
 
 - JWT authentication and user management
-- Persistent conversations and messages
+- persistent conversations and messages
 - LangGraph-based orchestration
-- Planner-driven routing
-- Conversational AI through Ollama
-- Retrieval-augmented generation with Qdrant
-- Web research with ranked evidence
-- Internal tool runtime
-- Dynamic MCP tool discovery and execution
-- Official A2A Protocol 1.0 server and public Agent Card
-- Remote Agent Registry and remote task delegation
-- Automatic capability-based Agent Selection
-- Chat-level A2A routing through LangGraph
-- Parallel Multi-Agent workflow execution and aggregation
-- Human approval gate for sensitive distributed workflows
+- planner-driven routing
+- conversational AI through Ollama
+- retrieval-augmented generation with Qdrant
+- web research with ranked evidence
+- internal tool runtime
+- dynamic MCP tool discovery and execution
+- human review with approve, reject, and resume
+- read-only Filesystem, GitHub, PostgreSQL, and Docker MCP servers
+- internal Agent Registry
+- typed Agent Cards
+- Agent capability discovery
+- official A2A Protocol server
+- public Agent Card discovery
+- Remote Agent Registry
+- remote Agent Card resolution
+- remote task delegation
+- automatic capability-based Agent Selection
+- Chat integration through the `a2a` route
+- Multi-Agent workflow execution
+- parallel subtask scheduling
+- result aggregation
+- human approval gate for sensitive distributed workflows
 - A2A and Multi-Agent Prometheus metrics
-- Human review with approve, reject, and resume
-- Read-only Filesystem, GitHub, PostgreSQL, and Docker MCP servers
 - Prometheus metrics and Grafana dashboards
 - Docker Compose deployment
-- GitHub Actions continuous integration
-- A test suite covering routing, security, MCP compatibility, formatting, and tool behavior
+- GitHub Actions CI
+- unit and integration tests for routing, security, MCP, A2A, tools, and workflows
 
-Phase 5 is complete. RedPA now includes the official A2A Protocol server, Agent Cards, Remote Agent Registry, remote delegation, automatic capability selection, Chat-level A2A routing, parallel Multi-Agent workflows, result aggregation, approval gates, and distributed-execution metrics.
+**Phase 5, covering A2A and Multi-Agent orchestration, is complete.**
 
 ---
 
 ## Why RedPA AI?
 
-Many LLM applications stop at prompt-response interaction. RedPA AI focuses on the infrastructure required for dependable agentic systems:
+Many LLM applications stop at prompt-response interaction.
 
-- deterministic routing around LLM decisions;
-- explicit state management;
-- durable workflow boundaries;
-- structured tool contracts;
-- human approval for sensitive actions;
-- read-only security policies for infrastructure tools;
-- persistent application data;
-- observable execution;
-- modular integration of external capabilities.
+RedPA AI focuses on the infrastructure required for dependable agentic systems:
 
-The architecture is designed to make capabilities replaceable and independently testable.
+- deterministic routing around LLM decisions
+- explicit workflow state
+- typed request and response boundaries
+- structured tool contracts
+- read-only infrastructure integrations
+- human approval before sensitive actions
+- remote agent discovery and delegation
+- observable execution
+- persistent application state
+- modular services
+- bounded timeouts
+- isolated failure handling
+- testable components
+
+The architecture is designed so that tools, models, retrieval backends, remote agents, and workflow nodes can be replaced independently.
 
 ---
 
@@ -70,26 +86,35 @@ flowchart TD
     AUTH --> ORCH[LangGraph Orchestrator]
 
     ORCH --> PLAN[Planner]
-    PLAN --> CHAT[Chat Workflow]
-    PLAN --> RESEARCH[Research Workflow]
-    PLAN --> RAG[RAG Workflow]
-    PLAN --> TOOLS[Unified Tool Runtime]
-    PLAN --> REVIEW[Human Review]
 
-    TOOLS --> INTERNAL[Internal Tools]
-    TOOLS --> MCP[MCP Runtime]
+    PLAN --> CHAT[Chat Workflow]
+    PLAN --> RAG[RAG Workflow]
+    PLAN --> RESEARCH[Research Workflow]
+    PLAN --> TOOL[Unified Tool Runtime]
+    PLAN --> REVIEW[Human Review]
+    PLAN --> A2A[A2A Runtime]
+
+    TOOL --> INTERNAL[Internal Tools]
+    TOOL --> MCP[MCP Runtime]
 
     MCP --> FS[Filesystem MCP]
     MCP --> GH[GitHub MCP]
     MCP --> PG[PostgreSQL MCP]
     MCP --> DK[Docker MCP]
 
+    A2A --> RREG[Remote Agent Registry]
+    RREG --> COORD[RedPA Coordinator Agent]
+    COORD --> DISC[Capability Discovery]
+    COORD --> MULTI[Multi-Agent Workflow]
+    MULTI --> APPROVAL[Approval Gate]
+    MULTI --> AGG[Result Aggregation]
+
     RAG --> QD[Qdrant]
     CHAT --> OL[Ollama]
     RESEARCH --> WEB[Web Search]
 
     ORCH --> DB[(PostgreSQL)]
-    ORCH --> METRICS[Prometheus Metrics]
+    ORCH --> METRICS[Prometheus]
     METRICS --> GRAFANA[Grafana]
 ```
 
@@ -104,108 +129,267 @@ flowchart TD
 - persistent users
 - persistent conversations
 - persistent user and assistant messages
-- persistent human-review records
+- persistent Human Review records
 - async SQLAlchemy
 - Alembic migrations
 - PostgreSQL storage
 
 ### LangGraph Orchestration
 
-RedPA uses LangGraph as its workflow runtime. The orchestrator coordinates:
+LangGraph coordinates:
 
-- planning;
-- route selection;
-- chat generation;
-- RAG retrieval;
-- web research;
-- tool execution;
-- human-review interruption;
-- workflow continuation after approval.
+- planner execution
+- route selection
+- Chat generation
+- RAG retrieval
+- Research
+- Tool execution
+- A2A delegation
+- Human Review interruption
+- workflow resume after approval
+- final response assembly
 
 ### Planner
 
-The planner combines structured LLM planning with deterministic fallback rules. It can route requests to:
+The planner combines structured LLM planning with deterministic rules.
 
-- `chat`
-- `rag`
-- `research`
-- `a2a`
-- `tool`
-- `human_review`
+Supported routes:
 
-For MCP requests, the planner can use deterministic intent extraction or dynamic catalog-based tool selection.
+```text
+chat
+rag
+research
+a2a
+tool
+sql
+human_review
+```
+
+The planner applies deterministic intent detection before dynamic MCP selection for high-level A2A discovery requests.
+
+For example:
+
+```text
+Which agent can inspect Docker containers?
+```
+
+routes to:
+
+```text
+a2a
+```
+
+while:
+
+```text
+Inspect Docker container redpa-postgres
+```
+
+routes to:
+
+```text
+tool
+```
 
 ### Retrieval-Augmented Generation
 
 The RAG pipeline supports:
 
-- document ingestion;
-- text extraction;
-- chunking;
-- embedding generation;
-- Qdrant storage;
-- semantic retrieval;
-- source-grounded response generation.
+- document ingestion
+- text extraction
+- chunking
+- embedding generation
+- Qdrant storage
+- semantic retrieval
+- source-grounded response generation
 
 ### Research Workflow
 
-The research workflow supports:
+The Research workflow supports:
 
-- current web search;
-- evidence collection;
-- deduplication;
-- ranking;
-- source-aware synthesis;
-- research metadata;
-- failure isolation between search and generation.
+- public web search
+- evidence collection
+- evidence normalization
+- duplicate removal
+- ranking
+- bounded context construction
+- source-aware synthesis
+- research metadata
+- isolated search and generation failures
 
 ### Human Review
 
-Sensitive workflows can be interrupted and persisted for human approval.
-
-Supported lifecycle:
+Sensitive workflows can pause for approval.
 
 ```text
 Request
   → Planner
   → Approval required
-  → Human review created
+  → Human Review created
   → Approve or reject
   → Resume workflow
-  → Tool execution or safe termination
+  → Execute or terminate safely
 ```
 
 ---
 
 ## Agent-to-Agent Platform
 
-RedPA implements the Google Agent-to-Agent protocol through the official Python SDK.
+RedPA AI implements the Google Agent-to-Agent Protocol using the official Python SDK.
 
-Current capabilities:
+### Current A2A Capabilities
 
-- public Agent Card discovery;
-- JSON-RPC task execution;
-- Remote Agent Registry;
-- Remote Agent Card resolution;
-- remote task delegation;
-- automatic capability-based Agent Selection;
-- Chat integration through the `a2a` LangGraph route;
-- parallel Multi-Agent subtask execution;
-- result aggregation;
-- human approval before sensitive distributed workflows;
-- A2A and Multi-Agent Prometheus metrics.
+- internal Agent Registry
+- typed Agent Cards
+- Agent capability discovery
+- public A2A Coordinator service
+- JSON-RPC task execution
+- Remote Agent Registry
+- remote Agent Card resolution
+- remote task delegation
+- automatic Agent Selection
+- Chat-level A2A routing
+- task and context metadata
+- artifact extraction
+- Multi-Agent execution
+- parallel subtask scheduling
+- result aggregation
+- human approval gate
+- A2A metrics
+
+### Built-in Agents
+
+| Agent | Capability | Routes |
+|---|---|---|
+| Planner Agent | Route selection | Chat, Research, RAG, Tool, Human Review, A2A |
+| Research Agent | Web research | Research |
+| RAG Agent | Document retrieval | RAG |
+| Tool Agent | Internal and MCP tool execution | Tool |
+| Human Review Agent | Approval coordination | Human Review |
+
+### A2A Service
 
 ```text
-Planner
-  → A2A route
-  → Remote Agent Registry
-  → Agent Card discovery
-  → Capability selection
-  → SendMessageRequest
-  → Remote task lifecycle
-  → Artifact extraction
-  → Persisted Chat response
+http://localhost:8050/health
+http://localhost:8050/.well-known/agent-card.json
 ```
+
+JSON-RPC endpoint:
+
+```text
+http://localhost:8050/
+```
+
+### A2A Flow
+
+```text
+User Request
+  → Planner
+  → A2A Route
+  → Remote Agent Registry
+  → Agent Card Discovery
+  → Capability Ranking
+  → SendMessageRequest
+  → Remote Task Lifecycle
+  → Artifact Extraction
+  → Persisted Chat Response
+```
+
+### Automatic Agent Selection
+
+Remote Agent selection ranks:
+
+- Agent name
+- Agent description
+- Skill ID
+- Skill name
+- Skill description
+- tags
+- examples
+
+Selection metadata may include:
+
+```text
+remote_agent
+remote_base_url
+selected_skill
+selection_score
+selection_terms
+task_id
+context_id
+event_count
+execution_time_ms
+success
+error
+```
+
+### Multi-Agent Workflow
+
+The Multi-Agent service supports:
+
+- explicit subtasks
+- automatic subtask generation
+- bounded parallelism
+- workflow timeouts
+- per-subtask Agent Selection
+- partial failure reporting
+- result aggregation
+
+Example:
+
+```json
+{
+  "request": "Research and infrastructure inspection",
+  "subtasks": [
+    {
+      "id": "research",
+      "instruction": "Find an agent for web research and evidence"
+    },
+    {
+      "id": "docker",
+      "instruction": "Which agent can inspect Docker containers?"
+    }
+  ],
+  "max_parallelism": 2,
+  "timeout_seconds": 90,
+  "approval_granted": false
+}
+```
+
+### Multi-Agent Approval Gate
+
+Sensitive distributed workflows stop before remote delegation.
+
+Current high-risk categories include:
+
+- sending email
+- deleting or removing data
+- restarting or stopping infrastructure
+- modifying persistent data
+- refunds
+- production deployment
+
+Example:
+
+```json
+{
+  "request": "Send an email to the project manager",
+  "subtasks": [],
+  "max_parallelism": 2,
+  "timeout_seconds": 90,
+  "approval_granted": false
+}
+```
+
+Expected response:
+
+```text
+success: false
+approval_required: true
+results: []
+```
+
+No Remote Agent is contacted before approval.
 
 ---
 
@@ -213,20 +397,20 @@ Planner
 
 RedPA includes a unified MCP runtime with:
 
-- server configuration;
-- transport validation;
-- health checks;
-- tool discovery;
-- qualified tool names;
-- input-schema discovery;
-- allowlists;
-- approval policies;
-- cache management;
-- unified internal and MCP tool catalog;
-- dynamic planner selection;
-- structured execution metadata.
+- server configuration
+- transport validation
+- health checks
+- tool discovery
+- qualified tool names
+- input schema discovery
+- allowlists
+- approval policies
+- cache management
+- unified internal and MCP catalog
+- dynamic planner selection
+- structured execution metadata
 
-Qualified names use the following format:
+Qualified names use:
 
 ```text
 mcp:<server-name>:<tool-name>
@@ -249,18 +433,18 @@ A sandboxed, read-only filesystem server.
 | `search_files` | Search text content |
 | `file_info` | Return safe file metadata |
 
-Security controls include:
+Security controls:
 
-- strict sandbox boundaries;
-- path normalization;
-- parent-traversal rejection;
-- blocked credential files;
-- binary-file rejection;
-- read-only operation.
+- strict sandbox boundaries
+- path normalization
+- parent traversal rejection
+- blocked credential files
+- binary file rejection
+- read-only operation
 
 ### GitHub MCP
 
-A read-only server for public GitHub repository data.
+A read-only server for public GitHub data.
 
 | Tool | Purpose |
 |---|---|
@@ -270,41 +454,39 @@ A read-only server for public GitHub repository data.
 | `issues` | Repository issues |
 | `pull_requests` | Pull requests |
 
-Authentication through `GITHUB_TOKEN` is optional and used only to improve API limits.
-
 ### PostgreSQL MCP
 
 A strictly read-only PostgreSQL server.
 
 | Tool | Purpose |
 |---|---|
-| `list_schemas` | List user-visible schemas |
+| `list_schemas` | List visible schemas |
 | `list_tables` | List tables and views |
 | `describe_table` | Inspect columns, constraints, and indexes |
 | `query` | Run one validated read-only query |
-| `explain` | Return a JSON execution plan without `ANALYZE` |
+| `explain` | Return a JSON execution plan |
 
-The SQL security layer allows only:
+Allowed SQL entry points:
 
-- `SELECT`
-- `WITH`
-- `VALUES`
+```text
+SELECT
+WITH
+VALUES
+```
 
-It rejects:
+Rejected operations include:
 
-- `INSERT`
-- `UPDATE`
-- `DELETE`
-- `MERGE`
-- `COPY`
+- INSERT
+- UPDATE
+- DELETE
+- MERGE
+- COPY
 - DDL
 - administrative operations
 - multiple statements
 - SQL comments
-- row-locking queries
-- unsafe PostgreSQL filesystem and administration functions
-
-Every database operation runs inside a read-only transaction with row and timeout limits.
+- row locks
+- unsafe PostgreSQL functions
 
 ### Docker MCP
 
@@ -312,30 +494,28 @@ A read-only Docker Engine integration.
 
 | Tool | Purpose |
 |---|---|
-| `list_containers` | List running or stopped containers |
+| `list_containers` | List containers |
 | `inspect_container` | Return safe container metadata |
 | `container_logs` | Read recent logs |
 | `list_images` | List images |
 | `system_info` | Return Docker Engine information |
 
-RedPA does **not** expose tools for:
+Not exposed:
 
-- start;
-- stop;
-- restart;
-- kill;
-- remove;
-- create;
-- exec;
-- image mutation;
-- volume mutation;
-- network mutation.
+- start
+- stop
+- restart
+- kill
+- remove
+- create
+- exec
+- image mutation
+- volume mutation
+- network mutation
 
 ---
 
 ## Internal Tools
-
-The built-in tool runtime currently includes:
 
 | Tool | Purpose |
 |---|---|
@@ -353,7 +533,35 @@ Internal and MCP tools are exposed through a unified catalog.
 
 ## Example Requests
 
-### Filesystem
+### Chat
+
+```text
+Explain how LangGraph state transitions work.
+```
+
+### RAG
+
+```text
+Search inside my uploaded document for the deployment requirements.
+```
+
+### Research
+
+```text
+Research the latest developments in agentic AI.
+Search the web and summarize recent LangGraph updates.
+```
+
+### A2A
+
+```text
+Ask the remote coordinator to show available agents and health.
+Which agent can inspect Docker containers?
+Find an agent for web research and evidence.
+Show available agents.
+```
+
+### Filesystem MCP
 
 ```text
 Show files inside backend/app/mcp
@@ -362,7 +570,7 @@ Search for MCPManager in backend/app
 Show file info for README.md
 ```
 
-### GitHub
+### GitHub MCP
 
 ```text
 Show repository langchain-ai/langgraph
@@ -371,7 +579,7 @@ List open issues of langchain-ai/langgraph
 List branches of openai/openai-python
 ```
 
-### PostgreSQL
+### PostgreSQL MCP
 
 ```text
 List database schemas
@@ -381,7 +589,7 @@ Run query SELECT COUNT(*) AS user_count FROM users
 Explain SELECT * FROM messages
 ```
 
-### Docker
+### Docker MCP
 
 ```text
 Show Docker containers
@@ -392,25 +600,17 @@ List Docker images
 Show Docker system info
 ```
 
-### Research
-
-```text
-Research LangGraph durable execution.
-Search the web and summarize recent developments in agentic AI.
-Research the latest developments in automotive AI.
-```
-
 ---
 
 ## API Overview
 
-The FastAPI application exposes versioned endpoints under:
+Base prefix:
 
 ```text
 /api/v1
 ```
 
-Main API groups include:
+Main groups:
 
 - Health
 - Authentication
@@ -418,7 +618,6 @@ Main API groups include:
 - Conversations
 - Messages
 - Chat
-- LLM
 - Documents
 - Human Reviews
 - Internal Tools
@@ -442,7 +641,7 @@ http://localhost:8000/openapi.json
 
 ---
 
-## MCP API Overview
+## MCP API
 
 ```text
 GET  /api/v1/mcp/servers
@@ -453,6 +652,43 @@ GET  /api/v1/mcp/tools/{qualified_name}
 POST /api/v1/mcp/tools/execute
 GET  /api/v1/mcp/servers/{server_name}/tools
 POST /api/v1/mcp/servers/{server_name}/tools/{tool_name}/call
+```
+
+---
+
+## A2A API
+
+### Internal Agent Registry
+
+```text
+GET /api/v1/agents
+GET /api/v1/agents/health
+GET /api/v1/agents/discover
+GET /api/v1/agents/{agent_id}
+```
+
+### Remote Agents
+
+```text
+POST   /api/v1/agents/remotes
+GET    /api/v1/agents/remotes
+GET    /api/v1/agents/remotes/{name}/card
+POST   /api/v1/agents/remotes/{name}/delegate
+DELETE /api/v1/agents/remotes/{name}
+```
+
+### Multi-Agent Workflow
+
+```text
+POST /api/v1/agents/multi/delegate
+```
+
+### A2A Protocol Service
+
+```text
+GET  http://localhost:8050/health
+GET  http://localhost:8050/.well-known/agent-card.json
+POST http://localhost:8050/
 ```
 
 ---
@@ -539,6 +775,7 @@ redpa-ai/
 ├── monitoring/
 │   ├── grafana/
 │   └── prometheus/
+├── scripts/
 ├── tests/
 ├── docker-compose.yml
 ├── Dockerfile
@@ -557,6 +794,7 @@ redpa-ai/
 - Docker Compose
 - Python 3.13+
 - Git
+- Ollama
 
 ### Clone
 
@@ -567,9 +805,7 @@ cd redpa-ai
 
 ### Environment
 
-Create a `.env` file based on the project configuration.
-
-Important values include:
+Create a `.env` file.
 
 ```env
 APP_NAME=RedPA AI
@@ -583,7 +819,10 @@ OLLAMA_BASE_URL=http://host.docker.internal:11434
 
 GITHUB_TOKEN=
 
+A2A_HOST=0.0.0.0
+A2A_PORT=8050
 A2A_PUBLIC_URL=http://a2a-coordinator:8050
+
 A2A_REMOTE_DEFAULT_ENABLED=true
 A2A_REMOTE_DEFAULT_NAME=redpa-coordinator
 A2A_REMOTE_DEFAULT_URL=http://a2a-coordinator:8050
@@ -608,24 +847,38 @@ docker compose ps
 
 ```bash
 docker compose logs --tail=150 backend
+docker compose logs --tail=150 a2a-coordinator
 docker compose logs --tail=150 filesystem-mcp
 docker compose logs --tail=150 github-mcp
 docker compose logs --tail=150 postgres-mcp
 docker compose logs --tail=150 docker-mcp
-docker compose logs --tail=150 a2a-coordinator
 ```
+
+---
+
+## Service Endpoints
+
+| Service | URL |
+|---|---|
+| FastAPI Docs | `http://localhost:8000/docs` |
+| FastAPI OpenAPI | `http://localhost:8000/openapi.json` |
+| A2A Health | `http://localhost:8050/health` |
+| A2A Agent Card | `http://localhost:8050/.well-known/agent-card.json` |
+| Prometheus | `http://localhost:9090` |
+| Grafana | `http://localhost:3000` |
+| Qdrant | `http://localhost:6333` |
 
 ---
 
 ## Testing
 
-Run the full test suite:
+Run the full suite:
 
 ```bash
 python -m pytest tests -v
 ```
 
-Compile all backend modules:
+Compile backend modules:
 
 ```bash
 python -m compileall backend/app
@@ -639,19 +892,26 @@ docker compose config
 
 The suite covers:
 
-- MCP naming;
-- registry behavior;
-- tool discovery;
-- MCP v2 compatibility;
-- private-network policy;
-- filesystem sandboxing;
-- GitHub parsing and formatting;
-- PostgreSQL SQL validation;
-- Docker argument validation;
-- planner intent detection;
-- dynamic MCP selection;
-- unified tool behavior;
-- research ranking.
+- planner routing
+- deterministic route priority
+- MCP naming
+- MCP Registry behavior
+- MCP discovery
+- MCP v2 compatibility
+- private network policy
+- Filesystem sandboxing
+- GitHub parsing and formatting
+- PostgreSQL SQL validation
+- Docker argument validation
+- dynamic MCP selection
+- unified tool behavior
+- Research ranking
+- A2A Agent Cards
+- Remote Agent Registry
+- Remote delegation
+- automatic Agent Selection
+- Multi-Agent subtask generation
+- approval policy
 
 ---
 
@@ -671,60 +931,103 @@ http://localhost:3000
 
 Metrics include:
 
-- HTTP request count;
-- HTTP latency;
-- response status;
-- internal-tool execution;
-- MCP-tool execution;
-- execution duration;
-- workflow behavior.
+- HTTP request count
+- HTTP latency
+- response status
+- internal tool execution
+- MCP tool execution
+- A2A requests
+- Multi-Agent subtasks
+- Multi-Agent workflow duration
+- per-Agent subtask duration
+- approval-required decisions
+
+A2A metrics:
+
+```text
+redpa_a2a_multi_requests_total
+redpa_a2a_multi_subtasks_total
+redpa_a2a_multi_duration_seconds
+redpa_a2a_multi_subtask_duration_seconds
+redpa_a2a_approval_required_total
+```
 
 ---
 
 ## Security Model
 
-RedPA applies security at several layers:
+RedPA applies security at several layers.
 
-1. **Authentication**
-   - JWT access control
-   - current-user boundaries
+### Authentication
 
-2. **Planner**
-   - deterministic safety rules
-   - explicit route selection
+- JWT access control
+- current-user boundaries
 
-3. **Human Review**
-   - approval gates
-   - persisted decisions
-   - resumable execution
+### Planner
 
-4. **Tool Runtime**
-   - qualified tool names
-   - allowlists
-   - input schemas
-   - permission checks
+- deterministic safety rules
+- explicit route selection
+- A2A intent priority before MCP execution
 
-5. **Filesystem MCP**
-   - sandboxing
-   - traversal prevention
-   - blocked files
+### Human Review
 
-6. **PostgreSQL MCP**
-   - read-only transactions
-   - SQL validation
-   - row and timeout limits
+- approval gates
+- persisted decisions
+- resumable execution
 
-7. **Docker MCP**
-   - fixed GET-only operations
-   - no mutation tools
-   - safe identifier validation
+### Tool Runtime
 
-8. **Infrastructure**
-   - isolated Docker services
-   - health checks
-   - observable execution
+- qualified tool names
+- allowlists
+- input schemas
+- permission checks
 
-See [SECURITY.md](SECURITY.md) for reporting guidance.
+### Filesystem MCP
+
+- sandboxing
+- traversal prevention
+- blocked files
+
+### PostgreSQL MCP
+
+- read-only transactions
+- SQL validation
+- row and timeout limits
+
+### Docker MCP
+
+- fixed GET-only operations
+- no mutation tools
+- safe identifier validation
+
+### A2A
+
+- explicit Remote Agent registration
+- URL validation
+- Agent Card resolution
+- bounded timeouts
+- approval before sensitive distributed execution
+- task and context metadata
+
+### Infrastructure
+
+- isolated Docker services
+- health checks
+- observable execution
+
+See [SECURITY.md](SECURITY.md).
+
+---
+
+## Current Limitations
+
+The current A2A Coordinator performs capability discovery and coordination.
+
+Independent specialist Remote Agent services that directly execute Research, Docker, SQL, Filesystem, or GitHub tasks are not yet implemented.
+
+The current Multi-Agent approval gate is request-based and is not yet persisted through the existing Human Review database workflow.
+
+The Remote Agent Registry is currently bootstrapped in memory and should be persisted in a later phase.
 
 ---
 
@@ -732,26 +1035,62 @@ See [SECURITY.md](SECURITY.md) for reporting guidance.
 
 ### Completed
 
-- [x] Core platform, persistence, authentication, and LangGraph orchestration
-- [x] Chat, RAG, Research, Human Review, and workflow resume
-- [x] Internal Tool Runtime and read-only MCP platform
-- [x] Filesystem, GitHub, PostgreSQL, and Docker MCP servers
-- [x] Agent Registry and typed Agent Cards
-- [x] Official A2A Protocol server and public Agent Card
-- [x] Remote Agent Registry and remote task delegation
-- [x] Automatic capability-based Agent Selection
+- [x] Core FastAPI backend
+- [x] Async PostgreSQL persistence
+- [x] JWT authentication
+- [x] Conversations and messages
+- [x] LangGraph orchestration
+- [x] Chat workflow
+- [x] RAG pipeline
+- [x] Research workflow
+- [x] Human Review
+- [x] Approve, reject, and resume
+- [x] Internal tool runtime
+- [x] Prometheus and Grafana
+- [x] Docker Compose
+- [x] GitHub Actions CI
+- [x] MCP platform foundation
+- [x] Filesystem MCP
+- [x] GitHub MCP
+- [x] PostgreSQL MCP
+- [x] Docker MCP
+- [x] Dynamic MCP selection
+- [x] Agent Registry
+- [x] Agent Cards
+- [x] Agent Discovery
+- [x] Google A2A Protocol
+- [x] A2A Coordinator
+- [x] Remote Agent Registry
+- [x] Remote task delegation
+- [x] automatic Agent Selection
 - [x] Chat-level A2A routing
-- [x] Parallel Multi-Agent workflows and result aggregation
-- [x] A2A metrics and Human Approval Gate
+- [x] Multi-Agent workflow
+- [x] parallel subtask execution
+- [x] result aggregation
+- [x] A2A metrics
+- [x] human approval gate
+
+### In Progress
+
+- [ ] independent specialist Remote Agents
+  - [ ] Research Agent
+  - [ ] SQL Agent
+  - [ ] Docker Agent
+  - [ ] Filesystem Agent
+  - [ ] GitHub Agent
 
 ### Planned
 
-- [ ] Persisted Remote Agent Registry
-- [ ] Independent specialist Remote Agent services
-- [ ] Streaming A2A responses
-- [ ] Durable long-running workflows
+- [ ] persisted Remote Agent Registry
+- [ ] shared Agent context
+- [ ] streaming A2A responses
+- [ ] durable long-running workflows
+- [ ] background retries and recovery
 - [ ] Agent memory
-- [ ] Cloud deployment and distributed tracing
+- [ ] distributed tracing
+- [ ] cloud deployment
+- [ ] Kubernetes
+- [ ] enterprise observability
 
 Detailed planning is available in [docs/ROADMAP.md](docs/ROADMAP.md).
 
@@ -764,8 +1103,14 @@ Detailed planning is available in [docs/ROADMAP.md](docs/ROADMAP.md).
 - [MCP Platform](docs/MCP_PLATFORM.md)
 - [API Reference](docs/API_REFERENCE.md)
 - [Deployment](docs/DEPLOYMENT.md)
-- [Security](SECURITY.md)
+- [Human Review](docs/HUMAN_REVIEW.md)
+- [Monitoring](docs/MONITORING.md)
+- [Research Pipeline](docs/RESEARCH_PIPELINE.md)
+- [Tool Runtime](docs/TOOL_RUNTIME.md)
+- [Testing](docs/TESTING.md)
+- [Project Structure](docs/PROJECT_STRUCTURE.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Security](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 
 ---
