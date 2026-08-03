@@ -462,27 +462,17 @@ services:
     networks:
       - redpa-network
 
-    backend:
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
     image: redpa-ai-backend
     container_name: redpa-backend
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
       APP_VERSION: ${APP_VERSION:-0.2.0}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      DEBUG: ${DEBUG:-true}
-      API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
-      HOST: ${HOST:-0.0.0.0}
-      PORT: ${PORT:-8000}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      APP_NAME: ${APP_NAME:-RedPA AI}
-      APP_VERSION: ${APP_VERSION:-0.2.0}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
       HOST: ${HOST:-0.0.0.0}
@@ -580,5 +570,3 @@ networks:
   redpa-network:
     name: redpa-network
     driver: bridge
-profiles:
-  default:
