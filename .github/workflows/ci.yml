@@ -35,7 +35,7 @@ jobs:
       ENVIRONMENT: "development"
       DEBUG: "false"
       LOG_LEVEL: "INFO"
-      JSON_LOGS: "false"
+      JSON_LOGS: "true"
       EXPOSE_ERROR_DETAILS: "true"
 
       API_V1_PREFIX: "/api/v1"
