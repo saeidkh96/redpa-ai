@@ -1,81 +1,30 @@
-# Changelog
+# Phase 5.3 Changelog
 
-All notable changes to RedPA AI are documented in this file.
+## Added
 
-## [Unreleased]
+- remote A2A Agent Registry;
+- remote Agent Card resolution;
+- official A2A Client creation;
+- non-streaming SendMessageRequest delegation;
+- protobuf response serialization;
+- delegation timeout;
+- remote-agent registration API;
+- remote-agent listing API;
+- remote Agent Card API;
+- remote delegation API;
+- remote-agent removal API;
+- validation and registry tests.
 
-### Planned
+## Official SDK Flow
 
-- Agent Registry
-- Agent Cards
-- Agent discovery
-- Agent-to-Agent task delegation
-- Coordinator Agent
-- Multi-agent workflows
-- Long-running workflows
-- Agent memory
+- A2ACardResolver;
+- create_client;
+- ClientConfig;
+- new_text_message;
+- SendMessageRequest;
+- send_message async iterator.
 
-## [0.4.0] - 2026-08-03
+## Next
 
-### Added
-
-- MCP platform foundation
-- MCP server configuration and reload
-- MCP health reporting
-- MCP tool discovery
-- qualified MCP tool names
-- unified internal and MCP tool catalog
-- dynamic MCP tool selection
-- Filesystem MCP server
-- GitHub MCP server
-- PostgreSQL MCP server
-- Docker MCP server
-- MCP-specific formatters
-- MCP planner integration
-- MCP security tests
-- MCP v2 compatibility tests
-
-### Security
-
-- filesystem sandbox restrictions
-- PostgreSQL read-only SQL validation
-- Docker GET-only capability surface
-- MCP allowlists
-- private-network validation
-- approval-compatible tool permissions
-
-## [0.3.0]
-
-### Added
-
-- research workflow
-- ranked evidence pipeline
-- source deduplication
-- web search through DDGS
-- research metadata and confidence handling
-
-## [0.2.0]
-
-### Added
-
-- Human Review persistence
-- approve and reject operations
-- workflow resume after approval
-- Prometheus metrics
-- Grafana dashboards
-- Docker Compose infrastructure
-
-## [0.1.0]
-
-### Added
-
-- FastAPI application
-- JWT authentication
-- users
-- conversations
-- messages
-- LangGraph orchestration
-- Ollama chat
-- PostgreSQL persistence
-- Qdrant integration
-- initial RAG pipeline
+Phase 5.4 integrates automatic remote delegation into the RedPA planner
+and normal Chat workflow.

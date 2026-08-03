@@ -198,6 +198,49 @@ services:
     networks:
       - redpa-network
 
+
+  a2a-coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-a2a-coordinator
+    restart: unless-stopped
+    command:
+      [
+        "python",
+        "-m",
+        "app.a2a_protocol.server",
+      ]
+    environment:
+      A2A_HOST: 0.0.0.0
+      A2A_PORT: 8050
+      A2A_PUBLIC_URL: http://a2a-coordinator:8050
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai}
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    ports:
+      - "8050:8050"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8050/health', timeout=3)",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - redpa-network
+
   backend:
     build:
       context: .
