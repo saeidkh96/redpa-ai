@@ -19,6 +19,8 @@ Production-ready multi-agent orchestration, Model Context Protocol (MCP), Agent-
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![Redis](https://img.shields.io/badge/Redis-Cache-red)
+![Qdrant](https://img.shields.io/badge/Qdrant-VectorDB-orange)
 
 </p>
 
