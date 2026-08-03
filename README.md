@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.png" alt="RedPA AI Logo" width="220">
+  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
 </p>
 
 <h1 align="center">RedPA AI</h1>
@@ -8,21 +8,35 @@
   <strong>Enterprise Agentic AI Platform</strong>
 </p>
 
-# RedPA AI
+<p align="center">
+Production-ready multi-agent orchestration, Model Context Protocol (MCP), Agent-to-Agent (A2A) communication, durable workflows, semantic memory, and enterprise observability.
+</p>
+
+<p align="center">
+
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+</p>
+
+---
 
 > **A production-oriented Agentic AI platform for multi-agent orchestration, enterprise tool execution, durable workflows, semantic memory, and distributed observability.**
 
 RedPA AI is a modular backend platform for building real-world Agentic AI systems. It combines planner-based routing, Retrieval-Augmented Generation (RAG), Model Context Protocol (MCP), Agent-to-Agent (A2A) communication, Human-in-the-Loop approval, durable workflow execution, long-term Agent Memory, background jobs, and production-grade observability in one extensible architecture.
 
-The project is designed as an engineering platform rather than a single LLM wrapper. Its components are separated into API, orchestration, tool, memory, workflow, background runtime, monitoring, and deployment layers so they can evolve independently.
+The platform is designed as an engineering foundation rather than a single LLM wrapper. Its architecture separates APIs, orchestration, tools, workflows, memory, background processing, monitoring, and deployment, allowing every subsystem to evolve independently while remaining production-ready.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Key Capabilities](#key-capabilities)
 - [Architecture](#architecture)
+- [Key Capabilities](#key-capabilities)
 - [System Components](#system-components)
 - [Technology Stack](#technology-stack)
 - [Repository Structure](#repository-structure)
@@ -47,6 +61,24 @@ The project is designed as an engineering platform rather than a single LLM wrap
 ---
 
 ## Overview
+
+RedPA AI is an enterprise-oriented Agentic AI platform that enables intelligent agents to collaborate, use external tools, execute long-running workflows, maintain semantic memory, and safely interact with production systems. It combines modern AI engineering practices with backend infrastructure to build reliable, scalable, and observable AI applications.
+
+---
+
+## Architecture
+
+<p align="center">
+  <img
+    src="docs/images/architecture.png"
+    alt="RedPA AI Architecture"
+    width="100%"
+  />
+</p>
+
+---
+
+## Key Capabilities
 
 Modern AI applications need more than prompt execution.
 
