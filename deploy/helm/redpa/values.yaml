@@ -1,0 +1,44 @@
+replicaCount: 2
+
+image:
+  repository: redpa-ai-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 70
+
+env:
+  ENVIRONMENT: production
+  REDIS_URL: redis://redpa-redis:6379/0
+  QDRANT_URL: http://redpa-qdrant:6333
+  OTEL_ENABLED: "true"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  REQUIRE_HTTPS: "true"
+  ALLOWED_HOSTS: redpa.example.com
+
+secretEnv:
+  DATABASE_URL: ""
+  SECRET_KEY: ""
+  API_KEY_PEPPER: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  host: redpa.example.com
+  tlsSecretName: redpa-tls

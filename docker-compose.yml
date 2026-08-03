@@ -1,4 +1,225 @@
 services:
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: redpa-otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - tempo
+    networks:
+      - redpa-network
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: redpa-tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo.yaml:ro
+      - redpa-tempo-data:/var/tempo
+    ports:
+      - "3200:3200"
+    networks:
+      - redpa-network
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: redpa-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: ["redpa-redis-data:/data"]
+    networks: ["redpa-network"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  background-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-background-worker
+    command: ["python", "-m", "app.background_jobs.worker"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: ["redpa-network"]
+
+  background-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-background-scheduler
+    command: ["python", "-m", "app.background_jobs.scheduler"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: ["redpa-network"]
+
+
+  postgres-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-postgres-agent
+    command: ["python", "-m", "app.specialist_agents.postgres_agent"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      POSTGRES_AGENT_HOST: 0.0.0.0
+      POSTGRES_AGENT_PORT: 8062
+      POSTGRES_AGENT_PUBLIC_URL: http://postgres-agent:8062
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
+    ports:
+      - "8062:8062"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - redpa-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8062/health', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  docker-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-docker-agent
+    command: ["python", "-m", "app.specialist_agents.docker_agent"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      DOCKER_AGENT_HOST: 0.0.0.0
+      DOCKER_AGENT_PORT: 8063
+      DOCKER_AGENT_PUBLIC_URL: http://docker-agent:8063
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8063:8063"
+    networks:
+      - redpa-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8063/health', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  filesystem-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-filesystem-agent
+    command: ["python", "-m", "app.specialist_agents.filesystem_agent"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      FILESYSTEM_AGENT_HOST: 0.0.0.0
+      FILESYSTEM_AGENT_PORT: 8064
+      FILESYSTEM_AGENT_PUBLIC_URL: http://filesystem-agent:8064
+      FILESYSTEM_AGENT_ROOT: /app
+    ports:
+      - "8064:8064"
+    networks:
+      - redpa-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8064/health', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  github-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-github-agent
+    command: ["python", "-m", "app.specialist_agents.github_agent"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      GITHUB_AGENT_HOST: 0.0.0.0
+      GITHUB_AGENT_PORT: 8065
+      GITHUB_AGENT_PUBLIC_URL: http://github-agent:8065
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    ports:
+      - "8065:8065"
+    networks:
+      - redpa-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8065/health', timeout=5)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+  research-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-research-agent
+    command:
+      - python
+      - -m
+      - app.research_agent.server
+    working_dir: /app/backend
+    environment:
+      RESEARCH_AGENT_HOST: 0.0.0.0
+      RESEARCH_AGENT_PORT: 8061
+      RESEARCH_AGENT_PUBLIC_URL: http://research-agent:8061
+      PYTHONPATH: /app/backend
+    ports:
+      - "8061:8061"
+    networks:
+      - redpa-network
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >
+          import urllib.request;
+          urllib.request.urlopen(
+              'http://localhost:8061/health',
+              timeout=5
+          )
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   postgres:
     image: postgres:17-alpine
     container_name: redpa-postgres
@@ -253,7 +474,7 @@ services:
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
       APP_VERSION: ${APP_VERSION:-0.2.0}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
+      ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
       HOST: ${HOST:-0.0.0.0}
@@ -273,6 +494,11 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       STORAGE_DIRECTORY: ${STORAGE_DIRECTORY:-/app/backend/storage}
       MCP_SERVERS_CONFIG_PATH: ${MCP_SERVERS_CONFIG_PATH:-config/mcp_servers.json}
+      REDIS_URL: redis://redis:6379/0
+      REQUIRE_HTTPS: "false"
+      ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      OTEL_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
       - "8000:8000"
     volumes:
@@ -289,6 +515,8 @@ services:
       postgres-mcp:
         condition: service_healthy
       docker-mcp:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -333,6 +561,8 @@ services:
       - redpa-network
 
 volumes:
+  redpa-tempo-data:
+  redpa-redis-data:
   redpa-postgres-data:
   redpa-qdrant-data:
   redpa-prometheus-data:

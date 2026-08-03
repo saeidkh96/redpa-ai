@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class APIErrorBody(BaseModel):
+    error_id: str
+    code: str
+    message: str
+    details: dict[
+        str,
+        Any,
+    ] = Field(
+        default_factory=dict,
+    )
+    request_id: str | None = None
+    correlation_id: str | None = None
+    path: str
+    method: str
+
+
+class APIErrorResponse(BaseModel):
+    error: APIErrorBody

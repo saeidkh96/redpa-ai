@@ -53,3 +53,5 @@ frontend/node_modules/
 # Storage
 backend/storage/*
 !backend/storage/.gitkeep
+*.pyc
+release-check-report.json

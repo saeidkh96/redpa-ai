@@ -2,97 +2,138 @@
 
 ## Overview
 
-RedPA AI is a modular Agentic AI platform built around FastAPI, LangGraph, PostgreSQL, Qdrant, MCP, and the Google Agent-to-Agent protocol.
-
-## Main Layers
-
-- **API:** authentication, validation, dependency injection, and OpenAPI.
-- **Orchestration:** planner, LangGraph routes, interruption, resume, and response assembly.
-- **A2A:** Agent Registry, Agent Cards, protocol server, Remote Agents, delegation, Multi-Agent execution, approval, and metrics.
-- **Services:** Chat, RAG, Research, Human Review, MCP, tools, and A2A delegation.
-- **Persistence:** PostgreSQL models, repositories, migrations, messages, and reviews.
-- **Tooling:** internal tools and isolated read-only MCP servers.
-
-## Supported Routes
-
-```text
-chat
-rag
-research
-a2a
-tool
-sql
-human_review
-```
+RedPA AI is a production-oriented Agentic AI platform built around FastAPI,
+LangGraph-style orchestration, PostgreSQL, Qdrant, Redis, MCP, A2A specialist
+agents, background jobs, human approval, durable workflows, and distributed
+observability.
 
 ## High-Level Flow
 
-```mermaid
-flowchart TD
-    C[Client] --> API[FastAPI]
-    API --> G[LangGraph Orchestrator]
-    G --> P[Planner]
-    P --> CHAT[Chat]
-    P --> RAG[RAG]
-    P --> RES[Research]
-    P --> TOOL[Tool Runtime]
-    P --> REVIEW[Human Review]
-    P --> A2A[A2A Runtime]
-    TOOL --> MCP[MCP Runtime]
-    MCP --> FS[Filesystem MCP]
-    MCP --> GH[GitHub MCP]
-    MCP --> PG[PostgreSQL MCP]
-    MCP --> DK[Docker MCP]
-    A2A --> RR[Remote Agent Registry]
-    RR --> COORD[Coordinator Agent]
-    COORD --> DISC[Capability Discovery]
-    COORD --> MULTI[Multi-Agent Workflow]
-    MULTI --> APPROVAL[Approval Gate]
-    MULTI --> AGG[Result Aggregation]
-    G --> DB[(PostgreSQL)]
-    RAG --> Q[Qdrant]
-    CHAT --> O[Ollama]
-    RES --> W[Web Search]
-    G --> M[Prometheus]
-    M --> GF[Grafana]
+```text
+Client
+  |
+  v
+FastAPI API Gateway
+  |
+  +--> Authentication and Users
+  |
+  +--> Conversations and Messages
+  |
+  +--> Planner / Router
+  |      |
+  |      +--> Chat Agent
+  |      +--> RAG Agent
+  |      +--> Research Agent
+  |      +--> Tool Agent
+  |      +--> Human Review
+  |
+  +--> MCP Tool Layer
+  |      |
+  |      +--> Filesystem MCP
+  |      +--> GitHub MCP
+  |      +--> PostgreSQL MCP
+  |      +--> Docker MCP
+  |
+  +--> A2A Coordinator
+  |      |
+  |      +--> Research Specialist
+  |      +--> PostgreSQL Specialist
+  |      +--> Docker Specialist
+  |      +--> Filesystem Specialist
+  |      +--> GitHub Specialist
+  |
+  +--> Durable Distributed Workflows
+  |
+  +--> Agent Memory
+  |      |
+  |      +--> PostgreSQL Long-Term Memory
+  |      +--> Qdrant Semantic Memory
+  |      +--> Shared Agent Memory
+  |
+  +--> Background Runtime
+         |
+         +--> Redis
+         +--> Worker
+         +--> Scheduler
+         +--> Retry Queue
+         +--> Dead-Letter Queue
 ```
 
-## A2A Lifecycle
+## Data Stores
+
+### PostgreSQL
+
+Used for:
+
+- users;
+- conversations;
+- messages;
+- reviews;
+- durable workflows;
+- workflow subtasks;
+- background jobs;
+- long-term Agent Memory.
+
+### Qdrant
+
+Used for:
+
+- document embeddings;
+- RAG retrieval;
+- semantic Agent Memory search.
+
+### Redis
+
+Used for:
+
+- distributed cache;
+- rate limiting;
+- idempotency responses;
+- Worker and Scheduler heartbeats.
+
+## Observability
 
 ```text
-User request
-  → deterministic A2A intent
-  → a2a LangGraph node
-  → Remote Agent Registry
-  → Agent Card ranking
-  → SendMessageRequest
-  → JSON-RPC remote task
-  → completed task and artifact
-  → persisted Chat response
+Backend and Agents
+      |
+      +--> Prometheus Metrics
+      |
+      +--> OpenTelemetry Traces
+                |
+                v
+       OpenTelemetry Collector
+                |
+                v
+              Tempo
 ```
 
-## Multi-Agent Lifecycle
+Grafana can use Prometheus for metrics and Tempo for distributed traces.
 
-```text
-Request
-  → approval policy
-  → subtask generation
-  → bounded parallel delegation
-  → per-subtask results
-  → aggregation
-  → metrics
-```
+## Reliability
 
-## Security Boundaries
+The platform includes:
 
-- JWT and current-user boundaries
-- deterministic route and safety rules
-- read-only MCP capabilities
-- validated Remote Agent URLs and Agent Cards
-- bounded timeouts
-- no sensitive distributed execution before approval
-- observable task metadata and Prometheus metrics
+- durable workflow persistence;
+- workflow resumption;
+- human approval;
+- idempotent request handling;
+- background retries;
+- dead-letter jobs;
+- readiness and liveness endpoints;
+- dependency health checks;
+- slow-request detection;
+- slow-query detection.
 
-## Current Limitation
+## Security
 
-The Phase 5 Coordinator currently focuses on capability discovery and coordination. Independent specialist Remote Agent services that directly execute Research, Docker, SQL, or other tasks are planned.
+The platform includes:
+
+- JWT authentication;
+- CORS configuration;
+- API-key hashing foundation;
+- security response headers;
+- production environment validation;
+- rate limiting;
+- idempotency conflict detection;
+- Kubernetes non-root security context;
+- Secret resources and HTTPS-ready ingress.

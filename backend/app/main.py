@@ -6,11 +6,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.application_setup import configure_application_runtime
 from app.database.session import (
     check_database_connection,
     close_database_connection,
 )
+from app.middleware.idempotency import RedisIdempotencyMiddleware
+from app.middleware.rate_limit import RedisRateLimitMiddleware
+from app.middleware.security_headers import SecurityHeadersMiddleware
+from app.middleware.trace_headers import TraceHeadersMiddleware
 from app.monitoring.metrics import PrometheusMetricsMiddleware
+from app.performance import PerformanceMonitoringMiddleware, register_sql_performance_monitor
+from app.observability.tracing import configure_tracing
+from app.security_hardening.config import SecuritySettings
 
 
 @asynccontextmanager
@@ -37,6 +45,8 @@ def create_application() -> FastAPI:
     Create and configure the FastAPI application.
     """
 
+    security_settings = SecuritySettings.load()
+
     application = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
@@ -48,6 +58,23 @@ def create_application() -> FastAPI:
     )
 
     application.add_middleware(
+        SecurityHeadersMiddleware,
+        require_https=security_settings.require_https,
+    )
+
+    application.add_middleware(
+        TraceHeadersMiddleware,
+    )
+
+    application.add_middleware(
+        RedisRateLimitMiddleware,
+    )
+
+    application.add_middleware(
+        RedisIdempotencyMiddleware,
+    )
+
+    application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allowed_origins,
         allow_credentials=True,
@@ -56,7 +83,16 @@ def create_application() -> FastAPI:
         expose_headers=[
             "X-Request-ID",
             "X-Process-Time-Ms",
+            "X-Trace-ID",
+            "X-Span-ID",
+            "X-RateLimit-Limit",
+            "X-RateLimit-Remaining",
+            "X-Idempotency-Replayed",
         ],
+    )
+
+    application.add_middleware(
+        PerformanceMonitoringMiddleware,
     )
 
     application.add_middleware(
@@ -67,9 +103,20 @@ def create_application() -> FastAPI:
         },
     )
 
+
+    configure_application_runtime(application)
     application.include_router(
         api_router,
         prefix=settings.api_v1_prefix,
+    )
+
+
+    from app.database.session import engine as database_engine
+    register_sql_performance_monitor(database_engine)
+    configure_tracing(
+        application,
+        service_name="redpa-backend",
+        service_version=settings.app_version,
     )
 
     return application

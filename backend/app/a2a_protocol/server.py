@@ -14,13 +14,13 @@ from starlette.responses import JSONResponse
 from starlette.routing import Route
 
 from app.a2a_protocol.card import build_public_agent_card
-from app.a2a_protocol.executor import RedPACoordinatorExecutor
+from app.a2a_protocol.specialist_executor import RedPACoordinatorDelegatingExecutor
 
 
 public_agent_card = build_public_agent_card()
 
 request_handler = DefaultRequestHandler(
-    agent_executor=RedPACoordinatorExecutor(),
+    agent_executor=RedPACoordinatorDelegatingExecutor(),
     task_store=InMemoryTaskStore(),
     agent_card=public_agent_card,
 )
