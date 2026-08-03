@@ -95,4 +95,4 @@ Current release: `v1.0.0`
 
 MIT License
 
-Copyright (c) 2026 Saeed Khalilian
+Copyright (c) 2026 Saeid Khalilian
