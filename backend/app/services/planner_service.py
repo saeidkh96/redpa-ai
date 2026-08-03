@@ -39,6 +39,7 @@ PLANNER_JSON_SCHEMA: dict[str, Any] = {
                 "chat",
                 "rag",
                 "research",
+                "a2a",
                 "tool",
                 "sql",
                 "human_review",
@@ -83,6 +84,13 @@ ROUTE_PATTERNS: dict[
         r"(document|documents|file|files|pdf|pdfs)\b",
         r"\bknowledge[\s-]?base\b",
         r"\bvector\s+(database|store)\b",
+    ),
+    "a2a": (
+        r"\bvia\s+a2a\b",
+        r"\buse\s+(the\s+)?remote\s+agent\b",
+        r"\bask\s+(the\s+)?remote\s+(agent|coordinator)\b",
+        r"\bdelegate\s+.+\s+to\s+(the\s+)?remote\s+agent\b",
+        r"\bremote\s+a2a\b",
     ),
     "research": (
         r"^\s*research\b",
@@ -159,10 +167,27 @@ ROUTE_PATTERNS: dict[
 
 ROUTE_PRIORITY: tuple[AgentRoute, ...] = (
     "human_review",
+    "a2a",
     "tool",
     "sql",
     "rag",
     "research",
+)
+
+
+DETERMINISTIC_A2A_PATTERNS: tuple[str, ...] = (
+    r"\bvia\s+a2a\b",
+    r"\buse\s+(the\s+)?remote\s+agent\b",
+    r"\bask\s+(the\s+)?remote\s+(agent|coordinator)\b",
+    r"\bdelegate\s+.+\s+to\s+(the\s+)?remote\s+agent\b",
+    r"\bremote\s+a2a\b",
+    r"\bwhich\s+agent\s+can\b",
+    r"\bwhat\s+agent\s+can\b",
+    r"\bfind\s+(an|the)\s+agent\s+for\b",
+    r"\bfind\s+(an|the)\s+agent\s+that\b",
+    r"\bwho\s+can\s+handle\b",
+    r"\bshow\s+available\s+agents\b",
+    r"\blist\s+available\s+agents\b",
 )
 
 
@@ -224,6 +249,35 @@ class PlannerService:
 
         started_at = time.perf_counter()
 
+        deterministic_plan = cls._create_deterministic_plan(
+            user_message=cleaned_message,
+        )
+
+        if deterministic_plan is not None:
+            latency_ms = (
+                time.perf_counter() - started_at
+            ) * 1000
+
+            logger.info(
+                "Deterministic planner selected route "
+                "| route=%s confidence=%.2f signals=%s",
+                deterministic_plan.route,
+                deterministic_plan.confidence,
+                deterministic_plan.signals,
+            )
+
+            return PlannerExecutionResult(
+                plan=deterministic_plan,
+                provider="rule_based",
+                model="deterministic-router-v2",
+                fallback_used=False,
+                error=None,
+                latency_ms=round(
+                    latency_ms,
+                    2,
+                ),
+            )
+
         mcp_plan_result = await MCPPlannerService.create_plan(
             cleaned_message,
         )
@@ -247,35 +301,6 @@ class PlannerService:
                 plan=mcp_plan,
                 provider="rule_based",
                 model="mcp-capability-router-v1",
-                fallback_used=False,
-                error=None,
-                latency_ms=round(
-                    latency_ms,
-                    2,
-                ),
-            )
-
-        deterministic_plan = cls._create_deterministic_plan(
-            user_message=cleaned_message,
-        )
-
-        if deterministic_plan is not None:
-            latency_ms = (
-                time.perf_counter() - started_at
-            ) * 1000
-
-            logger.info(
-                "Deterministic planner selected route "
-                "| route=%s confidence=%.2f signals=%s",
-                deterministic_plan.route,
-                deterministic_plan.confidence,
-                deterministic_plan.signals,
-            )
-
-            return PlannerExecutionResult(
-                plan=deterministic_plan,
-                provider="rule_based",
-                model="deterministic-router-v2",
                 fallback_used=False,
                 error=None,
                 latency_ms=round(
@@ -359,6 +384,27 @@ class PlannerService:
         normalized_message = cls._normalize_text(
             user_message,
         )
+
+        a2a_signal = cls._match_first_pattern(
+            value=normalized_message,
+            patterns=DETERMINISTIC_A2A_PATTERNS,
+        )
+
+        if a2a_signal is not None:
+            return PlannerResult(
+                route="a2a",
+                confidence=1.0,
+                reasoning=(
+                    "Selected the a2a route because the "
+                    "request explicitly asks for remote A2A "
+                    "delegation."
+                ),
+                signals=[
+                    a2a_signal,
+                    "a2a",
+                    "remote delegation",
+                ],
+            )
 
         research_signal = cls._match_first_pattern(
             value=normalized_message,

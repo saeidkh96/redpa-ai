@@ -1,30 +1,27 @@
-# Phase 5.3 Changelog
+# Phase 5.6 + 5.7 Changelog
 
-## Added
+## Multi-Agent Workflow
 
-- remote A2A Agent Registry;
-- remote Agent Card resolution;
-- official A2A Client creation;
-- non-streaming SendMessageRequest delegation;
-- protobuf response serialization;
-- delegation timeout;
-- remote-agent registration API;
-- remote-agent listing API;
-- remote Agent Card API;
-- remote delegation API;
-- remote-agent removal API;
-- validation and registry tests.
+- automatic subtask generation;
+- explicit subtask support;
+- concurrent A2A execution;
+- parallelism limits;
+- workflow timeout;
+- per-subtask remote-agent selection;
+- result aggregation;
+- partial-failure reporting.
 
-## Official SDK Flow
+## Metrics
 
-- A2ACardResolver;
-- create_client;
-- ClientConfig;
-- new_text_message;
-- SendMessageRequest;
-- send_message async iterator.
+- workflow request counter;
+- subtask counter;
+- workflow duration histogram;
+- subtask duration histogram;
+- approval-required counter.
 
-## Next
+## Human Review Gate
 
-Phase 5.4 integrates automatic remote delegation into the RedPA planner
-and normal Chat workflow.
+- deterministic high-risk detection;
+- approval-required response;
+- approved retry support;
+- no remote execution before approval.

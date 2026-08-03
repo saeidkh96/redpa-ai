@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.multi_agents import router as multi_agents_router
 from app.api.v1.remote_agents import router as remote_agents_router
 from app.api.v1.agents import router as agents_router
 from app.api.v1.auth import router as auth_router
@@ -19,6 +20,7 @@ from app.api.v1.mcp import router as mcp_router
 from app.api.v1.unified_tools import router as unified_tools_router
 
 api_router = APIRouter()
+api_router.include_router(multi_agents_router)
 api_router.include_router(remote_agents_router)
 api_router.include_router(agents_router)
 

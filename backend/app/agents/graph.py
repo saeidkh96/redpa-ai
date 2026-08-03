@@ -1,6 +1,7 @@
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
+from app.agents.nodes.a2a import a2a_node
 from app.agents.nodes.capability_unavailable import (
     capability_unavailable_node,
 )
@@ -43,6 +44,11 @@ def create_agent_graph() -> CompiledStateGraph:
     )
 
     graph_builder.add_node(
+        "a2a",
+        a2a_node,
+    )
+
+    graph_builder.add_node(
         "tool",
         tool_node,
     )
@@ -74,6 +80,7 @@ def create_agent_graph() -> CompiledStateGraph:
             "chat": "chat",
             "rag": "rag",
             "research": "research",
+            "a2a": "a2a",
             "tool": "tool",
             "human_review": "human_review",
             "capability_unavailable": (
@@ -94,6 +101,11 @@ def create_agent_graph() -> CompiledStateGraph:
 
     graph_builder.add_edge(
         "research",
+        "response",
+    )
+
+    graph_builder.add_edge(
+        "a2a",
         "response",
     )
 

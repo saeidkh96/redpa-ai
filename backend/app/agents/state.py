@@ -5,6 +5,7 @@ AgentRoute = Literal[
     "chat",
     "rag",
     "research",
+    "a2a",
     "tool",
     "sql",
     "human_review",

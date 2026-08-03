@@ -18,6 +18,7 @@ RESUMABLE_ROUTES: tuple[AgentRoute, ...] = (
     "chat",
     "rag",
     "research",
+    "a2a",
     "tool",
     "sql",
 )
