@@ -1,0 +1,12 @@
+# Run after VERIFY_V2_RELEASE.ps1 and manual checklist pass.
+
+git status
+git add .
+git commit -m "release: prepare RedPA AI v2.0.0"
+git push
+
+powershell -ExecutionPolicy Bypass -File .\BUILD_V2_RELEASE.ps1
+
+# After inspecting the archive:
+# git tag -a v2.0.0 -m "RedPA AI v2.0.0"
+# git push origin v2.0.0
