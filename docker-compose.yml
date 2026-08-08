@@ -521,6 +521,24 @@ services:
     networks:
       - redpa-network
 
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: redpa-ai-frontend
+    container_name: redpa-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_REDPA_API_URL: ${NEXT_PUBLIC_REDPA_API_URL:-http://localhost:8000}
+    ports:
+      - "3001:3001"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - redpa-network
+  
   prometheus:
     image: prom/prometheus:latest
     container_name: redpa-prometheus
