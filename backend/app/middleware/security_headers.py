@@ -59,11 +59,12 @@ class SecurityHeadersMiddleware(
             "Cross-Origin-Resource-Policy": "same-site",
             "Content-Security-Policy": (
                 "default-src 'self'; "
-                "img-src 'self' data:; "
-                "style-src 'self' 'unsafe-inline'; "
-                "script-src 'self' 'unsafe-inline'; "
-                "connect-src 'self'"
-            ),
+                "img-src 'self' data: https://fastapi.tiangolo.com; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "connect-src 'self'; "
+                "font-src 'self' https://cdn.jsdelivr.net data:"
+),
         }
 
         if self.require_https:
