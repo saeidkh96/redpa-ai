@@ -1,47 +1,28 @@
-```{=html}
 <p align="center">
-```
-`<img src="docs/images/logo.png" width="220" alt="RedPA AI">`{=html}
-```{=html}
+  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
 </p>
-```
-```{=html}
-<h1 align="center">
-```
-RedPA AI
-```{=html}
-</h1>
-```
-```{=html}
+
+<h1 align="center">RedPA AI</h1>
+
 <p align="center">
-```
-`<strong>`{=html}Enterprise Agentic AI Platform`</strong>`{=html}
-```{=html}
+  <strong>Enterprise Agentic AI Platform</strong>
 </p>
-```
-```{=html}
+
 <p align="center">
-```
-Production-ready multi-agent orchestration, Model Context Protocol
-(MCP), Agent-to-Agent (A2A) communication, durable workflows, semantic
-memory, and enterprise observability.
-```{=html}
+Production-oriented multi-agent orchestration, MCP tool execution, A2A communication, durable workflows, semantic memory, human approval, and distributed observability.
 </p>
-```
-```{=html}
+
 <p align="center">
-```
+
 ![Python](https://img.shields.io/badge/Python-3.13-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)
+![Next.js](https://img.shields.io/badge/Next.js-Control_Center-black)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
+![Release](https://img.shields.io/badge/Release-v2.0.0-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Redis](https://img.shields.io/badge/Redis-Cache-red)
-![Qdrant](https://img.shields.io/badge/Qdrant-VectorDB-orange)
 
-```{=html}
 </p>
-```
 
 ------------------------------------------------------------------------
 
@@ -138,15 +119,15 @@ MCP servers**: Docker, Filesystem, GitHub, and PostgreSQL.
 
 ## Architecture
 
-```{=html}
+``
 <p align="center">
 ```
 `<img
     src="docs/images/architecture.png"
     alt="RedPA AI Architecture"
     width="100%"
-  />`{=html}
-```{=html}
+  />
+``
 </p>
 ```
 
