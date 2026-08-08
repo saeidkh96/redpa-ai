@@ -35,13 +35,6 @@ type Review = {
   requested_action?: string | null;
   request_content?: string | null;
   reviewer_feedback?: string | null;
-  action_payload?: {
-    resume_completed?: boolean;
-    resume_completed_at?: string | null;
-    resumed_assistant_message_id?: string | null;
-    resumed_route?: string | null;
-    [key: string]: unknown;
-  } | null;
   created_at: string;
 };
 
@@ -192,25 +185,7 @@ export default function Dashboard() {
       await loadReviews();
       await refresh();
     } catch (error) {
-      const detail =
-        error instanceof Error ? error.message : "Review action failed";
-
-      // Resume is intentionally idempotent from the UI perspective.
-      // The backend returns 409 when an approved review was already resumed.
-      // Treat that state as completed and refresh the review instead of
-      // presenting it as an operational failure to the user.
-      if (
-        action === "resume" &&
-        detail.toLowerCase().includes("already") &&
-        detail.toLowerCase().includes("resum")
-      ) {
-        setMessage("This approved workflow has already been resumed.");
-        await loadReviews();
-        await refresh();
-        return;
-      }
-
-      setMessage(detail);
+      setMessage(error instanceof Error ? error.message : "Review action failed");
     }
   };
 
@@ -289,22 +264,7 @@ export default function Dashboard() {
 
         <section className="panel" id="reviews">
           <div className="panelTitle"><div><p className="eyebrow">PHASE 10.4</p><h2>Human Review Console</h2></div>{token && <button className="ghost" onClick={() => { localStorage.removeItem("redpa_access_token"); setToken(""); }}>Sign out</button>}</div>
-          {!token ? <form className="login" onSubmit={login}><div><strong>Sign in to protected review actions</strong><p>Uses the existing JWT login endpoint.</p></div><input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><button>Sign in</button></form> : <div className="reviewGrid">{(reviews?.items ?? []).map(review => <article className="reviewCard" key={review.id}><div className="workflowTop"><span className={`badge ${tone(review.status)}`}>{review.status}</span><small>{when(review.created_at)}</small></div><strong>{review.requested_action || "Human Review"}</strong><p>{review.reason}</p>{review.request_content && <div className="requestBox">{review.request_content}</div>}{review.status === "pending" && <><textarea placeholder="Optional reviewer feedback" value={feedback[review.id] || ""} onChange={e => setFeedback(v => ({ ...v, [review.id]: e.target.value }))} /><div className="actions"><button className="approve" onClick={() => void reviewAction(review, "approve")}>Approve</button><button className="reject" onClick={() => void reviewAction(review, "reject")}>Reject</button></div></>}{review.status === "approved" && (
-  review.action_payload?.resume_completed ||
-  Boolean(review.action_payload?.resumed_assistant_message_id)
-    ? <div className="resumeDone">
-        <strong>Workflow resumed</strong>
-        {review.action_payload?.resumed_route && (
-          <span>Route: {review.action_payload.resumed_route}</span>
-        )}
-      </div>
-    : <button
-        className="resume"
-        onClick={() => void reviewAction(review, "resume")}
-      >
-        Resume workflow
-      </button>
-)}</article>)}{reviews && !reviews.items.length && <div className="empty">No reviews found.</div>}</div>}
+          {!token ? <form className="login" onSubmit={login}><div><strong>Sign in to protected review actions</strong><p>Uses the existing JWT login endpoint.</p></div><input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required /><input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required /><button>Sign in</button></form> : <div className="reviewGrid">{(reviews?.items ?? []).map(review => <article className="reviewCard" key={review.id}><div className="workflowTop"><span className={`badge ${tone(review.status)}`}>{review.status}</span><small>{when(review.created_at)}</small></div><strong>{review.requested_action || "Human Review"}</strong><p>{review.reason}</p>{review.request_content && <div className="requestBox">{review.request_content}</div>}{review.status === "pending" && <><textarea placeholder="Optional reviewer feedback" value={feedback[review.id] || ""} onChange={e => setFeedback(v => ({ ...v, [review.id]: e.target.value }))} /><div className="actions"><button className="approve" onClick={() => void reviewAction(review, "approve")}>Approve</button><button className="reject" onClick={() => void reviewAction(review, "reject")}>Reject</button></div></>}{review.status === "approved" && <button className="resume" onClick={() => void reviewAction(review, "resume")}>Resume workflow</button>}</article>)}{reviews && !reviews.items.length && <div className="empty">No reviews found.</div>}</div>}
         </section>
 
         <section className="panel" id="memory">
