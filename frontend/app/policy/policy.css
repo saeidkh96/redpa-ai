@@ -1,0 +1,156 @@
+.policyPage {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.policyHero,
+.policyPanelTitle {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.policyHero {
+  margin-bottom: 24px;
+}
+
+.policyHero h1,
+.policyPanel h2 {
+  margin: 4px 0 8px;
+}
+
+.policyHero p {
+  max-width: 820px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.policyMetrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.policyMetrics article,
+.policyPanel,
+.policyError {
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.policyMetrics span {
+  display: block;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.policyMetrics strong {
+  font-size: 28px;
+}
+
+.policyPanel {
+  margin-top: 18px;
+}
+
+.policyForm {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.policyForm label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.policyForm input,
+.policyForm select,
+.policyForm textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 9px;
+  padding: 10px;
+  background: transparent;
+  color: inherit;
+}
+
+.policyWide {
+  grid-column: 1 / -1;
+}
+
+.policyButton {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 9px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.policyResult {
+  margin-top: 18px;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(127, 127, 127, 0.08);
+}
+
+.policyResult div {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.policyTableWrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.policyTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.policyTable th,
+.policyTable td {
+  text-align: left;
+  padding: 11px 9px;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.18);
+  vertical-align: top;
+}
+
+.decision {
+  font-weight: 700;
+}
+
+.policyError {
+  margin-bottom: 18px;
+}
+
+@media (max-width: 900px) {
+  .policyMetrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .policyForm {
+    grid-template-columns: 1fr;
+  }
+
+  .policyWide {
+    grid-column: auto;
+  }
+
+  .policyHero {
+    flex-direction: column;
+  }
+}

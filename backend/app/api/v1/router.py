@@ -8,6 +8,8 @@ from app.api.v1.agent_memory_admin import router as agent_memory_admin_router
 from app.api.v1.agent_memory import router as agent_memory_router
 from app.api.v1.durable_workflows import router as durable_workflows_router
 from app.api.v1.distributed_agents import router as distributed_agents_router
+from app.api.v1.guardrails import router as guardrails_router
+from app.api.v1.policy_enforcement import router as policy_enforcement_router
 from fastapi import APIRouter
 
 from app.api.v1.multi_agents import router as multi_agents_router
@@ -92,4 +94,10 @@ api_router.include_router(evaluations.router)
 
 
 api_router.include_router(model_gateway.router)
+
+
+api_router.include_router(guardrails_router)
+
+
+api_router.include_router(policy_enforcement_router)
 

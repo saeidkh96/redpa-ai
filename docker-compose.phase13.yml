@@ -1,0 +1,28 @@
+services:
+  policy-service:
+    build:
+      context: ./policy-service
+      dockerfile: Dockerfile
+    image: redpa-ai-policy-service
+    container_name: redpa-policy-service
+    ports:
+      - "8090:8090"
+    networks:
+      - redpa-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O - http://localhost:8090/actuator/health | grep -q UP"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  backend:
+    environment:
+      POLICY_SERVICE_URL: http://policy-service:8090
+    depends_on:
+      policy-service:
+        condition: service_healthy
