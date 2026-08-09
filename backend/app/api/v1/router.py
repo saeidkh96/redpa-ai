@@ -1,4 +1,5 @@
-﻿from app.api.v1 import evaluations
+﻿from app.api.v1 import model_gateway
+from app.api.v1 import evaluations
 from app.api.v1.performance import router as performance_router
 from app.api.v1.platform_health import router as platform_health_router
 from app.api.v1.background_jobs import router as background_jobs_router
@@ -88,4 +89,7 @@ api_router.include_router(
 )
 
 api_router.include_router(evaluations.router)
+
+
+api_router.include_router(model_gateway.router)
 
