@@ -1,0 +1,149 @@
+.evaluation-shell {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.evaluation-hero,
+.evaluation-stats,
+.evaluation-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.evaluation-hero {
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  margin-bottom: 20px;
+}
+
+.evaluation-hero h1 {
+  margin: 4px 0 8px;
+  font-size: 34px;
+}
+
+.phase-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  opacity: .7;
+}
+
+.evaluation-notice {
+  padding: 12px 14px;
+  border: 1px solid rgba(127, 127, 127, .3);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.evaluation-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 20px;
+}
+
+.evaluation-stats article,
+.evaluation-panel,
+.evaluation-run-card {
+  border: 1px solid rgba(127, 127, 127, .25);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.evaluation-stats article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evaluation-stats strong {
+  font-size: 26px;
+}
+
+.evaluation-grid {
+  grid-template-columns: minmax(0, 1.4fr) minmax(360px, .6fr);
+}
+
+.evaluation-panel h2 {
+  margin-top: 0;
+}
+
+.evaluation-run-list {
+  display: grid;
+  gap: 12px;
+}
+
+.evaluation-run-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.evaluation-run-head > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.evaluation-run-head span,
+.evaluation-meta {
+  font-size: 13px;
+  opacity: .72;
+}
+
+.evaluation-score {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.evaluation-meta,
+.metric-chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.metric-chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(127, 127, 127, .25);
+}
+
+.metric-pass {
+  font-weight: 600;
+}
+
+.metric-fail {
+  opacity: .65;
+}
+
+.evaluation-panel textarea {
+  width: 100%;
+  min-height: 520px;
+  resize: vertical;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  box-sizing: border-box;
+  margin: 12px 0;
+}
+
+.evaluation-panel button,
+.evaluation-hero button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .evaluation-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .evaluation-grid {
+    grid-template-columns: 1fr;
+  }
+}
