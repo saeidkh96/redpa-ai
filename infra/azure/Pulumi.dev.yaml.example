@@ -1,0 +1,18 @@
+config:
+  azure-native:location: westeurope
+  redpa:environment: dev
+  redpa:location: westeurope
+  redpa:projectName: redpa
+  redpa:backendImage: ghcr.io/saeidkh96/redpa-ai-backend:latest
+  redpa:frontendImage: ghcr.io/saeidkh96/redpa-ai-frontend:latest
+  redpa:policyImage: ghcr.io/saeidkh96/redpa-ai-policy-service:latest
+  redpa:postgresAdmin: redpaadmin
+  redpa:minReplicas: "1"
+  redpa:maxReplicas: "2"
+
+# Configure secrets with Pulumi CLI instead of writing them here:
+#
+# pulumi config set --secret redpa:postgresPassword "<strong-password>"
+# pulumi config set --secret redpa:redisUrl "rediss://..."
+# pulumi config set --secret redpa:qdrantUrl "https://..."
+# pulumi config set --secret redpa:ollamaBaseUrl "https://..."

@@ -1,0 +1,6 @@
+name: redpa-ai-azure
+runtime:
+  name: python
+  options:
+    virtualenv: .venv
+description: RedPA AI Azure reference infrastructure with Pulumi
