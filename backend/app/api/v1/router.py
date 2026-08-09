@@ -1,4 +1,6 @@
-﻿from app.api.v1 import model_gateway
+﻿from app.api.v1.oauth import router as oauth_router
+from app.api.v1.tenants import router as tenants_router
+from app.api.v1 import model_gateway
 from app.api.v1 import evaluations
 from app.api.v1.performance import router as performance_router
 from app.api.v1.platform_health import router as platform_health_router
@@ -100,4 +102,9 @@ api_router.include_router(guardrails_router)
 
 
 api_router.include_router(policy_enforcement_router)
+
+
+api_router.include_router(tenants_router)
+
+api_router.include_router(oauth_router)
 

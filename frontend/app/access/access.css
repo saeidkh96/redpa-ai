@@ -1,0 +1,67 @@
+.accessPage {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.accessHero {
+  margin-bottom: 24px;
+}
+
+.accessMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.accessMetrics article,
+.accessPanel,
+.accessNotice,
+.accessCards article {
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.accessMetrics span {
+  display: block;
+  opacity: 0.7;
+}
+
+.accessMetrics strong {
+  font-size: 28px;
+}
+
+.accessPanel {
+  margin-top: 18px;
+}
+
+.accessForm {
+  display: flex;
+  gap: 10px;
+}
+
+.accessForm input {
+  flex: 1;
+}
+
+.accessForm input,
+.accessForm button,
+.accessCards button {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 9px;
+  padding: 10px;
+}
+
+.accessCards {
+  display: grid;
+  gap: 12px;
+}
+
+.accessCards article {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
