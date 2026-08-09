@@ -1,4 +1,5 @@
-﻿from app.api.v1.oauth import router as oauth_router
+﻿from app.api.v1.events import router as events_router
+from app.api.v1.oauth import router as oauth_router
 from app.api.v1.tenants import router as tenants_router
 from app.api.v1 import model_gateway
 from app.api.v1 import evaluations
@@ -107,4 +108,7 @@ api_router.include_router(policy_enforcement_router)
 api_router.include_router(tenants_router)
 
 api_router.include_router(oauth_router)
+
+
+api_router.include_router(events_router)
 

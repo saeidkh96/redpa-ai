@@ -1,0 +1,28 @@
+{
+  "project": "RedPA AI",
+  "version": "3.0.0",
+  "release_type": "portfolio-reference-platform",
+  "major_capabilities": [
+    "agentic orchestration",
+    "RAG",
+    "MCP",
+    "A2A",
+    "durable workflows",
+    "human review",
+    "agent memory",
+    "evaluation",
+    "multi-LLM model gateway",
+    "Spring Boot policy engine",
+    "DDD/C4/arc42",
+    "Azure/Pulumi reference architecture",
+    "RBAC and multi-tenancy",
+    "OAuth PKCE foundation",
+    "transactional outbox and Redis Streams",
+    "production hardening"
+  ],
+  "limitations": [
+    "Azure IaC does not imply live deployment",
+    "OAuth provider token exchange/account linking requires real credentials and persisted state/verifier",
+    "production certification is not claimed"
+  ]
+}

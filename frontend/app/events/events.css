@@ -1,0 +1,76 @@
+.eventPage {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+.eventHero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eventMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.eventMetrics article,
+.eventPanel,
+.eventNotice {
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.eventMetrics span {
+  display: block;
+  opacity: 0.7;
+}
+
+.eventMetrics strong {
+  font-size: 28px;
+}
+
+.eventPanel {
+  margin-top: 18px;
+}
+
+.eventActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eventActions input {
+  flex: 1;
+  min-width: 260px;
+}
+
+.eventActions input,
+.eventActions button,
+.eventHero button {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 9px;
+  padding: 10px;
+}
+
+.eventTableWrap {
+  overflow-x: auto;
+}
+
+.eventTable {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+}
+
+.eventTable th,
+.eventTable td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.18);
+}
