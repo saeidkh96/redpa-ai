@@ -1,110 +1,251 @@
+```{=html}
 <p align="center">
-  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
+```
+`<img src="docs/images/logo.png" width="220" alt="RedPA AI">`{=html}
+```{=html}
 </p>
-
-<h1 align="center">RedPA AI</h1>
-
+```
+```{=html}
+<h1 align="center">
+```
+RedPA AI
+```{=html}
+</h1>
+```
+```{=html}
 <p align="center">
-  <strong>Enterprise Agentic AI Platform</strong>
+```
+`<strong>`{=html}Enterprise Agentic AI Platform`</strong>`{=html}
+```{=html}
 </p>
-
+```
+```{=html}
 <p align="center">
-Production-oriented multi-agent orchestration, MCP tool execution, A2A communication, durable workflows, semantic memory, human approval, and distributed observability.
+```
+Production-oriented multi-agent orchestration, MCP tool execution, A2A
+communication, durable workflows, semantic memory, policy enforcement,
+human approval, multi-tenancy, event-driven integration, and distributed
+observability.
+```{=html}
 </p>
-
+```
+```{=html}
 <p align="center">
-
+```
 ![Python](https://img.shields.io/badge/Python-3.13-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688)
+![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688) ![Spring
+Boot](https://img.shields.io/badge/Spring_Boot-Policy_Engine-6DB33F)
 ![Next.js](https://img.shields.io/badge/Next.js-Control_Center-black)
 ![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
-![Release](https://img.shields.io/badge/Release-v2.0.0-success)
+![Redis](https://img.shields.io/badge/Redis-Streams-DC382D)
+![Azure](https://img.shields.io/badge/Azure-Pulumi-0078D4)
+![Release](https://img.shields.io/badge/Release-v3.0.0-success)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+```{=html}
 </p>
+```
 
 ------------------------------------------------------------------------
 
-> **A production-oriented Agentic AI platform for multi-agent
-> orchestration, enterprise tool execution, durable workflows, semantic
-> memory, and distributed observability.**
+> **A production-oriented Agentic AI platform for orchestrating
+> autonomous agents, enforcing policy at tool boundaries, executing
+> durable workflows, integrating enterprise systems, and operating AI
+> workloads with security, observability, and human oversight.**
 
-RedPA AI is a modular backend platform for building real-world Agentic
-AI systems. It combines planner-based routing, Retrieval-Augmented
+RedPA AI is a modular platform for building real-world Agentic AI
+systems. It combines planner-based routing, Retrieval-Augmented
 Generation (RAG), Model Context Protocol (MCP), Agent-to-Agent (A2A)
 communication, Human-in-the-Loop approval, durable workflow execution,
-long-term Agent Memory, background jobs, and production-grade
+semantic Agent Memory, model-provider abstraction, evaluation, policy
+enforcement, RBAC, multi-tenancy, event-driven messaging, and production
 observability in one extensible architecture.
 
-The platform is designed as an engineering foundation rather than a
-single LLM wrapper. Its architecture separates APIs, orchestration,
-tools, workflows, memory, background processing, monitoring, and
-deployment, allowing every subsystem to evolve independently while
-remaining production-ready.
+The project is designed as an engineering platform rather than a single
+LLM wrapper. APIs, orchestration, agents, tools, policy, workflows,
+memory, messaging, observability, identity, and infrastructure are
+separated so that each subsystem can evolve independently.
 
 ------------------------------------------------------------------------
 
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [What v3 Adds](#what-v3-adds)
+-   [Control Center](#control-center)
 -   [Architecture](#architecture)
 -   [Key Capabilities](#key-capabilities)
--   [System Components](#system-components)
--   [Technology Stack](#technology-stack)
--   [Repository Structure](#repository-structure)
--   [Quick Start](#quick-start)
--   [Configuration](#configuration)
--   [API Overview](#api-overview)
+-   [Policy and Guardrails](#policy-and-guardrails)
+-   [Evaluation and Model Gateway](#evaluation-and-model-gateway)
+-   [Access Control and
+    Multi-tenancy](#access-control-and-multi-tenancy)
+-   [Event-driven Architecture](#event-driven-architecture)
 -   [MCP Integration](#mcp-integration)
 -   [A2A Multi-Agent System](#a2a-multi-agent-system)
 -   [Durable Workflows](#durable-workflows)
 -   [Human-in-the-Loop](#human-in-the-loop)
 -   [Agent Memory](#agent-memory)
--   [Background Jobs](#background-jobs)
 -   [Observability](#observability)
+-   [Architecture Governance](#architecture-governance)
+-   [Cloud and Infrastructure](#cloud-and-infrastructure)
 -   [Security](#security)
--   [Health and Performance](#health-and-performance)
--   [Deployment](#deployment)
--   [Testing and CI](#testing-and-ci)
--   [Release Status](#release-status)
+-   [Technology Stack](#technology-stack)
+-   [Repository Structure](#repository-structure)
+-   [Quick Start](#quick-start)
+-   [API Overview](#api-overview)
+-   [Testing and Verification](#testing-and-verification)
+-   [Release](#release)
 -   [Roadmap](#roadmap)
+-   [Engineering Highlights](#engineering-highlights)
 -   [License](#license)
 
 ------------------------------------------------------------------------
 
 ## Overview
 
-RedPA AI is an enterprise-oriented Agentic AI platform that enables
-intelligent agents to collaborate, use external tools, execute
-long-running workflows, maintain semantic memory, and safely interact
-with production systems. It combines modern AI engineering practices
-with backend infrastructure to build reliable, scalable, and observable
-AI applications.
+RedPA AI provides an end-to-end foundation for production-oriented
+Agentic AI applications.
+
+The platform can:
+
+-   coordinate multiple agents;
+-   route tasks through structured planning;
+-   retrieve internal knowledge with RAG;
+-   discover and execute MCP tools;
+-   delegate work to remote A2A specialist agents;
+-   pause risky actions for human approval;
+-   persist and resume long-running workflows;
+-   maintain semantic and structured agent memory;
+-   evaluate model and workflow quality;
+-   route requests through a model gateway;
+-   enforce policy before internal-tool and MCP execution;
+-   isolate tenants and enforce tenant roles;
+-   publish domain events through a transactional outbox;
+-   deliver events through Redis Streams;
+-   expose metrics, logs, traces, health, and performance data;
+-   deploy locally with Docker or target Azure through Pulumi.
 
 ------------------------------------------------------------------------
 
-## RedPA AI v2 Control Center
+## What v3 Adds
 
-RedPA AI v2.0.0 adds an operator-facing web Control Center for
-inspecting and operating the platform from one interface.
+RedPA AI v3 extends the v2 platform with an enterprise governance and
+integration layer.
 
-The Control Center includes:
+### Evaluation
 
--   **Agent Control Center** --- agent registry and capability discovery
--   **Durable Workflow Visualizer** --- persisted workflows, subtasks,
-    execution state, and aggregated results
--   **Human Review Console** --- approve, reject, and resume
-    approval-gated workflows
--   **Agent Memory Explorer** --- inspect and semantically search stored
-    memories
--   **MCP & Tool Console** --- authenticated MCP registry, tool catalog,
-    and safe tool execution
--   **Observability & Operations** --- dependency health, background
-    runtime, metrics, and performance
--   **Security & Production Readiness** --- security controls and
-    release-gate visibility
--   **V2 Release Readiness** --- platform and frontend release status
+-   evaluation datasets and runs;
+-   reusable evaluation metrics;
+-   persisted evaluation results;
+-   evaluation APIs;
+-   evaluation dashboard foundation.
+
+### Model Gateway
+
+-   centralized model access;
+-   model-provider abstraction;
+-   model configuration;
+-   usage and cost visibility foundation;
+-   gateway-level routing and observability.
+
+### Policy Engine
+
+-   dedicated Spring Boot policy service;
+-   deterministic `ALLOW`, `REVIEW`, and `DENY` decisions;
+-   risk classification;
+-   matched policy rules;
+-   Human Review bridge;
+-   guarded internal-tool boundary;
+-   guarded MCP boundary;
+-   persistent policy audit events;
+-   policy metrics;
+-   Policy Control Center.
+
+### Architecture Governance
+
+-   Domain-Driven Design guidance;
+-   bounded contexts;
+-   Clean Architecture rules;
+-   SOLID guidance;
+-   Architecture Decision Records;
+-   C4 documentation;
+-   arc42 architecture documentation;
+-   automated architecture contract tests.
+
+### Cloud Architecture
+
+-   Azure reference architecture;
+-   Pulumi Python infrastructure;
+-   Azure Container Apps design;
+-   Azure Database for PostgreSQL design;
+-   Azure Key Vault integration design;
+-   Azure Container Registry;
+-   cloud security guidance;
+-   cost guidance;
+-   Pulumi preview CI workflow.
+
+### Identity and Tenancy
+
+-   tenant/workspace model;
+-   tenant memberships;
+-   role-based access-control foundation;
+-   tenant isolation foundation;
+-   OAuth provider discovery;
+-   OAuth PKCE foundation;
+-   Access & Tenancy Control Center.
+
+> OAuth token exchange and account linking remain intentionally disabled
+> until real provider credentials and persistent state/verifier storage
+> are configured.
+
+### Event-driven Integration
+
+-   transactional outbox;
+-   persisted event state;
+-   Redis Streams publication;
+-   event publisher service;
+-   Event Control Center;
+-   event API;
+-   event delivery verification.
+
+### Production Hardening
+
+-   production configuration guards;
+-   secret scanning;
+-   Kubernetes network policy;
+-   security CI;
+-   threat model;
+-   production-hardening documentation;
+-   release-gate automation.
+
+------------------------------------------------------------------------
+
+## Control Center
+
+The operator-facing Next.js Control Center provides one interface for
+inspecting and operating the platform.
+
+Main areas include:
+
+-   **Agent Control Center** --- agent registry and capability
+    discovery;
+-   **Durable Workflow Visualizer** --- workflows, subtasks, state, and
+    results;
+-   **Human Review Console** --- approve, reject, and resume gated
+    workflows;
+-   **Agent Memory Explorer** --- inspect and search stored memories;
+-   **MCP & Tool Console** --- registry, catalog, and guarded execution;
+-   **Evaluation Center** --- evaluation workflows and results;
+-   **Model Gateway Dashboard** --- model access and gateway visibility;
+-   **Policy Control Center** --- decisions, risk, matched rules,
+    reviews, and audit history;
+-   **Access & Tenancy Control Center** --- workspaces, memberships,
+    roles, and OAuth providers;
+-   **Event Control Center** --- transactional-outbox and event
+    publication visibility;
+-   **Observability & Operations** --- health, metrics, runtime, and
+    performance.
 
 Local Control Center:
 
@@ -112,48 +253,98 @@ Local Control Center:
 http://localhost:3001
 ```
 
-The validated v2 MCP control plane currently exposes **19 tools across 4
-MCP servers**: Docker, Filesystem, GitHub, and PostgreSQL.
-
 ------------------------------------------------------------------------
 
 ## Architecture
 
-``
-<p align="center">
+``` mermaid
+flowchart TB
+    Client[Client / API Consumer]
+    UI[Next.js Control Center]
+
+    subgraph Platform["FastAPI Platform"]
+        Auth[Auth / RBAC / Tenancy]
+        Planner[Planner / Router]
+        RAG[RAG]
+        Reviews[Human Review]
+        Gateway[Model Gateway]
+        Eval[Evaluation]
+        Events[Event API]
+    end
+
+    subgraph Agents["Agent Runtime"]
+        Chat[Chat Agent]
+        Research[Research Agent]
+        Tool[Tool Agent]
+        Coordinator[A2A Coordinator]
+    end
+
+    subgraph Governance["Governance"]
+        Policy[Spring Boot Policy Engine]
+        Audit[Policy Audit]
+    end
+
+    subgraph Integration["Integration Layer"]
+        MCP[MCP Tool Platform]
+        Specialists[A2A Specialist Agents]
+        Outbox[Transactional Outbox]
+        Streams[Redis Streams]
+    end
+
+    subgraph Runtime["State & Runtime"]
+        Durable[Durable Workflows]
+        Memory[Agent Memory]
+        Worker[Background Worker]
+        Scheduler[Scheduler]
+        Redis[(Redis)]
+    end
+
+    subgraph Data["Data Layer"]
+        Postgres[(PostgreSQL)]
+        Qdrant[(Qdrant)]
+    end
+
+    subgraph Observability["Observability"]
+        Prometheus[Prometheus]
+        Grafana[Grafana]
+        OTEL[OpenTelemetry]
+        Tempo[Tempo]
+    end
+
+    Client --> Platform
+    UI --> Platform
+    Planner --> Agents
+    Planner --> RAG
+    Agents --> Gateway
+    Tool --> Policy
+    MCP --> Policy
+    Policy --> Reviews
+    Tool --> MCP
+    Coordinator --> Specialists
+    Reviews --> Durable
+    Agents --> Durable
+    Durable --> Memory
+    RAG --> Qdrant
+    Memory --> Qdrant
+    Memory --> Postgres
+    Durable --> Postgres
+    Auth --> Postgres
+    Eval --> Postgres
+    Audit --> Postgres
+    Events --> Outbox
+    Outbox --> Streams
+    Streams --> Redis
+    Worker --> Redis
+    Scheduler --> Redis
+    Platform --> Prometheus
+    Platform --> OTEL
+    OTEL --> Tempo
+    Prometheus --> Grafana
+    Tempo --> Grafana
 ```
-`<img
-    src="docs/images/architecture.png"
-    alt="RedPA AI Architecture"
-    width="100%"
-  />
-``
-</p>
-```
 
-------------------------------------------------------------------------
-
-## Key Capabilities
-
-Modern AI applications need more than prompt execution.
-
-A production-grade system must be able to:
-
--   coordinate multiple agents;
--   route requests to the correct workflow;
--   retrieve external and internal knowledge;
--   call tools safely;
--   delegate work to remote specialist agents;
--   pause for human approval;
--   persist long-running state;
--   recover after interruption;
--   maintain semantic memory;
--   process work asynchronously;
--   expose health and performance data;
--   provide logs, metrics, and distributed traces;
--   run consistently across local, Docker, and Kubernetes environments.
-
-RedPA AI provides these capabilities as one integrated platform.
+The repository also contains C4 and arc42 documentation for architecture
+views beyond this high-level diagram.
 
 ------------------------------------------------------------------------
 
@@ -161,457 +352,212 @@ RedPA AI provides these capabilities as one integrated platform.
 
 ### Agentic AI
 
--   Planner-based task routing
--   Multi-agent orchestration
--   Chat workflows
--   Research workflows
--   Tool execution workflows
--   Retrieval-Augmented Generation
--   Context-aware conversations
--   Remote specialist delegation
--   Shared agent context
-
-### Model Context Protocol
-
--   MCP server registry
--   Dynamic tool discovery
--   Unified tool execution
--   Filesystem MCP server
--   GitHub MCP server
--   PostgreSQL MCP server
--   Docker MCP server
--   Permission-aware tool calls
--   Approval support for risky actions
-
-### Agent-to-Agent Communication
-
--   A2A Agent Cards
--   Remote agent discovery
--   Capability-based routing
--   Coordinator Agent
--   Parallel subtask execution
--   Aggregated multi-agent responses
--   Specialist status normalization
--   Distributed task delegation
+-   planner-based routing;
+-   multi-agent orchestration;
+-   structured agent state;
+-   chat workflows;
+-   research workflows;
+-   RAG workflows;
+-   tool workflows;
+-   context-aware conversations;
+-   distributed specialist delegation;
+-   shared execution context.
 
 ### Workflow Reliability
 
--   Durable workflow persistence
--   Workflow checkpoints
--   Workflow resumption
--   Retry support
--   Human approval
--   Distributed subtask tracking
--   Failed and running task recovery
--   Idempotent requests
-
-### Agent Memory
-
--   Long-term memory
--   Semantic memory
--   Shared agent memory
--   Memory search
--   Memory summarization
--   Memory deduplication
--   Memory retention policies
--   PostgreSQL and Qdrant-backed storage
-
-### Platform Runtime
-
--   Redis distributed cache
--   Rate limiting
--   Idempotency middleware
--   Background Worker
--   Scheduler
--   Delayed jobs
--   Retry queue
--   Dead-letter queue
--   Worker and Scheduler heartbeats
-
-### Observability
-
--   Prometheus metrics
--   Grafana integration
--   OpenTelemetry tracing
--   Tempo trace storage
--   Structured JSON logging
--   Request IDs
--   Correlation IDs
--   Trace IDs and Span IDs
--   Slow request detection
--   Slow SQL detection
--   Dependency health checks
-
-### Deployment
-
--   Docker
--   Docker Compose
--   Kubernetes manifests
--   Helm chart
--   Readiness, liveness, and startup probes
--   Non-root container security context
--   Resource requests and limits
--   Horizontal Pod Autoscaling
-
-------------------------------------------------------------------------
-
-## System Components
-
-### FastAPI Backend
-
-The backend exposes the public API and coordinates the platform runtime.
-
-Responsibilities include:
-
--   authentication;
--   user management;
--   conversations;
--   messages;
--   chat execution;
--   document ingestion;
--   human reviews;
--   MCP tools;
--   A2A coordination;
--   durable workflows;
--   Agent Memory;
--   background jobs;
--   health and monitoring endpoints.
-
-### Planner and Routing
-
-The Planner analyzes a request and selects the appropriate execution
-path.
-
-Typical routes include:
-
--   direct chat;
--   RAG;
--   research;
--   internal tools;
--   MCP tools;
+-   durable workflow persistence;
+-   workflow checkpoints;
+-   workflow resume;
 -   Human Review;
--   distributed A2A execution.
-
-### Specialist Agents
-
-Specialist agents run as separate services and expose A2A-compatible
-Agent Cards.
-
-Current specialists include:
-
--   Research Agent
--   PostgreSQL Agent
--   Docker Agent
--   Filesystem Agent
--   GitHub Agent
-
-### MCP Servers
-
-Each MCP service provides a focused tool boundary.
-
-This separation improves:
-
--   security;
--   testability;
--   service isolation;
--   capability discovery;
--   permission management;
--   deployment flexibility.
-
-### Durable Workflow Engine
-
-The durable workflow layer persists state and allows interrupted or
-failed execution to continue later.
-
-It supports:
-
--   workflow creation;
--   subtask persistence;
--   approval state;
--   resume logic;
--   failed-task retry;
--   running-task recovery;
--   metadata normalization;
--   final workflow aggregation.
+-   retry support;
+-   failed-task recovery;
+-   distributed subtask tracking;
+-   idempotency;
+-   background processing;
+-   dead-letter handling.
 
 ### Agent Memory
 
-The memory subsystem combines relational persistence and vector search.
+-   long-term memory;
+-   semantic memory;
+-   private and shared memory;
+-   memory search;
+-   memory summarization;
+-   deduplication;
+-   retention policies;
+-   PostgreSQL metadata;
+-   Qdrant semantic retrieval.
 
-PostgreSQL stores structured memory metadata.
+### Runtime
 
-Qdrant stores semantic representations for similarity-based retrieval.
-
-------------------------------------------------------------------------
-
-## Technology Stack
-
-  Area                  Technologies
-  --------------------- ------------------------------------
-  Backend               Python, FastAPI, Pydantic
-  Database              PostgreSQL, SQLAlchemy, asyncpg
-  Vector Database       Qdrant
-  Cache and Runtime     Redis
-  Agent Orchestration   LangGraph-style stateful workflows
-  LLM Runtime           Ollama
-  Agent Protocols       MCP, A2A
-  Containers            Docker, Docker Compose
-  Metrics               Prometheus
-  Dashboards            Grafana
-  Tracing               OpenTelemetry, Tempo
-  Testing               pytest, pytest-asyncio
-  Deployment            Kubernetes, Helm
-  CI                    GitHub Actions
+-   Redis cache;
+-   Redis Streams;
+-   rate limiting;
+-   idempotency middleware;
+-   background worker;
+-   scheduler;
+-   delayed jobs;
+-   retry queue;
+-   dead-letter queue;
+-   worker and scheduler heartbeats.
 
 ------------------------------------------------------------------------
 
-## Repository Structure
+## Policy and Guardrails
+
+RedPA AI v3 introduces a dedicated policy boundary between agent intent
+and sensitive execution.
+
+The policy service evaluates:
+
+-   action;
+-   resource;
+-   execution boundary;
+-   arguments;
+-   agent identity;
+-   policy rules;
+-   risk level.
+
+Policy outcomes are:
 
 ``` text
-redpa-ai/
-├── backend/
-│   └── app/
-│       ├── a2a_protocol/
-│       ├── agent_memory/
-│       ├── api/
-│       │   └── v1/
-│       ├── background_jobs/
-│       ├── core/
-│       ├── database/
-│       ├── distributed_durable/
-│       ├── errors/
-│       ├── health/
-│       ├── logging_config/
-│       ├── mcp/
-│       ├── mcp_servers/
-│       ├── middleware/
-│       ├── monitoring/
-│       ├── observability/
-│       ├── performance/
-│       ├── research/
-│       ├── runtime_cache/
-│       ├── security_hardening/
-│       ├── specialist_agents/
-│       └── main.py
-├── frontend/
-├── config/
-├── deploy/
-│   ├── helm/
-│   └── kubernetes/
-├── docs/
-├── observability/
-├── tests/
-├── .github/
-│   └── workflows/
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-├── VERIFY_V2_RELEASE.ps1
-├── BUILD_V2_RELEASE.ps1
-├── RELEASE_NOTES_v2.0.0.md
-└── README.md
+ALLOW
+REVIEW
+DENY
 ```
+
+Example behavior:
+
+  Action              Decision   Risk       Policy
+  ------------------- ---------- ---------- ----------------------------------
+  `list_containers`   ALLOW      LOW        `READ_ONLY_ALLOW`
+  `send_email`        REVIEW     HIGH       `EXTERNAL_SIDE_EFFECT_REVIEW`
+  `drop_database`     DENY       CRITICAL   `DESTRUCTIVE_ACTION_DENY`
+  unknown action      REVIEW     MEDIUM     `UNKNOWN_ACTION_REQUIRES_REVIEW`
+
+`REVIEW` decisions can create Human Review records. `DENY` decisions
+stop execution. Policy decisions are persisted to the audit trail with
+their boundary, risk, matched rules, policy version, review link, and
+enforcement outcome.
+
+The same enforcement model protects both internal tools and MCP
+execution boundaries.
 
 ------------------------------------------------------------------------
 
-## Quick Start
+## Evaluation and Model Gateway
 
-### Requirements
+### Evaluation
 
-Install:
+The evaluation subsystem provides a foundation for measuring Agentic AI
+behavior instead of relying only on manual inspection.
 
--   Python 3.13+
--   Docker Desktop
--   Docker Compose
--   Git
--   Ollama, if using a local model outside Docker
+It includes:
 
-### Clone
+-   evaluation persistence;
+-   datasets;
+-   evaluation runs;
+-   metric execution;
+-   result storage;
+-   API contracts;
+-   dashboard integration.
 
-``` bash
-git clone https://github.com/<your-username>/redpa-ai.git
-cd redpa-ai
-```
+### Model Gateway
 
-### Create the virtual environment
+The Model Gateway separates application workflows from model-provider
+details.
 
-Windows PowerShell:
+Its role is to centralize:
 
-``` powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+-   provider configuration;
+-   model selection;
+-   request routing;
+-   model access;
+-   observability;
+-   usage and cost-analysis foundations.
 
-Linux or macOS:
+This makes model infrastructure replaceable without coupling every agent
+directly to one provider.
 
-``` bash
-python -m venv .venv
-source .venv/bin/activate
-```
+------------------------------------------------------------------------
 
-### Install dependencies
+## Access Control and Multi-tenancy
 
-``` bash
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
+Phase 16 introduces tenant-aware platform boundaries.
 
-### Configure environment variables
+### Tenancy
 
-``` bash
-cp .env.example .env
-```
+-   workspace/tenant records;
+-   tenant membership;
+-   owner membership on tenant creation;
+-   tenant-scoped access foundation;
+-   tenant listing and management APIs.
 
-On Windows:
+### RBAC
 
-``` powershell
-Copy-Item .env.example .env
-```
+The access-control layer provides a foundation for role-aware
+authorization inside a tenant.
 
-Review `.env` before starting the platform.
+### OAuth
 
-### Validate the project
+OAuth provider discovery and PKCE foundations are implemented.
 
-``` bash
-python -m compileall backend/app
-python -m pytest tests -v
-docker compose config
-```
+Production OAuth completion requires:
 
-### Start the platform
+-   real provider credentials;
+-   persistent OAuth state;
+-   persistent PKCE verifier storage;
+-   secure callback handling;
+-   account linking.
 
-``` bash
-docker compose up -d --build
-```
+These are intentionally not claimed as completed production OAuth login.
 
-### Check the services
+------------------------------------------------------------------------
 
-``` bash
-docker compose ps
-```
+## Event-driven Architecture
 
-### Open the platform
+RedPA AI v3 adds a transactional event pipeline.
 
 ``` text
-Control Center:  http://localhost:3001
+Application transaction
+        |
+        v
+Transactional Outbox
+        |
+        v
+Event Publisher
+        |
+        v
+Redis Streams
+        |
+        v
+Consumers / Integrations
 ```
 
-### Open the API
+The outbox pattern prevents application state changes and event
+publication from becoming two unrelated operations.
 
-``` text
-Swagger UI:     http://localhost:8000/docs
-OpenAPI:        http://localhost:8000/openapi.json
-Health:         http://localhost:8000/api/v1/platform/health
-Readiness:      http://localhost:8000/api/v1/platform/ready
-Liveness:       http://localhost:8000/api/v1/platform/live
-Metrics:        http://localhost:8000/api/v1/metrics
-Performance:    http://localhost:8000/api/v1/performance/snapshot
-Prometheus:     http://localhost:9090
-Grafana:        http://localhost:3000
-Tempo:          http://localhost:3200
-Qdrant:         http://localhost:6333
-```
+Capabilities include:
 
-------------------------------------------------------------------------
+-   persisted outbox events;
+-   publication state;
+-   Redis Streams delivery;
+-   publisher service;
+-   event APIs;
+-   Event Control Center;
+-   runtime verification that published events appear in the Redis
+    stream.
 
-## Configuration
-
-Important environment variables:
-
-``` env
-APP_NAME=RedPA AI
-APP_VERSION=0.2.0
-ENVIRONMENT=development
-DEBUG=true
-
-API_V1_PREFIX=/api/v1
-HOST=0.0.0.0
-PORT=8000
-
-DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
-REDIS_URL=redis://redis:6379/0
-QDRANT_URL=http://qdrant:6333
-
-SECRET_KEY=replace-with-a-long-secret
-JWT_SECRET_KEY=replace-with-a-long-jwt-secret
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_MODEL=qwen2.5:7b
-
-OTEL_ENABLED=true
-OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-TEMPO_URL=http://tempo:3200
-OTEL_COLLECTOR_HEALTH_URL=http://otel-collector:13133
-
-RATE_LIMIT_REQUESTS=120
-RATE_LIMIT_WINDOW_SECONDS=60
-IDEMPOTENCY_TTL_SECONDS=86400
-
-SLOW_REQUEST_THRESHOLD_MS=1000
-SLOW_QUERY_THRESHOLD_MS=500
-
-JSON_LOGS=true
-LOG_LEVEL=INFO
-EXPOSE_ERROR_DETAILS=true
-
-REQUIRE_HTTPS=false
-ALLOWED_HOSTS=localhost,127.0.0.1,backend
-```
-
-For production:
-
-``` env
-ENVIRONMENT=production
-DEBUG=false
-JSON_LOGS=true
-EXPOSE_ERROR_DETAILS=false
-REQUIRE_HTTPS=true
-```
-
-Use strong secrets and restrict allowed hosts.
-
-------------------------------------------------------------------------
-
-## API Overview
-
-The platform groups endpoints under `/api/v1`.
-
-Main API areas include:
-
-  Area                    Purpose
-  ----------------------- ------------------------------------
-  `/auth`                 Authentication and token handling
-  `/users`                User management
-  `/conversations`        Conversation lifecycle
-  `/messages`             Conversation messages
-  `/chat`                 Agentic chat execution
-  `/documents`            Document ingestion and retrieval
-  `/reviews`              Human Review workflows
-  `/tools`                Internal tools
-  `/mcp`                  MCP operations
-  `/unified-tools`        Unified tool catalog and execution
-  `/agents`               Agent management
-  `/remote-agents`        Remote A2A agents
-  `/multi-agents`         Multi-agent execution
-  `/distributed-agents`   Distributed specialist execution
-  `/durable-workflows`    Durable workflow API
-  `/agent-memory`         Memory operations
-  `/jobs`                 Background jobs
-  `/platform`             Health endpoints
-  `/performance`          Runtime performance
-  `/metrics`              Prometheus metrics
-
-The exact request and response schemas are available in Swagger UI.
+This layer provides the foundation for future external integrations and
+asynchronous domain-event consumers.
 
 ------------------------------------------------------------------------
 
 ## MCP Integration
 
-RedPA AI implements MCP as a tool platform rather than embedding every
-integration directly into the backend.
+RedPA AI uses MCP as a dedicated enterprise tool layer.
 
-### MCP Services
+Validated MCP services include:
 
 ``` text
 Filesystem MCP   : 8010
@@ -620,40 +566,21 @@ PostgreSQL MCP   : 8030
 Docker MCP       : 8040
 ```
 
-### MCP Capabilities
+Capabilities include:
 
 -   server registration;
--   dynamic discovery;
--   tool metadata;
--   argument validation;
--   permission checks;
--   safe execution;
--   unified qualified names;
--   response formatting;
--   private network validation.
+-   dynamic tool discovery;
+-   unified tool catalog;
+-   structured arguments;
+-   permission-aware execution;
+-   policy enforcement;
+-   Human Review integration;
+-   response normalization;
+-   service isolation.
 
-### Security Examples
-
-The Filesystem MCP:
-
--   blocks path traversal;
--   blocks sensitive environment files;
--   restricts access to the configured sandbox.
-
-The PostgreSQL MCP:
-
--   permits read-only queries;
--   blocks write operations;
--   blocks multi-statement SQL;
--   blocks unsafe PostgreSQL functions;
--   blocks comments and locking clauses.
-
-The Docker MCP:
-
--   validates container names;
--   limits log output;
--   rejects unsafe resource references;
--   uses read-only Docker socket access where configured.
+Security controls include filesystem sandboxing, PostgreSQL read-only
+protections, Docker input validation, and policy evaluation before
+guarded MCP actions.
 
 ------------------------------------------------------------------------
 
@@ -661,20 +588,18 @@ The Docker MCP:
 
 RedPA AI supports distributed Agent-to-Agent execution.
 
-### Coordinator Responsibilities
+The coordinator can:
 
-The coordinator:
+1.  parse a complex request;
+2.  create subtasks;
+3.  discover suitable agents;
+4.  select capabilities;
+5.  delegate work;
+6.  execute independent work in parallel;
+7.  collect successful and failed results;
+8.  aggregate the final response.
 
-1.  parses a complex request;
-2.  creates subtasks;
-3.  discovers suitable agents;
-4.  selects capabilities;
-5.  delegates work;
-6.  runs independent tasks in parallel;
-7.  aggregates results;
-8.  reports failed and successful subtasks.
-
-### Specialist Services
+Specialist services include:
 
 ``` text
 A2A Coordinator      : 8050
@@ -685,47 +610,39 @@ Filesystem Agent     : 8064
 GitHub Agent         : 8065
 ```
 
-### Agent Cards
-
-Each remote service exposes an Agent Card under:
+Remote services expose Agent Cards through:
 
 ``` text
 /.well-known/agent-card.json
 ```
 
-The card describes:
-
--   agent identity;
--   protocol version;
--   capabilities;
--   available skills;
--   endpoint information.
-
 ------------------------------------------------------------------------
 
 ## Durable Workflows
 
-Durable workflows are designed for tasks that cannot be treated as one
+Durable workflows support tasks that cannot safely be treated as one
 synchronous request.
 
-Examples include:
+Typical examples:
 
 -   distributed research;
--   approval-gated tool execution;
--   multi-step data workflows;
--   tasks that must survive service restart;
--   workflows with retryable subtasks.
+-   approval-gated actions;
+-   multi-step tool workflows;
+-   tasks that must survive restart;
+-   retryable distributed subtasks.
 
-### Workflow Lifecycle
+Lifecycle:
 
 ``` text
 Create
   |
 Persist
   |
-Execute subtasks
+Execute
   |
-Pause for approval or failure
+Checkpoint
+  |
+Pause for review / retry if required
   |
 Resume
   |
@@ -734,17 +651,9 @@ Aggregate
 Finalize
 ```
 
-The platform stores:
-
--   workflow status;
--   original request;
--   metadata;
--   subtask states;
--   remote agent identifiers;
--   results;
--   errors;
--   execution timing;
--   retry state.
+Persisted state can include workflow status, request data, metadata,
+subtasks, remote-agent identifiers, results, errors, timing, approval
+state, and retry state.
 
 ------------------------------------------------------------------------
 
@@ -752,29 +661,31 @@ The platform stores:
 
 Risky operations can be paused before execution.
 
-Typical approval cases include:
+Typical cases include:
 
 -   sending email;
 -   modifying external systems;
--   executing high-risk tools;
--   performing actions with irreversible effects.
+-   high-risk tool execution;
+-   actions with irreversible side effects;
+-   policy decisions returning `REVIEW`.
 
 The Human Review flow supports:
 
 -   review creation;
--   pending review listing;
+-   pending-review listing;
 -   approval;
 -   rejection;
 -   edited responses;
--   workflow resumption;
--   prevention of duplicate review creation after approval.
+-   workflow resume;
+-   policy-to-review linking;
+-   prevention of duplicate approval gates after resume.
 
 ------------------------------------------------------------------------
 
 ## Agent Memory
 
-The Agent Memory layer enables agents to reuse relevant information
-across workflows.
+The memory subsystem combines relational persistence with vector
+retrieval.
 
 ### Memory Types
 
@@ -784,7 +695,7 @@ across workflows.
 -   long-term structured memory;
 -   summarized memory.
 
-### Memory Operations
+### Operations
 
 -   create;
 -   retrieve;
@@ -795,453 +706,584 @@ across workflows.
 -   retain;
 -   analyze.
 
-### Storage
-
-PostgreSQL stores structured records and metadata.
-
-Qdrant supports semantic similarity search.
-
-------------------------------------------------------------------------
-
-## Background Jobs
-
-The background runtime is backed by PostgreSQL and Redis.
-
-### Capabilities
-
--   delayed execution;
--   retry with exponential backoff;
--   maximum-attempt control;
--   dead-letter queue;
--   concurrent Worker execution;
--   Scheduler;
--   job status API;
--   Worker heartbeat;
--   Scheduler heartbeat.
-
-### Job States
-
-``` text
-queued
-running
-completed
-dead_letter
-```
-
-### Example Job
-
-``` json
-{
-  "job_type": "sleep",
-  "payload": {
-    "seconds": 2
-  },
-  "max_attempts": 3,
-  "delay_seconds": 0
-}
-```
+PostgreSQL stores structured records and metadata. Qdrant supports
+semantic similarity search.
 
 ------------------------------------------------------------------------
 
 ## Observability
 
-RedPA AI includes metrics, logs, traces, and health monitoring.
+RedPA AI includes metrics, logs, traces, health monitoring, and
+policy/event visibility.
 
 ### Prometheus
 
-Prometheus scrapes:
+The backend exposes Prometheus-compatible metrics.
 
 ``` text
 GET /api/v1/metrics
 ```
 
-Examples of custom metrics:
+### Distributed Tracing
 
-``` text
-redpa_slow_requests_total
-redpa_request_duration_seconds
-redpa_slow_sql_queries_total
-redpa_sql_query_duration_seconds
-```
+OpenTelemetry instrumentation integrates application tracing with Tempo.
 
-### OpenTelemetry
-
-Instrumentation includes:
-
--   FastAPI;
--   HTTPX;
--   Redis;
--   asyncpg;
--   logging.
-
-### Tempo
-
-Tempo stores distributed traces received through the OpenTelemetry
-Collector.
-
-OTLP ports:
+OTLP endpoints:
 
 ``` text
 4317 gRPC
 4318 HTTP
 ```
 
-Tempo readiness:
-
-``` text
-GET http://localhost:3200/ready
-```
-
 ### Structured Logging
 
-JSON logs can include:
+Logs can carry:
 
 -   timestamp;
 -   level;
 -   logger;
--   message;
 -   request ID;
 -   correlation ID;
 -   trace ID;
 -   span ID;
--   path;
--   method;
--   status;
--   execution time;
 -   workflow ID;
 -   job ID;
 -   error code;
--   error ID.
+-   execution timing.
+
+### Operational Dashboards
+
+Grafana, the Control Center, policy audit views, and event views provide
+complementary operational visibility.
+
+------------------------------------------------------------------------
+
+## Architecture Governance
+
+Phase 14 formalizes architectural boundaries instead of leaving
+architecture only as conventions in implementation code.
+
+The repository includes:
+
+-   Domain-Driven Design bounded-context documentation;
+-   Clean Architecture dependency rules;
+-   SOLID engineering guidance;
+-   Architecture Decision Records;
+-   C4 architecture documentation;
+-   arc42 documentation;
+-   automated architecture tests.
+
+The goal is to make architectural decisions explicit, reviewable, and
+testable.
+
+------------------------------------------------------------------------
+
+## Cloud and Infrastructure
+
+### Local Runtime
+
+The complete development platform can run through Docker Compose.
+
+### Kubernetes and Helm
+
+Deployment assets include:
+
+-   Kubernetes manifests;
+-   Helm chart;
+-   health probes;
+-   resource limits;
+-   security context;
+-   Horizontal Pod Autoscaling;
+-   network-policy hardening.
+
+### Azure Reference Architecture
+
+Phase 15 adds an Azure deployment design implemented with Pulumi Python.
+
+The reference architecture includes:
+
+-   Azure Container Apps;
+-   Azure Database for PostgreSQL;
+-   Azure Key Vault;
+-   Azure Container Registry;
+-   managed cloud configuration;
+-   security guidance;
+-   cost guidance;
+-   CI-based Pulumi preview.
+
+> Local verification validates the IaC structure and Pulumi provider
+> configuration. It does **not** claim that Azure resources have already
+> been deployed.
+
+Cloud deployment remains explicit through `pulumi preview` and
+`pulumi up`.
 
 ------------------------------------------------------------------------
 
 ## Security
 
-Security features include:
+Security controls include:
 
 -   JWT authentication;
+-   tenant-aware access-control foundation;
+-   RBAC foundation;
+-   OAuth PKCE foundation;
 -   security response headers;
 -   CORS configuration;
--   API-key hashing foundation;
 -   rate limiting;
--   idempotency conflict detection;
+-   idempotency;
 -   environment validation;
--   production secret validation;
--   optional HTTPS enforcement;
--   allowed-host validation;
+-   production configuration guards;
+-   secret scanning;
+-   policy enforcement;
+-   Human Review;
+-   policy audit logging;
+-   guarded internal tools;
+-   guarded MCP execution;
 -   safe MCP input validation;
 -   read-only tool policies;
 -   Kubernetes non-root execution;
 -   dropped Linux capabilities;
--   read-only root filesystem support.
+-   network-policy hardening;
+-   threat-model documentation;
+-   security CI workflows.
 
-### Idempotency
-
-For supported write requests, send:
-
-``` text
-Idempotency-Key: unique-request-key
-```
-
-Repeated identical requests return the stored response.
-
-Reusing the same key with a different request produces a conflict
-response.
-
-### Rate Limiting
-
-Default settings:
-
-``` env
-RATE_LIMIT_REQUESTS=120
-RATE_LIMIT_WINDOW_SECONDS=60
-```
-
-Rate-limit response headers include:
-
-``` text
-X-RateLimit-Limit
-X-RateLimit-Remaining
-```
+The project deliberately distinguishes implemented controls from
+production configuration that still requires real credentials or cloud
+deployment.
 
 ------------------------------------------------------------------------
 
-## Health and Performance
+## Technology Stack
 
-### Liveness
-
-``` text
-GET /api/v1/platform/live
-```
-
-Confirms that the backend process is running.
-
-### Readiness
-
-``` text
-GET /api/v1/platform/ready
-```
-
-Checks critical dependencies.
-
-### Deep Health
-
-``` text
-GET /api/v1/platform/health
-```
-
-Checks:
-
--   PostgreSQL;
--   Redis;
--   Qdrant;
--   Tempo;
--   OpenTelemetry Collector;
--   Background Worker;
--   Background Scheduler.
-
-### Performance Snapshot
-
-``` text
-GET /api/v1/performance/snapshot
-```
-
-Provides:
-
--   slow request threshold;
--   slow query threshold;
--   queued jobs;
--   running jobs;
--   dead-letter jobs.
-
-### Performance Headers
-
-Responses can include:
-
-``` text
-X-Request-ID
-X-Correlation-ID
-X-Process-Time-Ms
-X-Performance-Time-Ms
-X-Trace-ID
-X-Span-ID
-```
+  Area                  Technologies
+  --------------------- ------------------------------------------------
+  Backend               Python, FastAPI, Pydantic
+  Policy Service        Java, Spring Boot
+  Frontend              Next.js, TypeScript
+  Database              PostgreSQL, SQLAlchemy, asyncpg
+  Vector Database       Qdrant
+  Cache / Messaging     Redis, Redis Streams
+  Agent Orchestration   LangGraph-style stateful workflows
+  LLM Runtime           Ollama and Model Gateway abstraction
+  Agent Protocols       MCP, A2A
+  Architecture          DDD, Clean Architecture, C4, arc42, ADR
+  Containers            Docker, Docker Compose
+  Metrics               Prometheus
+  Dashboards            Grafana, RedPA Control Center
+  Tracing               OpenTelemetry, Tempo
+  Cloud IaC             Pulumi Python, Azure Native
+  Cloud Target          Microsoft Azure
+  Testing               pytest, Spring/JUnit/Cucumber, contract tests
+  Deployment            Kubernetes, Helm, Azure reference architecture
+  CI/CD                 GitHub Actions
 
 ------------------------------------------------------------------------
 
-## Deployment
-
-### Docker Compose
-
-Validate:
-
-``` bash
-docker compose config
-```
-
-Start:
-
-``` bash
-docker compose up -d --build
-```
-
-Stop:
-
-``` bash
-docker compose down
-```
-
-Remove volumes:
-
-``` bash
-docker compose down -v
-```
-
-### Kubernetes
-
-Resources are located under:
+## Repository Structure
 
 ``` text
-deploy/kubernetes
-deploy/helm/redpa
+redpa-ai/
+├── backend/
+│   ├── alembic/
+│   └── app/
+│       ├── a2a_protocol/
+│       ├── agent_memory/
+│       ├── api/v1/
+│       ├── background_jobs/
+│       ├── database/
+│       ├── distributed_durable/
+│       ├── events/
+│       ├── mcp/
+│       ├── mcp_servers/
+│       ├── middleware/
+│       ├── model_gateway/
+│       ├── monitoring/
+│       ├── observability/
+│       ├── security/
+│       ├── security_hardening/
+│       ├── services/
+│       ├── specialist_agents/
+│       └── main.py
+├── frontend/
+│   ├── app/
+│   └── components/
+├── policy-service/
+├── infra/
+│   └── azure/
+├── config/
+├── deploy/
+│   ├── helm/
+│   └── kubernetes/
+├── docs/
+│   ├── architecture/
+│   ├── events/
+│   ├── release/
+│   └── security/
+├── observability/
+├── scripts/
+│   ├── release/
+│   └── security/
+├── tests/
+├── .github/
+│   └── workflows/
+├── docker-compose.yml
+├── docker-compose.phase13.yml
+├── BUILD_V3_RELEASE.ps1
+├── RELEASE_MANIFEST_v3.0.0.json
+└── README.md
 ```
 
-### Helm
+The exact tree may evolve as bounded contexts and deployment assets are
+refined.
 
-Validate:
+------------------------------------------------------------------------
 
-``` bash
-helm lint deploy/helm/redpa
-```
+## Quick Start
+
+### Requirements
 
 Install:
 
-``` bash
-helm upgrade --install redpa deploy/helm/redpa \
-  --namespace redpa \
-  --create-namespace \
-  --set secretEnv.DATABASE_URL="..." \
-  --set secretEnv.SECRET_KEY="..." \
-  --set secretEnv.API_KEY_PEPPER="..."
-```
+-   Python 3.13+;
+-   Docker Desktop;
+-   Docker Compose;
+-   Git;
+-   Node.js when running the frontend outside Docker;
+-   Java/Maven when building the policy service outside Docker;
+-   Ollama when using the local model runtime outside Docker.
 
-The chart includes:
-
--   Deployment;
--   Service;
--   Secret;
--   Ingress;
--   Horizontal Pod Autoscaler;
--   health probes;
--   resource limits;
--   security context.
-
-------------------------------------------------------------------------
-
-## Testing and CI
-
-Compile the backend:
+### Clone
 
 ``` bash
-python -m compileall backend/app
+git clone https://github.com/saeidkh96/redpa-ai.git
+cd redpa-ai
 ```
 
-Validate Docker Compose:
+### Create a virtual environment
 
-``` bash
-docker compose config
-```
-
-When pytest tests are present, run:
-
-``` bash
-python -m pytest tests -v
-```
-
-> **v2.0.0 validation note:** the final release verification executed the
-> complete automated test suite successfully: **148 tests passed**.
-
-The v2 release gate was validated through automated and manual
-integration checks covering:
-
--   Python source compilation;
--   Docker Compose configuration;
--   liveness and readiness;
--   deep platform health;
--   performance snapshot;
--   Prometheus metrics;
--   Control Center availability;
--   JWT authentication;
--   MCP authentication boundaries;
--   authenticated MCP control plane;
--   frontend production build;
--   agent capability discovery;
--   durable workflow visualization;
--   Human Review approval and workflow resume;
--   Agent Memory semantic search;
--   MCP registry and tool discovery;
--   end-to-end execution of a safe MCP tool.
-
-Windows release verification:
+Windows PowerShell:
 
 ``` powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V2_RELEASE.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-### GitHub Actions
+Linux/macOS:
 
-CI is used for dependency installation, compilation, application import,
-test execution when tests are present, and project validation.
+``` bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+### Install Python dependencies
+
+``` bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### Configure the environment
+
+Windows:
+
+``` powershell
+Copy-Item .env.example .env
+```
+
+Linux/macOS:
+
+``` bash
+cp .env.example .env
+```
+
+Review `.env` before starting the platform. Do not commit local secret
+files.
+
+### Validate Docker configuration
+
+``` powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.phase13.yml `
+  config
+```
+
+### Start the platform
+
+``` powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.phase13.yml `
+  up -d --build
+```
+
+### Apply database migrations
+
+``` powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.phase13.yml `
+  exec backend alembic upgrade head
+```
+
+### Check services
+
+``` powershell
+docker compose `
+  -f docker-compose.yml `
+  -f docker-compose.phase13.yml `
+  ps
+```
+
+### Main local endpoints
+
+``` text
+Control Center:       http://localhost:3001
+Backend Swagger:      http://localhost:8000/docs
+Backend OpenAPI:      http://localhost:8000/openapi.json
+Policy Service:       http://localhost:8090
+Prometheus:           http://localhost:9090
+Grafana:              http://localhost:3000
+Tempo:                http://localhost:3200
+Qdrant:               http://localhost:6333
+```
 
 ------------------------------------------------------------------------
 
-## Release Status
+## API Overview
 
-### v2.0.0
+Main API areas are exposed under `/api/v1`.
 
-**Status: Released**
+  Area                   Purpose
+  ---------------------- -----------------------------------
+  `/auth`                Authentication
+  `/users`               User management
+  `/conversations`       Conversation lifecycle
+  `/messages`            Conversation messages
+  `/chat`                Agentic chat
+  `/documents`           Document ingestion and RAG
+  `/reviews`             Human Review
+  `/tools`               Internal tools
+  `/mcp`                 MCP operations
+  `/unified-tools`       Unified tool catalog
+  `/agents`              Agent management
+  `/remote-agents`       Remote A2A agents
+  `/multi-agents`        Multi-agent execution
+  `/durable-workflows`   Durable workflow operations
+  `/agent-memory`        Agent Memory
+  `/evaluations`         Evaluation
+  `/model-gateway`       Model Gateway
+  `/policy`              Policy enforcement and audit
+  `/tenants`             Tenant/workspace management
+  `/oauth`               OAuth provider foundation
+  `/events`              Event outbox and event operations
+  `/jobs`                Background jobs
+  `/platform`            Health
+  `/performance`         Performance
+  `/metrics`             Prometheus metrics
 
-v2.0.0 includes:
+Use Swagger UI for the current request and response schemas.
 
--   operator-facing Control Center;
--   distributed agent discovery and orchestration;
--   durable workflows;
--   Human-in-the-Loop workflow control;
--   semantic Agent Memory;
--   authenticated MCP control plane;
--   4 MCP servers and 19 tools;
--   production observability;
--   security and release-readiness checks;
--   **148 passing automated tests** in the final v2 release verification.
+------------------------------------------------------------------------
 
-Release notes:
+## Testing and Verification
 
-``` text
-RELEASE_NOTES_v2.0.0.md
+RedPA AI uses layered verification rather than relying on a single
+unit-test suite.
+
+Coverage includes:
+
+-   Python compilation;
+-   pytest unit and contract tests;
+-   API contract tests;
+-   architecture tests;
+-   security tests;
+-   policy enforcement tests;
+-   Spring Boot tests;
+-   Cucumber/BDD policy scenarios;
+-   database migration verification;
+-   Docker Compose validation;
+-   frontend production builds;
+-   runtime authentication checks;
+-   Human Review checks;
+-   MCP policy enforcement;
+-   policy audit persistence;
+-   Redis Streams publication;
+-   secret scanning;
+-   release archive verification.
+
+### Phase 17--19 final verification
+
+``` powershell
+powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASES_17_18_19_RUNTIME.ps1
 ```
 
-Release artifact:
+The verified release pipeline covers:
 
-``` text
-redpa-ai-v2.0.0.zip
+-   transactional outbox enqueue;
+-   Redis Streams publication;
+-   persisted published state;
+-   Event Control Center availability;
+-   Spring Boot Policy Service health;
+-   metrics endpoint;
+-   production security gates;
+-   release packaging.
+
+### Build the v3 archive
+
+``` powershell
+powershell -ExecutionPolicy Bypass -File .\BUILD_V3_RELEASE.ps1
 ```
 
-SHA256:
+Release output:
 
 ``` text
-B1AD542FF99B82CD0F55C5305D848F41F4E589BAFC5DBFCA902F46FEE208224C
+dist/redpa-ai-v3.0.0.zip
+dist/redpa-ai-v3.0.0.sha256
 ```
+
+------------------------------------------------------------------------
+
+## Release
+
+### v3.0.0
+
+RedPA AI v3 completes the current enterprise-platform roadmap.
+
+Major v3 capabilities include:
+
+-   evaluation framework;
+-   Model Gateway;
+-   Spring Boot Policy Engine;
+-   deterministic guardrails;
+-   policy audit and metrics;
+-   Policy Control Center;
+-   DDD bounded contexts;
+-   Clean Architecture rules;
+-   C4 and arc42 documentation;
+-   ADRs;
+-   Azure reference architecture;
+-   Pulumi IaC;
+-   RBAC foundation;
+-   multi-tenancy;
+-   tenant isolation foundation;
+-   OAuth PKCE foundation;
+-   transactional outbox;
+-   Redis Streams;
+-   Event Control Center;
+-   production hardening;
+-   threat model;
+-   secret scanning;
+-   security/release CI gates;
+-   automated v3 release packaging.
+
+Release manifest:
+
+``` text
+RELEASE_MANIFEST_v3.0.0.json
+```
+
+Final checklist:
+
+``` text
+docs/release/V3_FINAL_CHECKLIST.md
+```
+
+Release archive:
+
+``` text
+dist/redpa-ai-v3.0.0.zip
+```
+
+> The source tree and release automation can prepare the v3.0.0 artifact
+> locally. A Git tag/repository release should only be created after the
+> final release checklist and archive contents have been reviewed.
 
 ------------------------------------------------------------------------
 
 ## Roadmap
 
-### Completed
+### v1 --- Agentic Foundation
 
--   [x] Authentication
--   [x] Conversations and Messages
--   [x] Planner and Routing
+-   [x] FastAPI platform
+-   [x] PostgreSQL
+-   [x] authentication
+-   [x] conversations and messages
+-   [x] planner and routing
 -   [x] RAG
--   [x] MCP
--   [x] Unified Tool Registry
+-   [x] tool execution
+-   [x] Docker Compose
+
+### v2 --- Distributed Agentic Runtime
+
+-   [x] MCP server/client platform
+-   [x] unified tool registry
 -   [x] Human Review
--   [x] Workflow Resume
--   [x] A2A Coordinator
--   [x] Specialist Agents
--   [x] Distributed Durable Workflows
+-   [x] workflow resume
+-   [x] A2A coordinator
+-   [x] specialist agents
+-   [x] distributed durable workflows
 -   [x] Agent Memory
--   [x] Redis Cache
--   [x] Rate Limiting
--   [x] Idempotency
--   [x] Background Worker
--   [x] Scheduler
--   [x] Retry Queue
--   [x] Dead-Letter Queue
+-   [x] Redis cache
+-   [x] background worker
+-   [x] scheduler
+-   [x] retry and dead-letter queues
+-   [x] rate limiting
+-   [x] idempotency
 -   [x] Prometheus
 -   [x] Grafana
 -   [x] OpenTelemetry
 -   [x] Tempo
--   [x] Structured Logging
--   [x] Global Error Framework
--   [x] Health and Performance APIs
--   [x] Docker Compose
+-   [x] structured logging
 -   [x] Kubernetes
 -   [x] Helm
--   [x] CI
+-   [x] Web Control Center
+
+### v3 --- Enterprise Governance, Cloud, and Integration
+
+-   [x] evaluation framework
+-   [x] Model Gateway
+-   [x] Spring Boot Policy Engine
+-   [x] Human Review policy bridge
+-   [x] internal-tool enforcement
+-   [x] MCP enforcement
+-   [x] persistent policy audit
+-   [x] policy metrics
+-   [x] Policy Control Center
+-   [x] DDD bounded contexts
+-   [x] Clean Architecture rules
+-   [x] SOLID guidance
+-   [x] ADRs
+-   [x] C4 documentation
+-   [x] arc42 documentation
+-   [x] Azure reference architecture
+-   [x] Pulumi Python IaC
+-   [x] cloud security and cost guidance
+-   [x] RBAC foundation
+-   [x] multi-tenancy
+-   [x] tenant isolation foundation
+-   [x] OAuth PKCE foundation
+-   [x] Access & Tenancy Control Center
+-   [x] transactional outbox
+-   [x] Redis Streams
+-   [x] Event Control Center
+-   [x] production hardening
+-   [x] threat model
+-   [x] secret scanning
+-   [x] security CI
+-   [x] release automation
 
 ### Future Work
 
--   [x] Web Control Center
--   [ ] Multi-tenancy
--   [ ] Role-based access control
--   [ ] OAuth providers
--   [ ] Cloud deployment reference architecture
--   [ ] Advanced policy engine
--   [ ] Agent evaluation dashboard
--   [ ] Cost and token analytics
--   [ ] Model provider abstraction
--   [ ] Event-driven external integrations
--   [ ] Expanded automated test coverage
+-   [ ] complete production OAuth token exchange and account linking
+-   [ ] deploy and validate the Azure stack in a live Azure subscription
+-   [ ] add external event consumers/connectors
+-   [ ] expand tenant-level authorization policies
+-   [ ] add more model providers to the Model Gateway
+-   [ ] expand evaluation datasets and benchmark suites
+-   [ ] add production SLO/SLA dashboards
+-   [ ] perform larger-scale load and resilience testing
 
 ------------------------------------------------------------------------
 
@@ -1249,21 +1291,35 @@ B1AD542FF99B82CD0F55C5305D848F41F4E589BAFC5DBFCA902F46FEE208224C
 
 RedPA AI demonstrates practical experience with:
 
--   Agentic AI system design;
+-   Agentic AI architecture;
 -   multi-agent orchestration;
--   distributed services;
--   RAG;
--   MCP;
--   A2A;
--   stateful workflow execution;
+-   Retrieval-Augmented Generation;
+-   Model Context Protocol;
+-   Agent-to-Agent communication;
+-   durable workflow execution;
 -   Human-in-the-Loop systems;
 -   semantic memory;
--   asynchronous job processing;
+-   model abstraction;
+-   AI evaluation;
+-   deterministic AI guardrails;
+-   policy enforcement;
+-   auditability;
+-   event-driven architecture;
+-   transactional outbox patterns;
+-   Redis Streams;
+-   RBAC and multi-tenancy;
+-   OAuth PKCE architecture;
+-   Domain-Driven Design;
+-   Clean Architecture;
+-   C4 and arc42;
+-   Azure architecture;
+-   Infrastructure as Code with Pulumi;
 -   API security;
 -   observability;
 -   containerization;
--   Kubernetes deployment;
--   CI and release engineering.
+-   Kubernetes and Helm;
+-   CI/CD;
+-   security and release engineering.
 
 ------------------------------------------------------------------------
 
