@@ -29,12 +29,12 @@
 - [x] production hardening
 
 ## Release gate
-- [ ] apply final database migration in Docker
-- [ ] run full regression suite
-- [ ] run frontend production build
-- [ ] run Spring Boot build
-- [ ] run runtime health checks
-- [ ] run event Redis Streams smoke test
-- [ ] create release archive
-- [ ] review archive contents
+- [x] apply final database migration in Docker
+- [x] run full regression suite
+- [x] run frontend production build
+- [x] run Spring Boot build
+- [x] run runtime health checks
+- [x] run event Redis Streams smoke test
+- [x] create release archive
+- [x] review archive contents
 - [ ] tag v3.0.0 only after all checks pass
