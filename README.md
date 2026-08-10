@@ -1,32 +1,17 @@
-```{=html}
 <p align="center">
-```
-`<img src="docs/images/logo.png" width="220" alt="RedPA AI">`{=html}
-```{=html}
+  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
 </p>
-```
-```{=html}
-<h1 align="center">
-```
-RedPA AI
-```{=html}
-</h1>
-```
-```{=html}
+
+<h1 align="center">RedPA AI</h1>
+
 <p align="center">
-```
-`<strong>`{=html}Enterprise Agentic AI Platform`</strong>`{=html}
-```{=html}
+  <strong>Enterprise Agentic AI Platform</strong>
 </p>
-```
-```{=html}
+
 <p align="center">
-```
-Production-oriented multi-agent orchestration, MCP tool execution, A2A
-communication, durable workflows, semantic memory, policy enforcement,
-human approval, multi-tenancy, event-driven integration, and distributed
-observability.
-```{=html}
+  Production-oriented multi-agent orchestration, MCP tool execution, A2A communication,
+  durable workflows, semantic memory, policy enforcement, human approval, multi-tenancy,
+  event-driven integration, and distributed observability.
 </p>
 ```
 ```{=html}
