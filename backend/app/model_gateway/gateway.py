@@ -68,6 +68,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         capability: LLMCapability = LLMCapability.CHAT,
+        allowed_providers: frozenset[str] | set[str] | None = None,
     ) -> GatewayResult:
         route = self.preview_route(
             agent_id=agent_id,
@@ -80,6 +81,16 @@ class ModelGateway:
             route.provider,
             *route.fallback_providers,
         )
+
+        if allowed_providers is not None:
+            candidates = tuple(
+                name for name in candidates
+                if name in allowed_providers
+            )
+            if not candidates:
+                raise ProviderNotFoundError(
+                    "No routed model provider is allowed by tenant governance.",
+                )
 
         attempted: list[str] = []
         last_error: Exception | None = None

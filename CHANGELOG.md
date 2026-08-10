@@ -1,5 +1,18 @@
 # Changelog
 
+## v4.1 Control Plane Integration
+
+### Added
+
+- persistent tenant model budgets and model usage ledger;
+- provider allow-list enforcement in the existing Model Gateway;
+- configurable per-provider/model pricing for token cost accounting;
+- persistent workflow definitions, runs, checkpoints, and lifecycle transitions;
+- workflow lifecycle events through the existing transactional outbox;
+- event delivery state with exponential retry, dead-letter queue, and replay;
+- Prometheus metrics for governance, workflows, and delivery failures;
+- authenticated v4.1 control-plane APIs and tenant membership checks.
+
 ## v1.0.0
 
 ### Added

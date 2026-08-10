@@ -1,4 +1,4 @@
-﻿services:
+services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -71,6 +71,31 @@
       PYTHONPATH: /app/backend
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
       REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: ["redpa-network"]
+
+
+  outbox-publisher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-outbox-publisher
+    restart: unless-stopped
+    command: ["python", "-m", "app.events.outbox_publisher"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-CHANGE_THIS_TO_A_LONG_RANDOM_SECRET}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      EVENT_STREAM_NAME: ${EVENT_STREAM_NAME:-redpa:events}
+      OUTBOX_PUBLISHER_POLL_SECONDS: ${OUTBOX_PUBLISHER_POLL_SECONDS:-1}
+      OUTBOX_PUBLISHER_BATCH_SIZE: ${OUTBOX_PUBLISHER_BATCH_SIZE:-100}
     depends_on:
       postgres:
         condition: service_healthy
@@ -589,4 +614,3 @@ networks:
   redpa-network:
     name: redpa-network
     driver: bridge
-

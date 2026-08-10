@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -14,6 +15,7 @@ class GatewayMessage(BaseModel):
 
 class GatewayInvokeRequest(BaseModel):
     messages: list[GatewayMessage] = Field(min_length=1)
+    tenant_id: UUID | None = None
     agent_id: str | None = Field(default=None, max_length=150)
     provider: str | None = Field(default=None, max_length=100)
     model: str | None = Field(default=None, max_length=200)

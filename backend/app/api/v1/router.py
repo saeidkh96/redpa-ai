@@ -1,4 +1,5 @@
-﻿from app.api.v1.events import router as events_router
+from app.api.v1.platform_v4 import router as platform_v4_router
+from app.api.v1.events import router as events_router
 from app.api.v1.oauth import router as oauth_router
 from app.api.v1.tenants import router as tenants_router
 from app.api.v1 import model_gateway
@@ -112,3 +113,5 @@ api_router.include_router(oauth_router)
 
 api_router.include_router(events_router)
 
+
+api_router.include_router(platform_v4_router)
