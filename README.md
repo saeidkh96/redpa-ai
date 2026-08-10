@@ -13,24 +13,19 @@
   durable workflows, semantic memory, policy enforcement, human approval, multi-tenancy,
   event-driven integration, and distributed observability.
 </p>
-```
-```{=html}
-<p align="center">
-```
-![Python](https://img.shields.io/badge/Python-3.13-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688) ![Spring
-Boot](https://img.shields.io/badge/Spring_Boot-Policy_Engine-6DB33F)
-![Next.js](https://img.shields.io/badge/Next.js-Control_Center-black)
-![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-336791)
-![Redis](https://img.shields.io/badge/Redis-Streams-DC382D)
-![Azure](https://img.shields.io/badge/Azure-Pulumi-0078D4)
-![Release](https://img.shields.io/badge/Release-v3.0.0-success)
-![License](https://img.shields.io/badge/License-MIT-green)
 
-```{=html}
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-Latest-009688" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Spring_Boot-Policy_Engine-6DB33F" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/Next.js-Control_Center-black" alt="Next.js">
+  <img src="https://img.shields.io/badge/Docker-Enabled-2496ED" alt="Docker">
+  <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
+  <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
+  <img src="https://img.shields.io/badge/Release-v3.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
-```
 
 ------------------------------------------------------------------------
 
