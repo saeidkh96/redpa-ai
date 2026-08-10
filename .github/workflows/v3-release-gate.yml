@@ -25,7 +25,9 @@ jobs:
     runs-on: ubuntu-latest
 
     timeout-minutes: 30
-
+    env:
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai_test"
+      JWT_SECRET_KEY: "github-actions-test-jwt-secret-key-that-is-long-enough"
     steps:
       # ------------------------------------------------------------
       # Checkout
