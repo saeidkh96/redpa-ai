@@ -64,8 +64,8 @@ GET  /api/v1/policy/audit
 Extract into the repository root, then:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_13_4_13_6.ps1
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_13_4_13_6.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_13_4_13_6.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_13_4_13_6.ps1
 ```
 
 Apply the migration:

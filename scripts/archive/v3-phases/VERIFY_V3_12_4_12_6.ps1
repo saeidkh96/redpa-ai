@@ -50,7 +50,7 @@ Pass "Model Gateway routing/reliability tests"
 
 $routerContent = Get-Content ".\backend\app\api\v1\router.py" -Raw
 if ($routerContent -notmatch "model_gateway\.router") {
-    throw "Model Gateway API router is not registered. Run APPLY_V3_12_6_API.ps1."
+    throw "Model Gateway API router is not registered. Run scripts/archive/v3-phases/APPLY_V3_12_6_API.ps1."
 }
 Pass "Model Gateway API registration"
 

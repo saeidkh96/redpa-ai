@@ -35,7 +35,7 @@ Keep Docker Desktop running and ensure Ollama is reachable.
 Then run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_12.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_12.ps1
 ```
 
 The verification script intentionally asks for a RedPA login because Model Gateway endpoints are protected by the existing JWT boundary.

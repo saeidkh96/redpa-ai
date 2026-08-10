@@ -63,13 +63,13 @@ Extract this ZIP into the repository root and replace files when prompted.
 Register the router once:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_12_6_API.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_12_6_API.ps1
 ```
 
 Verify:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_12_4_12_6.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_12_4_12_6.ps1
 ```
 
 If verification passes:

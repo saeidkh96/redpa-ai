@@ -42,5 +42,5 @@
 - [x] Frontend production image builds
 - [ ] README reflects v2
 - [ ] CHANGELOG reflects v2
-- [x] RELEASE_NOTES_v2.0.0.md exists
+- [x] docs/archive/v2/RELEASE_NOTES_v2.0.0.md exists
 - [ ] Release archive and SHA256 checksum are generated

@@ -704,7 +704,7 @@ export default function Dashboard() {
         </section>
 
         <section className="panel" id="release">
-          <PanelTitle eyebrow="PHASE 10.9" title="V2 Release Readiness" badge="v2.0.0 candidate" />
+          <PanelTitle eyebrow="V3" title="Release Readiness" badge="v3.0.0" />
           <div className="releaseGrid">
             <Metric label="Platform" value={health?.status === "healthy" ? "Ready" : "Check"} />
             <Metric label="Frontend" value="Online" />
@@ -713,7 +713,11 @@ export default function Dashboard() {
           </div>
           <div className="releaseBox">
             <strong>Final validation</strong>
-            <p>Run <code>.\VERIFY_V2_RELEASE.ps1</code>. After automated checks and the manual release checklist pass, commit the final files and run <code>.\BUILD_V2_RELEASE.ps1</code>.</p>
+            <p>
+              Run <code>.\VERIFY_V3_PHASES_17_18_19_RUNTIME.ps1</code>. After the runtime,
+              regression, security, and release checks pass, build the release artifact with{" "}
+              <code>.\BUILD_V3_RELEASE.ps1</code>.
+            </p>
           </div>
         </section>
       </section>

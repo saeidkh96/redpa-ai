@@ -30,7 +30,7 @@ The new frontend runs on port `3001`. Grafana remains on `3000`.
 ## Final verification
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V2_RELEASE.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v2\VERIFY_V2_RELEASE.ps1
 ```
 
 The final v2.0.0 release verification completed successfully with:
@@ -50,5 +50,5 @@ The final v2.0.0 release verification completed successfully with:
 After the release gate passes and manual checks are complete:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\BUILD_V2_RELEASE.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v2\BUILD_V2_RELEASE.ps1
 ```

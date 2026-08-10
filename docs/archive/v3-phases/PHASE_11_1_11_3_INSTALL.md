@@ -37,7 +37,7 @@ Extract into the repository root and replace files when prompted.
 Run:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_11_1_11_3.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_11_1_11_3.ps1
 ```
 
 If PASS:

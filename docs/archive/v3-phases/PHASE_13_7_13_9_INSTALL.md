@@ -49,8 +49,8 @@ Final verification covers:
 ## Install
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_13_7_13_9.ps1
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_13_8.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_13_7_13_9.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_13_8.ps1
 ```
 
 Then rebuild frontend:
@@ -71,5 +71,5 @@ http://localhost:3001/policy
 Finally:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_13.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_13.ps1
 ```

@@ -49,7 +49,7 @@ Pass "Python guardrail tests"
 
 $routerContent = Get-Content ".\backend\app\api\v1\router.py" -Raw
 if ($routerContent -notmatch "guardrails_router") {
-    throw "Guardrails API router is not registered. Run APPLY_V3_13_1_13_3.ps1."
+    throw "Guardrails API router is not registered. Run scripts/archive/v3-phases/APPLY_V3_13_1_13_3.ps1."
 }
 Pass "Guardrails API registration"
 

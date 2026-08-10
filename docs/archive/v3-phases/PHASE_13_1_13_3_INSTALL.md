@@ -67,13 +67,13 @@ Extract the ZIP into the RedPA repository root.
 Register the FastAPI router:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_13_1_13_3.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_13_1_13_3.ps1
 ```
 
 Verify source, Python tests, Compose, Spring Boot tests and Cucumber BDD:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_13_1_13_3.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_13_1_13_3.ps1
 ```
 
 ## Start Phase 13 runtime

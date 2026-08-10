@@ -20,7 +20,7 @@ Adds:
 Run the router patch once:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_11_5_API.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_11_5_API.ps1
 ```
 
 ## 11.6 Evaluation Dashboard
@@ -35,7 +35,7 @@ The dashboard displays persisted evaluation runs, aggregate scores, metric-level
 ## Verification
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_11_4_11_6.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_11_4_11_6.ps1
 ```
 
 Then rebuild/restart:

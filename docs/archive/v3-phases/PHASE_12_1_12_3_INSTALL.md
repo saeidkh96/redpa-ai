@@ -35,7 +35,7 @@ Keep the OpenAI-compatible provider disabled until you intentionally configure a
 ## Verify
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_12_1_12_3.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_12_1_12_3.ps1
 ```
 
 No database migration is required.

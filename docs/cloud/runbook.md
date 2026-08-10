@@ -3,7 +3,7 @@
 ## 1. Validate locally
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_15.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_15.ps1
 ```
 
 ## 2. Authenticate

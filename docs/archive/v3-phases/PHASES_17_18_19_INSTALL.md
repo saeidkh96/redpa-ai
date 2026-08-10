@@ -38,13 +38,13 @@ This package closes the planned RedPA v3 roadmap.
 ## 1. Extract and apply
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_PHASES_17_18_19.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_PHASES_17_18_19.ps1
 ```
 
 ## 2. Source verification
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASES_17_18_19_SOURCE.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASES_17_18_19_SOURCE.ps1
 ```
 
 ## 3. Apply Docker database migration
@@ -89,7 +89,7 @@ http://localhost:3001/events
 ## 5. Final runtime/release verification
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASES_17_18_19_RUNTIME.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASES_17_18_19_RUNTIME.ps1
 ```
 
 Expected final state:

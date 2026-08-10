@@ -26,13 +26,13 @@ reviewable, while allowing bounded contexts to migrate incrementally.
 Extract into the repository root.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_PHASE_14.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_PHASE_14.ps1
 ```
 
 Then verify:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_14.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_14.ps1
 ```
 
 Expected final output:

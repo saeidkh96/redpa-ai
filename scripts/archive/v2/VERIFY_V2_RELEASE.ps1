@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 function Pass($message) {
     Write-Host "[PASS] $message" -ForegroundColor Green
@@ -15,7 +15,7 @@ $required = @(
     "README.md",
     "LICENSE",
     "SECURITY.md",
-    "RELEASE_NOTES_v2.0.0.md",
+    "docs/archive/v2/RELEASE_NOTES_v2.0.0.md",
     "docs/V2_RELEASE_CHECKLIST.md",
     "docs/V2_PRODUCTION_HARDENING.md"
 )

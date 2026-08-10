@@ -29,7 +29,7 @@ docker compose exec backend alembic upgrade head
 Run final Phase 11 verification:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_11.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_11.ps1
 ```
 
 Expected final message:

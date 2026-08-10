@@ -34,5 +34,5 @@ retention and operational-data sensitivity.
 
 ## Release gate
 
-Do not tag `v2.0.0` until `VERIFY_V2_RELEASE.ps1` passes and the manual checklist
+Do not tag `v2.0.0` until `scripts/archive/v2/VERIFY_V2_RELEASE.ps1` passes and the manual checklist
 in `docs/V2_RELEASE_CHECKLIST.md` is reviewed.

@@ -45,7 +45,7 @@ Pass "Evaluation + benchmark tests"
 
 $routerContent = Get-Content ".\backend\app\api\v1\router.py" -Raw
 if ($routerContent -notmatch "evaluations\.router") {
-    throw "Evaluation API router is not registered. Run APPLY_V3_11_5_API.ps1 first."
+    throw "Evaluation API router is not registered. Run scripts/archive/v3-phases/APPLY_V3_11_5_API.ps1 first."
 }
 Pass "Evaluation API registration"
 

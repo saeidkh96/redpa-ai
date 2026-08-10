@@ -33,8 +33,8 @@ callback non-production until those prerequisites exist.
 Extract into the repository root.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_PHASE_16.ps1
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_16.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_PHASE_16.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_16.ps1
 ```
 
 If source verification passes, apply the migration in Docker:
@@ -64,5 +64,5 @@ http://localhost:3001/access
 Finally:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_16_RUNTIME.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_16_RUNTIME.ps1
 ```

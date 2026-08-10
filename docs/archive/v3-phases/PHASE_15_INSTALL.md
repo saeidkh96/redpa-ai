@@ -17,8 +17,8 @@ Phase 15 covers:
 Extract into the repository root.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\APPLY_V3_PHASE_15.ps1
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_15.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\APPLY_V3_PHASE_15.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_15.ps1
 ```
 
 The verifier is deliberately safe: it does not create billable Azure
@@ -46,7 +46,7 @@ Then:
 
 ```powershell
 $env:REDPA_RUN_AZURE_PREVIEW = "1"
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASE_15.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\archive\v3-phases\VERIFY_V3_PHASE_15.ps1
 ```
 
 Only run `pulumi up` when you intentionally want to create Azure resources.
