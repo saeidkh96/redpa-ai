@@ -3,4 +3,4 @@ runtime:
   name: python
   options:
     virtualenv: .venv
-description: RedPA AI Azure reference infrastructure with Pulumi
+description: RedPA AI production-oriented Azure Container Apps infrastructure

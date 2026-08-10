@@ -7,12 +7,27 @@ config:
   redpa:frontendImage: ghcr.io/saeidkh96/redpa-ai-frontend:latest
   redpa:policyImage: ghcr.io/saeidkh96/redpa-ai-policy-service:latest
   redpa:postgresAdmin: redpaadmin
+  redpa:postgresVersion: "16"
   redpa:minReplicas: "1"
   redpa:maxReplicas: "2"
+  redpa:workerMinReplicas: "1"
+  redpa:workerMaxReplicas: "2"
+  redpa:logRetentionDays: "30"
+  redpa:deployBackgroundServices: "true"
+  redpa:deployResearchAgent: "true"
+  redpa:deployA2ACoordinator: "true"
+  redpa:backendCpu: "1.0"
+  redpa:backendMemory: 2Gi
+  redpa:frontendCpu: "0.5"
+  redpa:frontendMemory: 1Gi
+  redpa:policyCpu: "0.5"
+  redpa:policyMemory: 1Gi
 
-# Configure secrets with Pulumi CLI instead of writing them here:
-#
+# Required secrets:
 # pulumi config set --secret redpa:postgresPassword "<strong-password>"
+# pulumi config set --secret redpa:secretKey "<long-random-secret>"
+# pulumi config set --secret redpa:apiKeyPepper "<long-random-pepper>"
+# Optional:
 # pulumi config set --secret redpa:redisUrl "rediss://..."
 # pulumi config set --secret redpa:qdrantUrl "https://..."
 # pulumi config set --secret redpa:ollamaBaseUrl "https://..."

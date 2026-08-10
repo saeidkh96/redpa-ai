@@ -56,3 +56,6 @@ backend/storage/*
 !backend/storage/.gitkeep
 *.pyc
 release-check-report.json
+
+# Local Pulumi stack configuration
+infra/azure/Pulumi.*.yaml

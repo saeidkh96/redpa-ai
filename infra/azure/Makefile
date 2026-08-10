@@ -1,4 +1,4 @@
-.PHONY: install preview up destroy
+.PHONY: install preview up refresh destroy
 
 install:
 	python -m pip install -r requirements.txt
@@ -8,6 +8,9 @@ preview:
 
 up:
 	pulumi up
+
+refresh:
+	pulumi refresh
 
 destroy:
 	pulumi destroy

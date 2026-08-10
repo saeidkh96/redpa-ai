@@ -1,78 +1,47 @@
-# RedPA AI on Azure with Pulumi
+# RedPA AI — Azure Deployment Pack
 
-This directory is the Phase 15 Azure reference architecture.
+Replacement for the current `infra/azure` baseline.
 
-## Azure resources
-
-The baseline provisions:
-
+## Provisions
 - Resource Group
-- Azure Container Registry
-- Azure Container Apps Environment
-- Backend Container App
-- Frontend Container App
-- Spring Boot Policy Service Container App
-- Azure Database for PostgreSQL Flexible Server
-- Azure Key Vault
-- Log Analytics Workspace
+- ACR
+- User Assigned Managed Identity + AcrPull
+- Key Vault + Key Vault Secrets User
+- Log Analytics
+- Container Apps Environment connected to Log Analytics
+- PostgreSQL Flexible Server + `redpa_ai`
+- Backend
+- Frontend
+- Spring Boot Policy Service
+- Background Worker
+- Background Scheduler
+- Research Agent
+- A2A Coordinator
 
-Redis, Qdrant, and model inference remain explicit external endpoints in this
-reference stack. This avoids pretending that a development container is a
-production-grade stateful Azure service.
-
-## Prerequisites
-
-- Azure CLI
-- Pulumi CLI
-- Python
-- an Azure subscription
-- Docker images published to a registry accessible by Azure
+## External by design
+Redis, Qdrant, and Ollama/model inference remain configurable external endpoints. This avoids silently choosing expensive/stateful Azure replacements before the architecture is decided.
 
 ## Setup
-
 ```powershell
-cd infra\azure
+cd infrazure
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-
 az login
 pulumi login
 pulumi stack init dev
 pulumi config set azure-native:location westeurope
 pulumi config set redpa:environment dev
+pulumi config set redpa:location westeurope
+pulumi config set redpa:projectName redpa
 pulumi config set --secret redpa:postgresPassword "<strong-password>"
-```
-
-Optional external service endpoints:
-
-```powershell
-pulumi config set --secret redpa:redisUrl "rediss://..."
-pulumi config set --secret redpa:qdrantUrl "https://..."
-pulumi config set --secret redpa:ollamaBaseUrl "https://..."
-```
-
-Preview:
-
-```powershell
+pulumi config set --secret redpa:secretKey "<long-random-secret>"
+pulumi config set --secret redpa:apiKeyPepper "<long-random-pepper>"
+python -m compileall .
 pulumi preview
 ```
 
-Deploy:
+Do not run `pulumi up` until preview is clean.
 
-```powershell
-pulumi up
-```
-
-Destroy when no longer required:
-
-```powershell
-pulumi destroy
-```
-
-## Important
-
-`pulumi up` creates billable Azure resources.
-
-The Phase 15 verification script does not deploy cloud resources by default.
-A real Azure preview is opt-in through `REDPA_RUN_AZURE_PREVIEW=1`.
+## Important production note
+The included PostgreSQL baseline enables public network access. Before real production traffic, move PostgreSQL and Container Apps to private/VNet-integrated networking and disable public database access.
