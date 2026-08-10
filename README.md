@@ -257,6 +257,18 @@ http://localhost:3001
 
 ## Architecture
 
+
+<p align="center">
+  <img
+    src="docs/images/architecture.png"
+    alt="RedPA AI v3 Architecture"
+    width="100%"
+  />
+</p>
+
+### Logical Architecture
+
+
 ``` mermaid
 flowchart TB
     Client[Client / API Consumer]
