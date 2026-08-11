@@ -49,6 +49,7 @@ class ModelGateway:
         provider: str | None = None,
         model: str | None = None,
         capability: LLMCapability = LLMCapability.CHAT,
+        metadata: dict[str, object] | None = None,
     ) -> ModelRoute:
         return self.router.select(
             registry=self.registry,
@@ -57,6 +58,7 @@ class ModelGateway:
                 requested_provider=provider,
                 requested_model=model,
                 required_capability=capability,
+                metadata=metadata,
             ),
         )
 
@@ -75,6 +77,7 @@ class ModelGateway:
             provider=provider,
             model=model or request.model,
             capability=capability,
+            metadata=request.metadata,
         )
 
         candidates = (

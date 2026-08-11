@@ -47,6 +47,33 @@ class ModelGatewayConfig:
             timeout_seconds=_env_float("OLLAMA_TIMEOUT_SECONDS", 120.0),
             enabled=_env_bool("MODEL_GATEWAY_OLLAMA_ENABLED", True),
         )
+        openai = ProviderConfig(
+            name="openai",
+            provider_type="openai_compatible",
+            base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com").rstrip("/"),
+            default_model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+            api_key=os.getenv("OPENAI_API_KEY"),
+            timeout_seconds=_env_float("OPENAI_TIMEOUT_SECONDS", 120.0),
+            enabled=_env_bool("MODEL_GATEWAY_OPENAI_ENABLED", False),
+        )
+        anthropic = ProviderConfig(
+            name="anthropic",
+            provider_type="anthropic",
+            base_url=os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/"),
+            default_model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"),
+            api_key=os.getenv("ANTHROPIC_API_KEY"),
+            timeout_seconds=_env_float("ANTHROPIC_TIMEOUT_SECONDS", 120.0),
+            enabled=_env_bool("MODEL_GATEWAY_ANTHROPIC_ENABLED", False),
+        )
+        gemini = ProviderConfig(
+            name="gemini",
+            provider_type="gemini",
+            base_url=os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com").rstrip("/"),
+            default_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
+            api_key=os.getenv("GEMINI_API_KEY"),
+            timeout_seconds=_env_float("GEMINI_TIMEOUT_SECONDS", 120.0),
+            enabled=_env_bool("MODEL_GATEWAY_GEMINI_ENABLED", False),
+        )
         compatible = ProviderConfig(
             name=os.getenv("OPENAI_COMPATIBLE_PROVIDER_NAME", "openai-compatible"),
             provider_type="openai_compatible",
@@ -58,5 +85,5 @@ class ModelGatewayConfig:
         )
         return cls(
             default_provider=os.getenv("MODEL_GATEWAY_DEFAULT_PROVIDER", "ollama"),
-            providers=(ollama, compatible),
+            providers=(ollama, openai, anthropic, gemini, compatible),
         )

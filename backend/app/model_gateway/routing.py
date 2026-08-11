@@ -9,6 +9,7 @@ from app.model_gateway.contracts import (
     LLMCapability,
     LLMProvider,
 )
+from app.model_gateway.economics import ModelEconomicsCatalog
 from app.model_gateway.registry import (
     LLMProviderRegistry,
     ProviderNotFoundError,
@@ -162,6 +163,39 @@ class AgentRoutingStrategy:
         )
 
 
+class CostAwareRoutingStrategy:
+    """Routes to the cheapest capability-compatible provider when requested."""
+
+    def __init__(self, catalog: ModelEconomicsCatalog | None = None) -> None:
+        self.catalog = catalog or ModelEconomicsCatalog.from_environment()
+
+    def select(self, *, registry: LLMProviderRegistry, context: RoutingContext) -> ModelRoute | None:
+        metadata = context.metadata or {}
+        if str(metadata.get("routing_mode", "")).lower() not in {"cost", "cost_aware", "cheapest"}:
+            return None
+        candidates = registry.providers_supporting(context.required_capability)
+        allowed = metadata.get("allowed_providers")
+        if isinstance(allowed, (list, tuple, set, frozenset)) and allowed:
+            allowed_names = {str(name) for name in allowed}
+            candidates = [p for p in candidates if p.descriptor.name in allowed_names]
+        if not candidates:
+            return None
+        estimated_input = int(metadata.get("estimated_input_tokens", 1000) or 1000)
+        estimated_output = int(metadata.get("estimated_output_tokens", 500) or 500)
+        ranked = sorted(
+            candidates,
+            key=lambda p: self.catalog.get(p.descriptor.name, context.requested_model or p.descriptor.default_model).estimate(estimated_input, estimated_output),
+        )
+        selected = ranked[0]
+        fallbacks = tuple(p.descriptor.name for p in ranked[1:])
+        return ModelRoute(
+            provider=selected.descriptor.name,
+            model=context.requested_model or selected.descriptor.default_model,
+            reason="cost_aware",
+            fallback_providers=fallbacks,
+        )
+
+
 class CapabilityRoutingStrategy:
     """Selects the first enabled provider supporting the required capability."""
 
@@ -222,6 +256,7 @@ class CompositeRoutingStrategy:
             (
                 ExplicitRoutingStrategy(),
                 AgentRoutingStrategy.from_environment(),
+                CostAwareRoutingStrategy(),
                 CapabilityRoutingStrategy(),
             ),
             global_fallback_providers=fallback,

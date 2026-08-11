@@ -1,5 +1,14 @@
 # Changelog
 
+## v4.2 Production Agentic Systems Readiness
+
+- Added OpenAI, Anthropic Claude, Gemini, and Ollama multi-provider gateway support.
+- Added cost-aware capability routing and provider economics catalog.
+- Added unified production agent runtime for LLMs, guarded tools, data context, and business rules.
+- Added deterministic input/output guardrails, evaluation gates, AI-specific Prometheus telemetry, concurrency/idempotency/retry foundations.
+- Added `/api/v1/production-ai` readiness and runtime execution APIs.
+
+
 ## v4.1 Control Plane Integration
 
 ### Added

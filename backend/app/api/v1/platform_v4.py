@@ -51,6 +51,15 @@ class AgentIn(BaseModel):
     version: str
     capabilities: list[str]
     endpoint: str | None = None
+    allowed_models: list[str] = []
+    allowed_tools: list[str] = []
+    memory_policy: str = "tenant_scoped"
+    approval_policy: str = "risk_based"
+    evaluation_policy: str = "production_default"
+    timeout_seconds: float = 120.0
+    max_retries: int = 2
+    max_cost_usd: float | None = None
+    max_concurrency: int = 8
 
 
 class ToolIn(BaseModel):
@@ -433,7 +442,21 @@ async def replay_dead_letter(
 @router.post("/agents")
 async def register_agent(body: AgentIn, current_user: CurrentUser):
     del current_user
-    return asdict(control_center.agents.register(AgentDefinition(body.agent_id, body.version, tuple(body.capabilities), body.endpoint)))
+    return asdict(control_center.agents.register(AgentDefinition(
+        agent_id=body.agent_id,
+        version=body.version,
+        capabilities=tuple(body.capabilities),
+        endpoint=body.endpoint,
+        allowed_models=tuple(body.allowed_models),
+        allowed_tools=tuple(body.allowed_tools),
+        memory_policy=body.memory_policy,
+        approval_policy=body.approval_policy,
+        evaluation_policy=body.evaluation_policy,
+        timeout_seconds=body.timeout_seconds,
+        max_retries=body.max_retries,
+        max_cost_usd=body.max_cost_usd,
+        max_concurrency=body.max_concurrency,
+    )))
 
 
 @router.post("/tools")

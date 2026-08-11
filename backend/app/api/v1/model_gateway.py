@@ -139,6 +139,7 @@ async def invoke_model(
                 provider=request.provider,
                 model=request.model,
                 capability=request.capability,
+                metadata=request.metadata,
             )
         except ProviderNotFoundError as exc:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

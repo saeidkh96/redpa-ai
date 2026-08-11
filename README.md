@@ -108,6 +108,24 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V4.2 Production Agentic Systems Readiness
+
+RedPA V4.2 adds the production-agentic capabilities needed to operate agents as real product infrastructure rather than isolated prototypes:
+
+- multi-provider model access for Ollama, OpenAI/OpenAI-compatible, Anthropic Claude, and Google Gemini;
+- capability-aware, fallback-aware and cost-aware routing;
+- a unified agent runtime combining LLMs, guarded internal/MCP tools, data context, and business rules;
+- deterministic input/output guardrails layered with the existing policy service and HITL path;
+- runtime evaluation gates with pass, retry, human-review, and block outcomes;
+- AI-specific Prometheus telemetry for outcomes, latency, cost, guardrails, and tool calls;
+- concurrency, idempotency, retry-budget and existing circuit-breaker/durable-workflow reliability controls;
+- tenant provider allow-lists, token/cost budgets, persisted usage, and provider economics for cost-efficient routing.
+
+See [`docs/V4_2_PRODUCTION_AGENTIC_READINESS.md`](docs/V4_2_PRODUCTION_AGENTIC_READINESS.md).
+
+------------------------------------------------------------------------
+
 ## What v3 Adds
 
 RedPA AI v3 extends the v2 platform with an enterprise governance and
