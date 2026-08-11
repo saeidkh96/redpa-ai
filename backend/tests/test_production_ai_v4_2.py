@@ -76,7 +76,7 @@ async def test_anthropic_provider_parses_response() -> None:
             "stop_reason": "end_turn",
             "usage": {"input_tokens": 4, "output_tokens": 2},
         })
-    provider = AnthropicProvider(ProviderConfig("anthropic", "anthropic", "https://api.anthropic.com", "claude-test", api_key="x"), transport=httpx.MockTransport(handler))
+    provider = AnthropicProvider(ProviderConfig("anthropic", "anthropic", "https://api.anthropic.com", "claude-test", api_key="test-api-key"), transport=httpx.MockTransport(handler))
     response = await provider.generate(LLMRequest(messages=(LLMMessage("user", "hi"),)))
     assert response.content == "ok"
     assert response.usage and response.usage.total_tokens == 6
@@ -90,7 +90,7 @@ async def test_gemini_provider_parses_response() -> None:
             "candidates": [{"content": {"parts": [{"text": "gemini ok"}]}, "finishReason": "STOP"}],
             "usageMetadata": {"promptTokenCount": 5, "candidatesTokenCount": 3, "totalTokenCount": 8},
         })
-    provider = GeminiProvider(ProviderConfig("gemini", "gemini", "https://generativelanguage.googleapis.com", "gemini-test", api_key="x"), transport=httpx.MockTransport(handler))
+    provider = GeminiProvider(ProviderConfig("gemini", "gemini", "https://generativelanguage.googleapis.com", "gemini-test", api_key="test-api-key"), transport=httpx.MockTransport(handler))
     response = await provider.generate(LLMRequest(messages=(LLMMessage("user", "hi"),)))
     assert response.content == "gemini ok"
     assert response.usage and response.usage.total_tokens == 8
