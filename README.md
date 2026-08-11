@@ -160,28 +160,6 @@ integration layer.
 -   policy metrics;
 -   Policy Control Center.
 
-### Architecture
-
-<p align="center">
-  <img src="docs/images/architecture.png"
-       alt="RedPA AI V4.2 Production Agentic AI Platform Architecture"
-       width="100%">
-</p>
-
-<p align="center">
-  <em>RedPA AI V4.2 — Production Agentic AI Platform Architecture</em>
-</p>
-
-The diagram summarizes the implemented platform layers: FastAPI APIs and middleware,
-LangGraph orchestration, the production agent runtime, durable workflows, agent memory,
-the unified tool/MCP layer, A2A and distributed agents, the multi-provider model gateway,
-governance and identity controls, PostgreSQL/Qdrant/Redis infrastructure, observability,
-and deployment assets.
-
-For deeper architecture documentation, see
-[`docs/architecture.md`](docs/architecture.md) and
-[`docs/architecture/`](docs/architecture/).
-
 ------------------------------------------------------------------------
 ## Control Center
 
