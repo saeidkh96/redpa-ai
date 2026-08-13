@@ -7,6 +7,11 @@ from app.model_gateway.bootstrap import model_gateway
 from app.model_gateway.contracts import LLMMessage, LLMProviderError, LLMRequest
 from app.model_gateway.registry import ProviderNotFoundError
 from app.security.rbac import Permission, authorize
+from app.schemas.reliability_validation import (
+    FailureSimulationRequest,
+    FailureSimulationResponse,
+    ReliabilityScorecardResponse,
+)
 from app.schemas.model_gateway import (
     CircuitBreakerResponse,
     GatewayInvokeRequest,
@@ -21,11 +26,13 @@ from app.services.platform_v4_model_governance_service import (
     ModelPricingCatalog,
     PlatformModelGovernanceService,
 )
+from app.services.reliability_validation_service import ReliabilityValidationService
 from app.services.tenant_service import TenantMembershipNotFoundError, TenantService
 
 
 router = APIRouter(prefix="/model-gateway", tags=["Model Gateway"])
 pricing_catalog = ModelPricingCatalog.from_environment()
+reliability_validation = ReliabilityValidationService()
 
 
 @router.get("/providers", response_model=list[ProviderDescriptorResponse])
@@ -245,3 +252,22 @@ async def invoke_model(
         ),
         attempted_providers=list(result.attempted_providers),
     )
+
+
+@router.get("/reliability/scorecard", response_model=ReliabilityScorecardResponse)
+async def reliability_scorecard(current_user: CurrentUser) -> ReliabilityScorecardResponse:
+    del current_user
+    health = await model_gateway.health()
+    return reliability_validation.scorecard(
+        health=health,
+        circuits=model_gateway.executor.circuit_snapshot(),
+    )
+
+
+@router.post("/reliability/simulate", response_model=FailureSimulationResponse)
+async def simulate_provider_failure(
+    request: FailureSimulationRequest,
+    current_user: CurrentUser,
+) -> FailureSimulationResponse:
+    del current_user
+    return reliability_validation.simulate(request)

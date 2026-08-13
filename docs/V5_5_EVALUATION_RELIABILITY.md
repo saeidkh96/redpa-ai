@@ -34,3 +34,28 @@ POST /api/v1/evaluations/quality-gates/evaluate
 ### Scope
 
 This batch compares persisted evaluation runs already stored by RedPA. It does not claim automated deployment promotion or CI blocking yet; those are separate integrations.
+
+
+## Batch 2: Benchmark Persistence and Provider Reliability
+
+Implemented:
+
+- database-backed benchmark run history;
+- benchmark filtering by agent or model;
+- persisted case results and metric averages;
+- provider reliability scorecards derived from live health and circuit-breaker state;
+- deterministic retry/fallback failure validation without mutating live providers;
+- Control Plane benchmark history and reliability scorecard.
+
+API:
+
+```text
+GET  /api/v1/evaluations/benchmark-history
+GET  /api/v1/evaluations/benchmark-history/{run_id}
+GET  /api/v1/model-gateway/reliability/scorecard
+POST /api/v1/model-gateway/reliability/simulate
+```
+
+`POST /api/v1/evaluations/benchmarks/run` now persists its benchmark result.
+
+The failure simulator validates retry/fallback policy behavior deterministically. It does not inject faults into external production providers.

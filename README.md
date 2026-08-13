@@ -115,6 +115,13 @@ The platform can:
 
 V5.5 extends RedPA's existing evaluation and reliability foundations with release-oriented quality controls.
 
+**Batch 2 implemented:**
+
+- persisted benchmark history with case-level results;
+- agent/model benchmark filtering and comparison pool;
+- provider reliability scorecards using live health and circuit-breaker state;
+- deterministic retry/fallback failure validation.
+
 **Batch 1 implemented:**
 
 - persisted baseline vs candidate evaluation comparison;

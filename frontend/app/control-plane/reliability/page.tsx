@@ -37,6 +37,42 @@ type Regression = {
 };
 type Gate = { decision: string; reasons: string[]; regression: Regression };
 
+type Benchmark = {
+  id: string;
+  name: string;
+  agent_id?: string | null;
+  model_name?: string | null;
+  aggregate_score: number;
+  pass_rate: number;
+  pass_threshold: number;
+  metric_averages: Record<string, number>;
+  created_at: string;
+};
+type BenchmarkList = { items: Benchmark[]; total: number };
+type ProviderReliability = {
+  provider: string;
+  available: boolean;
+  circuit_state: string;
+  failures: number;
+  failure_threshold: number;
+  score: number;
+  status: string;
+};
+type ReliabilityScorecard = {
+  overall_score: number;
+  healthy_providers: number;
+  degraded_providers: number;
+  unavailable_providers: number;
+  providers: ProviderReliability[];
+};
+type FailureSimulation = {
+  primary_attempts: number;
+  fallback_attempted: boolean;
+  recovered: boolean;
+  expected_outcome: string;
+  events: string[];
+};
+
 export default function ReliabilityEvaluationPage() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [baseline, setBaseline] = useState("");
@@ -45,6 +81,9 @@ export default function ReliabilityEvaluationPage() {
   const [maxMetricDrop, setMaxMetricDrop] = useState("0.10");
   const [minimumScore, setMinimumScore] = useState("0.70");
   const [gate, setGate] = useState<Gate | null>(null);
+  const [benchmarks, setBenchmarks] = useState<Benchmark[]>([]);
+  const [scorecard, setScorecard] = useState<ReliabilityScorecard | null>(null);
+  const [simulation, setSimulation] = useState<FailureSimulation | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
@@ -53,10 +92,21 @@ export default function ReliabilityEvaluationPage() {
     setLoading(true);
     setError("");
     try {
-      const payload = await redpaFetch<RunList>("/api/v1/evaluations?limit=100");
-      setRuns(payload.items);
-      if (!baseline && payload.items.length > 1) setBaseline(payload.items[1].id);
-      if (!candidate && payload.items.length) setCandidate(payload.items[0].id);
+      const [runResult, benchmarkResult, reliabilityResult] = await Promise.allSettled([
+        redpaFetch<RunList>("/api/v1/evaluations?limit=100"),
+        redpaFetch<BenchmarkList>("/api/v1/evaluations/benchmark-history?limit=100"),
+        redpaFetch<ReliabilityScorecard>("/api/v1/model-gateway/reliability/scorecard", {}, true),
+      ]);
+      if (runResult.status === "fulfilled") {
+        const payload = runResult.value;
+        setRuns(payload.items);
+        if (!baseline && payload.items.length > 1) setBaseline(payload.items[1].id);
+        if (!candidate && payload.items.length) setCandidate(payload.items[0].id);
+      } else {
+        throw runResult.reason;
+      }
+      if (benchmarkResult.status === "fulfilled") setBenchmarks(benchmarkResult.value.items);
+      if (reliabilityResult.status === "fulfilled") setScorecard(reliabilityResult.value);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load evaluation runs");
     } finally {
@@ -88,6 +138,23 @@ export default function ReliabilityEvaluationPage() {
       setError(err instanceof Error ? err.message : "Quality gate evaluation failed");
     } finally {
       setEvaluating(false);
+    }
+  }
+
+  async function simulateFailure() {
+    setError("");
+    try {
+      setSimulation(await redpaFetch<FailureSimulation>("/api/v1/model-gateway/reliability/simulate", {
+        method: "POST",
+        body: JSON.stringify({
+          primary_failures: 2,
+          retry_attempts: 2,
+          fallback_available: true,
+          primary_retryable: true,
+        }),
+      }, true));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failure simulation failed");
     }
   }
 
@@ -139,6 +206,29 @@ export default function ReliabilityEvaluationPage() {
         </tbody></table></div>
       </section>
     </> : null}
+
+    <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Provider resilience</span><h2>Reliability scorecard</h2></div>{scorecard ? <StatusBadge value={scorecard.unavailable_providers ? "degraded" : "healthy"} /> : null}</div>
+      <section className="cpMetrics">
+        <MetricCard label="Overall reliability" value={scorecard ? scorecard.overall_score.toFixed(3) : "—"} />
+        <MetricCard label="Healthy providers" value={scorecard?.healthy_providers ?? "—"} />
+        <MetricCard label="Degraded" value={scorecard?.degraded_providers ?? "—"} />
+        <MetricCard label="Unavailable" value={scorecard?.unavailable_providers ?? "—"} />
+      </section>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Provider</th><th>Status</th><th>Score</th><th>Circuit</th><th>Failures</th></tr></thead><tbody>
+        {(scorecard?.providers || []).map((item) => <tr key={item.provider}><td><strong>{item.provider}</strong></td><td><StatusBadge value={item.status} /></td><td>{item.score.toFixed(3)}</td><td><StatusBadge value={item.circuit_state} /></td><td>{item.failures} / {item.failure_threshold}</td></tr>)}
+      </tbody></table></div>
+      <div className="cpActions"><button onClick={() => void simulateFailure()}>Validate retry + fallback scenario</button></div>
+      {simulation ? <div className={simulation.recovered ? "cpSuccess" : "cpNotice"}><strong>{simulation.expected_outcome}</strong> · {simulation.events.join(" → ")}</div> : null}
+    </section>
+
+    <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Persisted benchmark history</span><h2>Agent / model comparison pool</h2></div><span>{benchmarks.length} runs</span></div>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Benchmark</th><th>Agent</th><th>Model</th><th>Score</th><th>Pass rate</th><th>Created</th></tr></thead><tbody>
+        {benchmarks.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><small>{item.id}</small></td><td>{item.agent_id || "—"}</td><td>{item.model_name || "—"}</td><td>{item.aggregate_score.toFixed(3)}</td><td>{(item.pass_rate * 100).toFixed(1)}%</td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}
+      </tbody></table></div>
+      {!benchmarks.length ? <p className="cpMuted">Benchmark runs created through the benchmark API will be persisted here after the V5.5 migration is applied.</p> : null}
+    </section>
 
     <section className="cpPanel">
       <div className="cpPanelHead"><div><span>Evaluation history</span><h2>Candidate pool</h2></div></div>

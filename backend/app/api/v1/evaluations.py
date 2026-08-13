@@ -18,6 +18,10 @@ from app.schemas.benchmark import (
     BenchmarkRunRequest,
     BenchmarkRunResponse,
 )
+from app.schemas.benchmark_persistence import (
+    PersistedBenchmarkRunListResponse,
+    PersistedBenchmarkRunResponse,
+)
 from app.schemas.evaluation import (
     EvaluationRequest,
     EvaluationRunListResponse,
@@ -31,6 +35,10 @@ from app.schemas.evaluation_regression import (
     EvaluationRegressionResponse,
     QualityGateRequest,
     QualityGateResponse,
+)
+from app.services.benchmark_persistence_service import (
+    BenchmarkPersistenceService,
+    BenchmarkRunNotFoundError,
 )
 from app.services.evaluation_service import (
     EvaluationRunNotFoundError,
@@ -51,6 +59,7 @@ benchmark_engine = BenchmarkEngine(
     evaluation_service=service,
 )
 regression_service = EvaluationRegressionService()
+benchmark_store = BenchmarkPersistenceService()
 
 
 @router.post(
@@ -128,6 +137,51 @@ async def get_evaluation_observability() -> EvaluationObservabilityResponse:
 
 
 @router.get(
+    "/benchmark-history",
+    response_model=PersistedBenchmarkRunListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List persisted benchmark runs",
+)
+async def list_persisted_benchmarks(
+    session: DatabaseSession,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    agent_id: str | None = Query(default=None, max_length=150),
+    model_name: str | None = Query(default=None, max_length=200),
+) -> PersistedBenchmarkRunListResponse:
+    items, total = await benchmark_store.list(
+        session=session,
+        limit=limit,
+        offset=offset,
+        agent_id=agent_id,
+        model_name=model_name,
+    )
+    return PersistedBenchmarkRunListResponse(
+        items=[PersistedBenchmarkRunResponse.model_validate(item) for item in items],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/benchmark-history/{run_id}",
+    response_model=PersistedBenchmarkRunResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a persisted benchmark run",
+)
+async def get_persisted_benchmark(
+    run_id: uuid.UUID,
+    session: DatabaseSession,
+) -> PersistedBenchmarkRunResponse:
+    try:
+        item = await benchmark_store.get(session=session, run_id=run_id)
+    except BenchmarkRunNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return PersistedBenchmarkRunResponse.model_validate(item)
+
+
+@router.get(
     "/{run_id}",
     response_model=EvaluationRunResponse,
     status_code=status.HTTP_200_OK,
@@ -159,6 +213,7 @@ async def get_evaluation(
 )
 async def run_benchmark(
     request: BenchmarkRunRequest,
+    session: DatabaseSession,
 ) -> BenchmarkRunResponse:
     cases = [
         BenchmarkCase(
@@ -178,6 +233,12 @@ async def run_benchmark(
         cases=cases,
         agent_id=request.agent_id,
         model_name=request.model_name,
+        pass_threshold=request.pass_threshold,
+    )
+
+    await benchmark_store.save(
+        session=session,
+        result=result,
         pass_threshold=request.pass_threshold,
     )
 

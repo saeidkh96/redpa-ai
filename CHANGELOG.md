@@ -2,6 +2,14 @@
 
 ## V5.5.0 — Evaluation & Reliability (in progress)
 
+### Batch 2
+
+- persisted benchmark runs and case-level results;
+- added benchmark history filtered by agent/model;
+- added provider reliability scorecards from health + circuit state;
+- added deterministic retry/fallback failure validation;
+- extended the V5.5 Control Plane with benchmark history and provider reliability.
+
 ### Batch 1
 
 - added persisted baseline/candidate evaluation comparison;
