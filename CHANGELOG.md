@@ -2,6 +2,15 @@
 
 ## V5.5.0 — Evaluation & Reliability (in progress)
 
+### Batch 3
+
+- added persisted release quality-gate history;
+- added release labels and gate metadata;
+- added CI-friendly release gate endpoint with HTTP 409 on blocked promotion;
+- added persisted benchmark trend endpoint;
+- added release gate and quality-trend views to the V5.5 Control Plane;
+- added `scripts/quality/release_gate.py` for CI process exit codes.
+
 ### Batch 2
 
 - persisted benchmark runs and case-level results;

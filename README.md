@@ -115,6 +115,14 @@ The platform can:
 
 V5.5 extends RedPA's existing evaluation and reliability foundations with release-oriented quality controls.
 
+**Batch 3 implemented:**
+
+- persisted release promotion quality gates and decision history;
+- CI-friendly gate endpoint returning HTTP `409` for blocked candidates;
+- benchmark quality trends from persisted benchmark history;
+- release-gate history and trend inspection in the Control Plane;
+- standalone CI release-gate CLI with pass/fail/error exit codes.
+
 **Batch 2 implemented:**
 
 - persisted benchmark history with case-level results;

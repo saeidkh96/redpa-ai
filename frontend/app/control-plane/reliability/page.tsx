@@ -35,7 +35,40 @@ type Regression = {
   regressed_metrics: string[];
   regression_detected: boolean;
 };
-type Gate = { decision: string; reasons: string[]; regression: Regression };
+type Gate = {
+  id: string;
+  decision: string;
+  reasons: string[];
+  release_label?: string | null;
+  regression: Regression;
+  created_at: string;
+};
+type ReleaseGateHistoryItem = {
+  id: string;
+  baseline_run_id: string;
+  candidate_run_id: string;
+  release_label?: string | null;
+  decision: string;
+  reasons: string[];
+  baseline_score: number;
+  candidate_score: number;
+  aggregate_delta: number;
+  regression_detected: boolean;
+  regressed_metrics: string[];
+  created_at: string;
+};
+type ReleaseGateHistory = { items: ReleaseGateHistoryItem[]; total: number };
+type BenchmarkTrend = {
+  id: string;
+  name: string;
+  agent_id?: string | null;
+  model_name?: string | null;
+  aggregate_score: number;
+  pass_rate: number;
+  metric_averages: Record<string, number>;
+  created_at: string;
+};
+type BenchmarkTrendResponse = { items: BenchmarkTrend[]; total: number };
 
 type Benchmark = {
   id: string;
@@ -80,7 +113,10 @@ export default function ReliabilityEvaluationPage() {
   const [maxAggregateDrop, setMaxAggregateDrop] = useState("0.05");
   const [maxMetricDrop, setMaxMetricDrop] = useState("0.10");
   const [minimumScore, setMinimumScore] = useState("0.70");
+  const [releaseLabel, setReleaseLabel] = useState("candidate-release");
   const [gate, setGate] = useState<Gate | null>(null);
+  const [gateHistory, setGateHistory] = useState<ReleaseGateHistoryItem[]>([]);
+  const [trends, setTrends] = useState<BenchmarkTrend[]>([]);
   const [benchmarks, setBenchmarks] = useState<Benchmark[]>([]);
   const [scorecard, setScorecard] = useState<ReliabilityScorecard | null>(null);
   const [simulation, setSimulation] = useState<FailureSimulation | null>(null);
@@ -92,10 +128,12 @@ export default function ReliabilityEvaluationPage() {
     setLoading(true);
     setError("");
     try {
-      const [runResult, benchmarkResult, reliabilityResult] = await Promise.allSettled([
+      const [runResult, benchmarkResult, reliabilityResult, gateHistoryResult, trendResult] = await Promise.allSettled([
         redpaFetch<RunList>("/api/v1/evaluations?limit=100"),
         redpaFetch<BenchmarkList>("/api/v1/evaluations/benchmark-history?limit=100"),
         redpaFetch<ReliabilityScorecard>("/api/v1/model-gateway/reliability/scorecard", {}, true),
+        redpaFetch<ReleaseGateHistory>("/api/v1/evaluations/release-gates?limit=100"),
+        redpaFetch<BenchmarkTrendResponse>("/api/v1/evaluations/benchmark-trends?limit=100"),
       ]);
       if (runResult.status === "fulfilled") {
         const payload = runResult.value;
@@ -107,6 +145,8 @@ export default function ReliabilityEvaluationPage() {
       }
       if (benchmarkResult.status === "fulfilled") setBenchmarks(benchmarkResult.value.items);
       if (reliabilityResult.status === "fulfilled") setScorecard(reliabilityResult.value);
+      if (gateHistoryResult.status === "fulfilled") setGateHistory(gateHistoryResult.value.items);
+      if (trendResult.status === "fulfilled") setTrends(trendResult.value.items);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load evaluation runs");
     } finally {
@@ -128,11 +168,14 @@ export default function ReliabilityEvaluationPage() {
         max_metric_drop: Number(maxMetricDrop),
         minimum_candidate_score: Number(minimumScore),
         require_candidate_pass: true,
+        release_label: releaseLabel.trim() || null,
+        metadata: { source: "control-plane" },
       };
-      setGate(await redpaFetch<Gate>("/api/v1/evaluations/quality-gates/evaluate", {
+      setGate(await redpaFetch<Gate>("/api/v1/evaluations/release-gates/evaluate", {
         method: "POST",
         body: JSON.stringify(payload),
       }));
+      await load();
     } catch (err) {
       setGate(null);
       setError(err instanceof Error ? err.message : "Quality gate evaluation failed");
@@ -187,8 +230,9 @@ export default function ReliabilityEvaluationPage() {
         <label><span>Max aggregate drop</span><input value={maxAggregateDrop} onChange={(e) => setMaxAggregateDrop(e.target.value)} /></label>
         <label><span>Max metric drop</span><input value={maxMetricDrop} onChange={(e) => setMaxMetricDrop(e.target.value)} /></label>
         <label><span>Minimum score</span><input value={minimumScore} onChange={(e) => setMinimumScore(e.target.value)} /></label>
+        <label><span>Release label</span><input value={releaseLabel} onChange={(e) => setReleaseLabel(e.target.value)} /></label>
       </div>
-      <div className="cpActions"><button onClick={() => void evaluate()} disabled={evaluating || !baseline || !candidate}>{evaluating ? "Evaluating…" : "Run quality gate"}</button></div>
+      <div className="cpActions"><button onClick={() => void evaluate()} disabled={evaluating || !baseline || !candidate}>{evaluating ? "Evaluating…" : "Evaluate & persist release gate"}</button></div>
     </section>
 
     {gate ? <>
@@ -206,6 +250,23 @@ export default function ReliabilityEvaluationPage() {
         </tbody></table></div>
       </section>
     </> : null}
+
+    <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Promotion history</span><h2>Release quality gates</h2></div><span>{gateHistory.length} decisions</span></div>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Time</th><th>Release</th><th>Decision</th><th>Baseline</th><th>Candidate</th><th>Delta</th><th>Reasons</th></tr></thead><tbody>
+        {gateHistory.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString()}</td><td><strong>{item.release_label || "—"}</strong><small>{item.id}</small></td><td><StatusBadge value={item.decision} /></td><td>{item.baseline_score.toFixed(3)}</td><td>{item.candidate_score.toFixed(3)}</td><td>{item.aggregate_delta.toFixed(3)}</td><td>{item.reasons.join(", ")}</td></tr>)}
+      </tbody></table></div>
+      {!gateHistory.length ? <p className="cpMuted">No persisted release-gate decisions yet.</p> : null}
+      <p className="cpMuted">CI can call <code>POST /api/v1/evaluations/release-gates/ci-check</code>; failed gates return HTTP 409.</p>
+    </section>
+
+    <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Historical quality</span><h2>Benchmark trend</h2></div><span>{trends.length} points</span></div>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Time</th><th>Benchmark</th><th>Agent</th><th>Model</th><th>Score</th><th>Pass rate</th></tr></thead><tbody>
+        {trends.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString()}</td><td><strong>{item.name}</strong></td><td>{item.agent_id || "—"}</td><td>{item.model_name || "—"}</td><td>{item.aggregate_score.toFixed(3)}</td><td>{(item.pass_rate * 100).toFixed(1)}%</td></tr>)}
+      </tbody></table></div>
+      {!trends.length ? <p className="cpMuted">Persisted benchmark runs will appear here chronologically.</p> : null}
+    </section>
 
     <section className="cpPanel">
       <div className="cpPanelHead"><div><span>Provider resilience</span><h2>Reliability scorecard</h2></div>{scorecard ? <StatusBadge value={scorecard.unavailable_providers ? "degraded" : "healthy"} /> : null}</div>

@@ -36,6 +36,12 @@ from app.schemas.evaluation_regression import (
     QualityGateRequest,
     QualityGateResponse,
 )
+from app.schemas.release_quality import (
+    BenchmarkTrendResponse,
+    ReleaseQualityGateHistoryResponse,
+    ReleaseQualityGateRequest,
+    ReleaseQualityGateResponse,
+)
 from app.services.benchmark_persistence_service import (
     BenchmarkPersistenceService,
     BenchmarkRunNotFoundError,
@@ -46,6 +52,9 @@ from app.services.evaluation_service import (
 )
 from app.services.evaluation_regression_service import (
     EvaluationRegressionService,
+)
+from app.services.release_quality_gate_service import (
+    ReleaseQualityGateService,
 )
 
 
@@ -60,6 +69,7 @@ benchmark_engine = BenchmarkEngine(
 )
 regression_service = EvaluationRegressionService()
 benchmark_store = BenchmarkPersistenceService()
+release_quality_service = ReleaseQualityGateService(evaluation_service=service, regression_service=regression_service)
 
 
 @router.post(
@@ -179,6 +189,98 @@ async def get_persisted_benchmark(
     except BenchmarkRunNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     return PersistedBenchmarkRunResponse.model_validate(item)
+
+
+@router.post(
+    "/release-gates/evaluate",
+    response_model=ReleaseQualityGateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Evaluate and persist a release quality gate",
+)
+async def evaluate_release_quality_gate(
+    request: ReleaseQualityGateRequest,
+    session: DatabaseSession,
+) -> ReleaseQualityGateResponse:
+    try:
+        return await release_quality_service.evaluate_and_persist(
+            session=session,
+            request=request,
+        )
+    except EvaluationRunNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+@router.post(
+    "/release-gates/ci-check",
+    response_model=ReleaseQualityGateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="CI-friendly release gate; returns HTTP 409 when the gate fails",
+)
+async def ci_release_quality_gate(
+    request: ReleaseQualityGateRequest,
+    session: DatabaseSession,
+) -> ReleaseQualityGateResponse:
+    try:
+        result = await release_quality_service.evaluate_and_persist(
+            session=session,
+            request=request,
+        )
+    except EvaluationRunNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    if result.decision == "FAIL":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=result.model_dump(mode="json"),
+        )
+
+    return result
+
+
+@router.get(
+    "/release-gates",
+    response_model=ReleaseQualityGateHistoryResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List persisted release quality-gate decisions",
+)
+async def list_release_quality_gates(
+    session: DatabaseSession,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    decision: str | None = Query(default=None, pattern="^(PASS|FAIL|pass|fail)$"),
+) -> ReleaseQualityGateHistoryResponse:
+    return await release_quality_service.history(
+        session=session,
+        limit=limit,
+        offset=offset,
+        decision=decision,
+    )
+
+
+@router.get(
+    "/benchmark-trends",
+    response_model=BenchmarkTrendResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get chronological persisted benchmark trend points",
+)
+async def benchmark_trends(
+    session: DatabaseSession,
+    limit: int = Query(default=100, ge=1, le=500),
+    agent_id: str | None = Query(default=None, max_length=150),
+    model_name: str | None = Query(default=None, max_length=200),
+) -> BenchmarkTrendResponse:
+    return await release_quality_service.benchmark_trend(
+        session=session,
+        limit=limit,
+        agent_id=agent_id,
+        model_name=model_name,
+    )
 
 
 @router.get(

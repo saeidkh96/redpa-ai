@@ -59,3 +59,44 @@ POST /api/v1/model-gateway/reliability/simulate
 `POST /api/v1/evaluations/benchmarks/run` now persists its benchmark result.
 
 The failure simulator validates retry/fallback policy behavior deterministically. It does not inject faults into external production providers.
+
+
+## Batch 3: Release Quality Pipeline
+
+Implemented:
+
+- persisted release quality-gate decisions;
+- release labels and gate metadata;
+- historical PASS/FAIL decisions with reasons and regression evidence;
+- CI-friendly quality-gate endpoint that returns HTTP `409` when promotion is blocked;
+- benchmark trend history using persisted benchmark runs;
+- Control Plane release-gate history and benchmark trend views;
+- standalone CI CLI with process exit codes.
+
+API:
+
+```text
+POST /api/v1/evaluations/release-gates/evaluate
+POST /api/v1/evaluations/release-gates/ci-check
+GET  /api/v1/evaluations/release-gates
+GET  /api/v1/evaluations/benchmark-trends
+```
+
+CI CLI:
+
+```bash
+python scripts/quality/release_gate.py \
+  --baseline <BASELINE_EVALUATION_UUID> \
+  --candidate <CANDIDATE_EVALUATION_UUID> \
+  --release-label v5.5-candidate
+```
+
+Exit codes:
+
+```text
+0  quality gate passed
+1  quality gate failed (HTTP 409)
+2  request/configuration error
+```
+
+This creates a real promotion boundary without claiming that RedPA automatically deploys a candidate after a PASS decision.
