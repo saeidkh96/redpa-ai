@@ -1,5 +1,22 @@
 # Changelog
 
+## V5.0.0 — Control Plane
+
+### Added
+
+- unified Next.js Control Plane under `/control-plane`;
+- operational views for agents, model providers, Tools & MCP, durable workflows and Human Reviews;
+- Execution Explorer backed by persisted distributed-agent workflow/subtask state;
+- Agent Memory analytics and semantic-search console;
+- tenant Usage & Cost console backed by Platform V4 model-governance accounting;
+- integrated Governance view for policy enforcement and policy audit;
+- Access & Tenancy view for tenant workspaces and configured OAuth providers;
+- V5 Control Plane architecture and release documentation.
+
+### Design constraint
+
+The V5 Control Plane only surfaces capabilities backed by existing repository APIs and persisted services. It does not label roadmap or placeholder functionality as implemented.
+
 ## v4.2 Production Agentic Systems Readiness
 
 - Added OpenAI, Anthropic Claude, Gemini, and Ollama multi-provider gateway support.

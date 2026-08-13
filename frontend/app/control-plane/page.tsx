@@ -43,7 +43,7 @@ export default function ControlPlaneOverview() {
 
   return <>
     <header className="cpHeader">
-      <div><p className="cpEyebrow">REDPA AI · V5</p><h1>Control Plane</h1><p>Operational view over the APIs already implemented by the RedPA platform.</p></div>
+      <div><p className="cpEyebrow">REDPA AI · V5</p><h1>Control Plane</h1><p>Unified operational surface for the implemented RedPA agent, model, tool, workflow, memory, governance and access APIs.</p></div>
       <button onClick={() => void load()} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</button>
     </header>
     {notice ? <div className="cpNotice">{notice}</div> : null}
@@ -62,7 +62,20 @@ export default function ControlPlaneOverview() {
       </div>
     </section>
     <section className="cpPanel"><div className="cpPanelHead"><div><span>Navigate</span><h2>Control Plane surfaces</h2></div></div>
-      <div className="cpLaunchGrid"><Link href="/control-plane/agents"><strong>Agents</strong><span>Registry, health and capability discovery</span></Link><Link href="/control-plane/models"><strong>Models</strong><span>Providers, models, health and circuits</span></Link><Link href="/control-plane/tools"><strong>Tools & MCP</strong><span>Unified tool catalog and MCP server health</span></Link><Link href="/control-plane/workflows"><strong>Workflows</strong><span>Durable execution history and resume</span></Link><Link href="/control-plane/reviews"><strong>Human Reviews</strong><span>Approve, reject and resume HITL requests</span></Link><Link href="/evaluations"><strong>Evaluations</strong><span>Existing evaluation dashboard</span></Link><Link href="/policy"><strong>Governance</strong><span>Existing policy control center</span></Link><Link href="/access"><strong>Access</strong><span>Tenant and RBAC control center</span></Link></div>
+      <div className="cpLaunchGrid">
+        <Link href="/control-plane/agents"><strong>Agents</strong><span>Registry, health and capability discovery</span></Link>
+        <Link href="/control-plane/models"><strong>Models</strong><span>Providers, models, health and circuits</span></Link>
+        <Link href="/control-plane/tools"><strong>Tools & MCP</strong><span>Unified tool catalog and MCP server health</span></Link>
+        <Link href="/control-plane/workflows"><strong>Workflows</strong><span>Durable execution history and resume</span></Link>
+        <Link href="/control-plane/executions"><strong>Executions</strong><span>Persisted execution traces, attempts and latency</span></Link>
+        <Link href="/control-plane/memory"><strong>Memory</strong><span>Memory analytics and semantic retrieval</span></Link>
+        <Link href="/control-plane/usage"><strong>Usage & Cost</strong><span>Tenant budgets and persisted model accounting</span></Link>
+        <Link href="/control-plane/reviews"><strong>Human Reviews</strong><span>Approve, reject and resume HITL requests</span></Link>
+        <Link href="/control-plane/governance"><strong>Governance</strong><span>Policy enforcement and audit trail</span></Link>
+        <Link href="/control-plane/access"><strong>Access & Tenancy</strong><span>Tenant workspaces and configured identity providers</span></Link>
+        <Link href="/evaluations"><strong>Evaluations</strong><span>Existing evaluation dashboard</span></Link>
+        <Link href="/events"><strong>Events</strong><span>Existing event control center</span></Link>
+      </div>
     </section>
   </>;
 }

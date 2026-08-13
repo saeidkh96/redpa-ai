@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v4.2-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v5.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V5.0 Control Plane](#v50-control-plane)
 -   [V4.2 Production Agentic Systems Readiness](#v42-production-agentic-systems-readiness)
 -   [Control Center](#control-center)
 -   [Architecture](#architecture)
@@ -109,6 +110,36 @@ The platform can:
 ------------------------------------------------------------------------
 
 
+## V5.0 Control Plane
+
+RedPA V5.0 adds a unified operator-facing Control Plane over the platform APIs already implemented in the repository.
+
+Implemented V5 surfaces include:
+
+- **Overview** — platform health, agent health, model-provider state and direct navigation to operational surfaces;
+- **Agents** — registry, health and capability discovery;
+- **Models** — providers, model discovery, health and circuit-breaker state;
+- **Tools & MCP** — unified tool catalog, MCP server health and catalog refresh;
+- **Workflows** — persisted distributed durable workflows, subtask state and resume/retry;
+- **Executions** — persisted distributed execution history with subtask attempts, routing and timing;
+- **Memory** — Agent Memory analytics and semantic search;
+- **Usage & Cost** — tenant model budgets and persisted model-usage accounting;
+- **Human Reviews** — review queue, approve/reject decisions and supported workflow resume;
+- **Governance** — policy enforcement preview and persisted policy audit events;
+- **Access & Tenancy** — tenant workspaces and configured OAuth-provider discovery.
+
+V5.0 is intentionally API-backed: the Control Plane surfaces implemented backend behavior and does not present roadmap-only functionality as complete.
+
+Local entry point:
+
+```text
+http://localhost:3001/control-plane
+```
+
+See [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md) and [`docs/release/V5_0_CONTROL_PLANE.md`](docs/release/V5_0_CONTROL_PLANE.md).
+
+------------------------------------------------------------------------
+
 ## V4.2 Production Agentic Systems Readiness
 
 RedPA V4.2 adds the production-agentic capabilities needed to operate agents as real product infrastructure rather than isolated prototypes:
@@ -128,7 +159,7 @@ See [`docs/V4_2_PRODUCTION_AGENTIC_READINESS.md`](docs/V4_2_PRODUCTION_AGENTIC_R
 
 ## V3 Foundation
 
-The V3 foundation, retained in V4.2, extends the v2 platform with an enterprise governance and
+The V3 foundation, retained in V5.0, extends the v2 platform with an enterprise governance and
 integration layer.
 
 ### Evaluation
@@ -163,8 +194,8 @@ integration layer.
 ------------------------------------------------------------------------
 ## Control Center
 
-The operator-facing Next.js Control Center provides one interface for
-inspecting and operating the platform.
+The Next.js V5 Control Plane provides one operator-facing interface for
+inspecting and operating implemented RedPA platform capabilities.
 
 Main areas include:
 
@@ -201,7 +232,7 @@ http://localhost:3001
 <p align="center">
   <img
     src="docs/images/architecture.png"
-    alt="RedPA AI v3 Architecture"
+    alt="RedPA AI Architecture"
     width="100%"
   />
 </p>
@@ -297,6 +328,8 @@ flowchart TB
 
 The repository also contains C4 and arc42 documentation for architecture
 views beyond this high-level diagram.
+
+The V5 Control Plane architecture is documented in [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md).
 
 ------------------------------------------------------------------------
 

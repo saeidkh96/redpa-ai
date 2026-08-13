@@ -14,10 +14,10 @@ const nav = [
   ["Memory", "/control-plane/memory"],
   ["Usage & Cost", "/control-plane/usage"],
   ["Human Reviews", "/control-plane/reviews"],
+  ["Governance", "/control-plane/governance"],
+  ["Access & Tenancy", "/control-plane/access"],
   ["Evaluations", "/evaluations"],
-  ["Policy", "/policy"],
   ["Events", "/events"],
-  ["Access", "/access"],
   ["Legacy Ops", "/"],
 ] as const;
 
