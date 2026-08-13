@@ -1,0 +1,41 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
+
+const nav = [
+  ["Overview", "/control-plane"],
+  ["Agents", "/control-plane/agents"],
+  ["Models", "/control-plane/models"],
+  ["Evaluations", "/evaluations"],
+  ["Policy", "/policy"],
+  ["Events", "/events"],
+  ["Access", "/access"],
+  ["Legacy Ops", "/"],
+] as const;
+
+export default function ControlPlaneShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <div className="cpShell">
+      <aside className="cpSidebar">
+        <Link href="/control-plane" className="cpBrand">
+          <img src="/logo.png" alt="RedPA AI" />
+          <div><strong>RedPA AI</strong><span>V5 Control Plane</span></div>
+        </Link>
+        <nav className="cpNav">
+          {nav.map(([label, href]) => {
+            const active = href === "/control-plane" ? pathname === href : pathname.startsWith(href);
+            return <Link key={href} href={href} className={active ? "active" : ""}>{label}</Link>;
+          })}
+        </nav>
+        <div className="cpSidebarFoot">
+          <span className="cpDot" />
+          <div><strong>Control Plane</strong><small>API-backed views only</small></div>
+        </div>
+      </aside>
+      <main className="cpMain">{children}</main>
+    </div>
+  );
+}
