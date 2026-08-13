@@ -15,12 +15,18 @@ models_app = typer.Typer(help="Inspect model providers.")
 tools_app = typer.Typer(help="Inspect the unified tool catalog.")
 quality_app = typer.Typer(help="Run release quality operations.")
 reliability_app = typer.Typer(help="Inspect provider reliability.")
+workflows_app = typer.Typer(help="Operate durable distributed workflows.")
+reviews_app = typer.Typer(help="Operate human-review requests.")
+mcp_app = typer.Typer(help="Inspect and execute MCP tools.")
 
 app.add_typer(agents_app, name="agents")
 app.add_typer(models_app, name="models")
 app.add_typer(tools_app, name="tools")
 app.add_typer(quality_app, name="quality")
 app.add_typer(reliability_app, name="reliability")
+app.add_typer(workflows_app, name="workflows")
+app.add_typer(reviews_app, name="reviews")
+app.add_typer(mcp_app, name="mcp")
 
 
 def _config(api_url: str | None, token: str | None) -> RedPAConfig:
@@ -215,6 +221,216 @@ def candidate_report(
     def execute() -> None:
         with RedPA(_config(api_url, token)) as client:
             _print(client.candidate_report(candidate), json_output=json_output)
+    _run(execute)
+
+
+@workflows_app.command("list")
+def workflows_list(
+    limit: int = typer.Option(50, min=1, max=200),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.workflows(limit=limit), json_output=json_output)
+    _run(execute)
+
+
+@workflows_app.command("get")
+def workflow_get(
+    workflow_id: str,
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.workflow(workflow_id), json_output=json_output)
+    _run(execute)
+
+
+@workflows_app.command("create")
+def workflow_create(
+    request: str = typer.Option(..., "--request"),
+    max_parallelism: int = typer.Option(4, min=1, max=10),
+    timeout_seconds: float = typer.Option(120.0, min=1.0, max=900.0),
+    approval_granted: bool = typer.Option(False, "--approval-granted"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(
+                client.create_workflow(
+                    request=request,
+                    max_parallelism=max_parallelism,
+                    timeout_seconds=timeout_seconds,
+                    approval_granted=approval_granted,
+                ),
+                json_output=json_output,
+            )
+    _run(execute)
+
+
+@workflows_app.command("resume")
+def workflow_resume(
+    workflow_id: str,
+    approval_granted: bool = typer.Option(False, "--approval-granted"),
+    retry_failed: bool = typer.Option(True, "--retry-failed/--no-retry-failed"),
+    retry_running: bool = typer.Option(True, "--retry-running/--no-retry-running"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(
+                client.resume_workflow(
+                    workflow_id,
+                    approval_granted=approval_granted,
+                    retry_failed=retry_failed,
+                    retry_running=retry_running,
+                ),
+                json_output=json_output,
+            )
+    _run(execute)
+
+
+@reviews_app.command("list")
+def reviews_list(
+    status: str | None = typer.Option(None, "--status"),
+    limit: int = typer.Option(20, min=1, max=100),
+    offset: int = typer.Option(0, min=0),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.reviews(status=status, limit=limit, offset=offset), json_output=json_output)
+    _run(execute)
+
+
+@reviews_app.command("get")
+def review_get(
+    review_id: str,
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.review(review_id), json_output=json_output)
+    _run(execute)
+
+
+@reviews_app.command("approve")
+def review_approve(
+    review_id: str,
+    feedback: str | None = typer.Option(None, "--feedback"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.approve_review(review_id, feedback=feedback), json_output=json_output)
+    _run(execute)
+
+
+@reviews_app.command("reject")
+def review_reject(
+    review_id: str,
+    feedback: str | None = typer.Option(None, "--feedback"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.reject_review(review_id, feedback=feedback), json_output=json_output)
+    _run(execute)
+
+
+@reviews_app.command("resume")
+def review_resume(
+    review_id: str,
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.resume_review(review_id), json_output=json_output)
+    _run(execute)
+
+
+@mcp_app.command("servers")
+def mcp_servers(
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.mcp_servers(), json_output=json_output)
+    _run(execute)
+
+
+@mcp_app.command("health")
+def mcp_health(
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.mcp_health(), json_output=json_output)
+    _run(execute)
+
+
+@mcp_app.command("tools")
+def mcp_tools(
+    refresh: bool = typer.Option(False, "--refresh"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.mcp_tools(refresh=refresh), json_output=json_output)
+    _run(execute)
+
+
+@mcp_app.command("execute")
+def mcp_execute(
+    qualified_name: str,
+    arguments: str = typer.Option("{}", "--arguments", help="JSON object with tool arguments."),
+    approval_granted: bool = typer.Option(False, "--approval-granted"),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        try:
+            parsed = json.loads(arguments)
+        except json.JSONDecodeError as exc:
+            typer.echo(f"Error: --arguments must be valid JSON: {exc}", err=True)
+            raise typer.Exit(code=2) from exc
+        if not isinstance(parsed, dict):
+            typer.echo("Error: --arguments must decode to a JSON object.", err=True)
+            raise typer.Exit(code=2)
+        with RedPA(_config(api_url, token)) as client:
+            _print(
+                client.execute_mcp_tool(
+                    qualified_name,
+                    arguments=parsed,
+                    approval_granted=approval_granted,
+                ),
+                json_output=json_output,
+            )
     _run(execute)
 
 

@@ -70,3 +70,26 @@ When backend source changes are not bind-mounted into the container, rebuild the
 ```bash
 docker compose up -d --build backend
 ```
+
+
+## V6.0 Complete Developer Surface
+
+The completed V6.0 developer layer includes:
+
+- synchronous `RedPA` client;
+- asynchronous `AsyncRedPA` client;
+- installable CLI entry point;
+- platform health and doctor diagnostics;
+- agent registry and capability discovery;
+- provider and unified-tool inspection;
+- durable workflow list/get/create/resume;
+- human-review list/get/approve/reject/resume;
+- MCP server/health/tool discovery and qualified-tool execution;
+- provider reliability inspection;
+- release quality-gate execution and candidate reports;
+- benchmark-suite and reliability-history API access;
+- actionable connection/authentication diagnostics;
+- local examples and dedicated SDK CI across Python 3.11, 3.12 and 3.13;
+- wheel/sdist package build support.
+
+V6.0 remains a client/developer layer over implemented RedPA APIs. It does not move orchestration or policy logic into the SDK.

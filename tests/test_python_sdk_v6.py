@@ -199,3 +199,90 @@ def test_sdk_connection_error_is_wrapped():
     assert exc.value.status_code is None
     assert exc.value.detail["type"] == "ConnectError"
     assert "Start or rebuild" in exc.value.detail["hint"]
+
+
+def test_sdk_workflow_and_review_routes():
+    seen: list[tuple[str, str]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append((request.method, request.url.path))
+        if request.url.path == "/api/v1/agents/distributed/durable":
+            return httpx.Response(200, json=[])
+        if request.url.path == "/api/v1/reviews":
+            return httpx.Response(
+                200,
+                json={"items": [], "total": 0, "limit": 20, "offset": 0},
+            )
+        raise AssertionError(request.url.path)
+
+    with RedPA(
+        RedPAConfig(base_url="http://redpa.test"),
+        transport=transport(handler),
+    ) as client:
+        assert client.workflows() == []
+        assert client.reviews()["total"] == 0
+
+    assert ("GET", "/api/v1/agents/distributed/durable") in seen
+    assert ("GET", "/api/v1/reviews") in seen
+
+
+def test_sdk_mcp_execute_uses_qualified_execute_route():
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/api/v1/mcp/tools/execute"
+        body = json.loads(request.content)
+        assert body == {
+            "qualified_name": "mcp:filesystem:read_file",
+            "arguments": {"path": "README.md"},
+            "approval_granted": True,
+        }
+        return httpx.Response(
+            200,
+            json={
+                "server_name": "filesystem",
+                "tool_name": "read_file",
+                "success": True,
+                "is_error": False,
+                "content": [],
+                "structured_content": None,
+                "execution_time_ms": 1.0,
+            },
+        )
+
+    with RedPA(
+        RedPAConfig(base_url="http://redpa.test"),
+        transport=transport(handler),
+    ) as client:
+        result = client.execute_mcp_tool(
+            "mcp:filesystem:read_file",
+            arguments={"path": "README.md"},
+            approval_granted=True,
+        )
+
+    assert result["success"] is True
+
+
+@pytest.mark.asyncio
+async def test_async_sdk_health():
+    async def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/api/v1/health"
+        return httpx.Response(
+            200,
+            json={
+                "status": "healthy",
+                "service": "RedPA AI",
+                "version": "6.0.0",
+                "environment": "test",
+                "database": {"status": "healthy"},
+            },
+        )
+
+    from redpa_sdk import AsyncRedPA
+
+    async with AsyncRedPA(
+        RedPAConfig(base_url="http://redpa.test"),
+        transport=httpx.MockTransport(handler),
+    ) as client:
+        result = await client.health()
+
+    assert result.status == "healthy"

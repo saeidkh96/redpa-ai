@@ -154,3 +154,132 @@ class RedPA:
             "GET",
             f"/api/v1/evaluations/release-candidates/{candidate_run_id}/report",
         )
+
+    def workflows(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        return self._request(
+            "GET",
+            "/api/v1/agents/distributed/durable",
+            params={"limit": limit},
+        )
+
+    def workflow(self, workflow_id: str) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            f"/api/v1/agents/distributed/durable/{workflow_id}",
+        )
+
+    def create_workflow(
+        self,
+        *,
+        request: str,
+        subtasks: list[dict[str, Any]] | None = None,
+        max_parallelism: int = 4,
+        timeout_seconds: float = 120.0,
+        approval_granted: bool = False,
+    ) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            "/api/v1/agents/distributed/durable",
+            json={
+                "request": request,
+                "subtasks": subtasks or [],
+                "max_parallelism": max_parallelism,
+                "timeout_seconds": timeout_seconds,
+                "approval_granted": approval_granted,
+            },
+        )
+
+    def resume_workflow(
+        self,
+        workflow_id: str,
+        *,
+        approval_granted: bool = False,
+        retry_failed: bool = True,
+        retry_running: bool = True,
+    ) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            f"/api/v1/agents/distributed/durable/{workflow_id}/resume",
+            json={
+                "approval_granted": approval_granted,
+                "retry_failed": retry_failed,
+                "retry_running": retry_running,
+            },
+        )
+
+    def reviews(
+        self,
+        *,
+        status: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> dict[str, Any]:
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if status:
+            params["status"] = status
+        return self._request("GET", "/api/v1/reviews", params=params)
+
+    def review(self, review_id: str) -> dict[str, Any]:
+        return self._request("GET", f"/api/v1/reviews/{review_id}")
+
+    def approve_review(self, review_id: str, *, feedback: str | None = None) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            f"/api/v1/reviews/{review_id}/approve",
+            json={"feedback": feedback},
+        )
+
+    def reject_review(self, review_id: str, *, feedback: str | None = None) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            f"/api/v1/reviews/{review_id}/reject",
+            json={"feedback": feedback},
+        )
+
+    def resume_review(self, review_id: str) -> dict[str, Any]:
+        return self._request("POST", f"/api/v1/reviews/{review_id}/resume")
+
+    def mcp_servers(self) -> list[dict[str, Any]]:
+        return self._request("GET", "/api/v1/mcp/servers")
+
+    def mcp_health(self) -> dict[str, Any]:
+        return self._request("GET", "/api/v1/mcp/health")
+
+    def mcp_tools(self, *, refresh: bool = False) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            "/api/v1/mcp/tools",
+            params={"refresh": str(refresh).lower()},
+        )
+
+    def execute_mcp_tool(
+        self,
+        qualified_name: str,
+        *,
+        arguments: dict[str, Any] | None = None,
+        approval_granted: bool = False,
+    ) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            "/api/v1/mcp/tools/execute",
+            json={
+                "qualified_name": qualified_name,
+                "arguments": arguments or {},
+                "approval_granted": approval_granted,
+            },
+        )
+
+    def benchmark_suites(self, *, limit: int = 50, offset: int = 0) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            "/api/v1/evaluations/benchmark-suites",
+            params={"limit": limit, "offset": offset},
+        )
+
+    def reliability_history(self, *, limit: int = 100, offset: int = 0) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            "/api/v1/model-gateway/reliability/history",
+            params={"limit": limit, "offset": offset},
+        )
+

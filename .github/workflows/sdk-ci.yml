@@ -1,0 +1,36 @@
+name: SDK CI
+
+on:
+  push:
+    paths:
+      - "sdk/python/**"
+      - "tests/test_python_sdk_v6.py"
+      - "tests/test_sdk_contract_v6.py"
+      - ".github/workflows/sdk-ci.yml"
+  pull_request:
+    paths:
+      - "sdk/python/**"
+      - "tests/test_python_sdk_v6.py"
+      - "tests/test_sdk_contract_v6.py"
+
+jobs:
+  python-sdk:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install SDK and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e sdk/python
+          python -m pip install pytest pytest-asyncio build
+      - name: Run SDK tests
+        run: |
+          python -m pytest tests/test_python_sdk_v6.py tests/test_sdk_contract_v6.py -q
+      - name: Build package
+        run: python -m build sdk/python

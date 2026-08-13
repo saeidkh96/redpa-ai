@@ -1,6 +1,17 @@
 # Changelog
 
-## V6.0.0 — Developer Platform (in progress)
+## V6.0.0 — Developer Platform
+
+### Completed V6 surface
+
+- added synchronous and asynchronous Python SDK clients;
+- added durable-workflow operations;
+- added Human Review operations;
+- added MCP discovery and execution operations;
+- added benchmark-suite and reliability-history client access;
+- added SDK examples and package-build support;
+- added dedicated SDK CI across Python 3.11, 3.12 and 3.13;
+- promoted SDK package version to `6.0.0`.
 
 ### Batch 1
 

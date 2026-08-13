@@ -1,0 +1,126 @@
+from __future__ import annotations
+
+from typing import Any
+
+import httpx
+
+from redpa_sdk.client import RedPAError
+from redpa_sdk.config import RedPAConfig
+from redpa_sdk.models import Health, Provider, ProviderHealth, ReliabilityScorecard
+
+
+class AsyncRedPA:
+    def __init__(
+        self,
+        config: RedPAConfig | None = None,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        self.config = config or RedPAConfig.from_env()
+        headers = {"Accept": "application/json"}
+        if self.config.token:
+            headers["Authorization"] = f"Bearer {self.config.token}"
+        self._client = httpx.AsyncClient(
+            base_url=self.config.base_url,
+            timeout=self.config.timeout_seconds,
+            headers=headers,
+            transport=transport,
+        )
+
+    async def __aenter__(self) -> "AsyncRedPA":
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+        await self.close()
+
+    async def close(self) -> None:
+        await self._client.aclose()
+
+    @staticmethod
+    def _detail(response: httpx.Response) -> Any:
+        try:
+            body = response.json()
+        except ValueError:
+            return response.text
+        return body.get("detail", body) if isinstance(body, dict) else body
+
+    async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
+        try:
+            response = await self._client.request(method, path, **kwargs)
+        except httpx.RequestError as exc:
+            raise RedPAError(
+                f"Cannot connect to RedPA API at {self.config.base_url}.",
+                detail={
+                    "type": exc.__class__.__name__,
+                    "message": str(exc),
+                    "hint": "Start or rebuild the RedPA backend, or set REDPA_API_URL to the correct API address.",
+                },
+            ) from exc
+        if response.is_error:
+            raise RedPAError(
+                f"RedPA API request failed with HTTP {response.status_code}.",
+                status_code=response.status_code,
+                detail=self._detail(response),
+            )
+        if response.status_code == 204:
+            return None
+        return response.json()
+
+    async def health(self) -> Health:
+        return Health.model_validate(await self._request("GET", "/api/v1/health"))
+
+    async def providers(self) -> list[Provider]:
+        payload = await self._request("GET", "/api/v1/model-gateway/providers")
+        return [Provider.model_validate(item) for item in payload]
+
+    async def provider_health(self) -> list[ProviderHealth]:
+        payload = await self._request("GET", "/api/v1/model-gateway/health")
+        return [ProviderHealth.model_validate(item) for item in payload]
+
+    async def reliability_scorecard(self) -> ReliabilityScorecard:
+        return ReliabilityScorecard.model_validate(
+            await self._request("GET", "/api/v1/model-gateway/reliability/scorecard")
+        )
+
+    async def workflows(self, *, limit: int = 50) -> list[dict[str, Any]]:
+        return await self._request(
+            "GET",
+            "/api/v1/agents/distributed/durable",
+            params={"limit": limit},
+        )
+
+    async def workflow(self, workflow_id: str) -> dict[str, Any]:
+        return await self._request("GET", f"/api/v1/agents/distributed/durable/{workflow_id}")
+
+    async def reviews(self, *, status: str | None = None, limit: int = 20, offset: int = 0) -> dict[str, Any]:
+        params: dict[str, Any] = {"limit": limit, "offset": offset}
+        if status:
+            params["status"] = status
+        return await self._request("GET", "/api/v1/reviews", params=params)
+
+    async def approve_review(self, review_id: str, *, feedback: str | None = None) -> dict[str, Any]:
+        return await self._request(
+            "POST",
+            f"/api/v1/reviews/{review_id}/approve",
+            json={"feedback": feedback},
+        )
+
+    async def mcp_health(self) -> dict[str, Any]:
+        return await self._request("GET", "/api/v1/mcp/health")
+
+    async def execute_mcp_tool(
+        self,
+        qualified_name: str,
+        *,
+        arguments: dict[str, Any] | None = None,
+        approval_granted: bool = False,
+    ) -> dict[str, Any]:
+        return await self._request(
+            "POST",
+            "/api/v1/mcp/tools/execute",
+            json={
+                "qualified_name": qualified_name,
+                "arguments": arguments or {},
+                "approval_granted": approval_granted,
+            },
+        )

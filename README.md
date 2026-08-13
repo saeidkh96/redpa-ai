@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v5.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v6.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -115,6 +115,19 @@ The platform can:
 ## V6.0 Developer Platform
 
 V6.0 begins the developer-platform layer for RedPA.
+
+**V6.0 complete developer surface:**
+
+- sync and async Python SDK clients;
+- packaged `redpa` CLI;
+- agent discovery and registry inspection;
+- durable workflow create/list/get/resume;
+- human-review list/get/approve/reject/resume;
+- MCP server, health, tool discovery and qualified-tool execution;
+- provider/reliability and release-quality operations;
+- benchmark-suite and reliability-history access;
+- actionable connection and authentication diagnostics;
+- SDK examples, package build configuration and dedicated Python 3.11–3.13 CI.
 
 **Batch 1 implemented:**
 

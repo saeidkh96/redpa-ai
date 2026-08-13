@@ -1,18 +1,27 @@
 # RedPA AI Python SDK
 
-V6.0 introduces the first installable developer-facing SDK for RedPA AI.
+The RedPA AI V6 SDK is the developer-facing client for the implemented RedPA `/api/v1` platform.
 
-## Install locally
+## Install
+
+From the repository:
 
 ```bash
 pip install -e sdk/python
 ```
 
-## Configuration
+Build a wheel:
 
 ```bash
-export REDPA_API_URL=http://localhost:8000
-export REDPA_TOKEN=<access-token>
+python -m build sdk/python
+```
+
+## Configuration
+
+```text
+REDPA_API_URL=http://localhost:8000
+REDPA_TOKEN=<access-token>
+REDPA_TIMEOUT_SECONDS=30
 ```
 
 PowerShell:
@@ -22,29 +31,67 @@ $env:REDPA_API_URL="http://localhost:8000"
 $env:REDPA_TOKEN="<access-token>"
 ```
 
-## Python
+## Sync Python client
 
 ```python
 from redpa_sdk import RedPA
 
 with RedPA() as client:
     print(client.health())
+    print(client.agents())
     print(client.providers())
-    print(client.reliability_scorecard())
+```
+
+## Async Python client
+
+```python
+import asyncio
+from redpa_sdk import AsyncRedPA
+
+async def main():
+    async with AsyncRedPA() as client:
+        print(await client.health())
+        print(await client.workflows(limit=10))
+
+asyncio.run(main())
 ```
 
 ## CLI
 
-```bash
+```text
 redpa status
 redpa doctor
+
 redpa agents list
-redpa agents discover research
+redpa agents discover "web research"
+
 redpa models providers
 redpa tools list
+
+redpa workflows list
+redpa workflows get <workflow-uuid>
+redpa workflows create --request "Research a topic"
+redpa workflows resume <workflow-uuid>
+
+redpa reviews list --status pending
+redpa reviews get <review-uuid>
+redpa reviews approve <review-uuid> --feedback "Approved"
+redpa reviews reject <review-uuid> --feedback "Rejected"
+redpa reviews resume <review-uuid>
+
+redpa mcp servers
+redpa mcp health
+redpa mcp tools
+redpa mcp execute mcp:redpa-filesystem:read_file --arguments "{\"path\":\"README.md\"}"
+
 redpa reliability scorecard
+
 redpa quality gate --baseline <uuid> --candidate <uuid> --release-label candidate
 redpa quality report --candidate <uuid>
 ```
 
-The SDK calls existing RedPA `/api/v1` endpoints. It does not embed or duplicate the RedPA backend runtime.
+Authenticated endpoints require `REDPA_TOKEN` or `--token`.
+
+## SDK scope
+
+The SDK is intentionally thin. Agent orchestration, durable workflow execution, MCP permissions, human review, model routing, evaluation, and reliability remain server-side RedPA capabilities. The SDK only exposes APIs that are implemented by the repository.
