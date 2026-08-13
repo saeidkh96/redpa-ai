@@ -98,6 +98,39 @@ type ReliabilityScorecard = {
   unavailable_providers: number;
   providers: ProviderReliability[];
 };
+
+type BenchmarkSuite = {
+  id: string;
+  name: string;
+  description?: string | null;
+  cases: unknown[];
+  pass_threshold: number;
+  enabled: boolean;
+  created_at: string;
+};
+type BenchmarkSuiteList = { items: BenchmarkSuite[]; total: number };
+type ReliabilitySnapshot = {
+  id: string;
+  overall_score: number;
+  healthy_providers: number;
+  degraded_providers: number;
+  unavailable_providers: number;
+  created_at: string;
+};
+type ReliabilityHistory = { items: ReliabilitySnapshot[]; total: number };
+type CandidateReport = {
+  candidate_run_id: string;
+  candidate_name: string;
+  candidate_score: number;
+  candidate_threshold: number;
+  latest_gate_decision?: string | null;
+  latest_benchmark_score?: number | null;
+  latest_benchmark_pass_rate?: number | null;
+  reliability_score?: number | null;
+  promotion_ready: boolean;
+  blockers: string[];
+};
+
 type FailureSimulation = {
   primary_attempts: number;
   fallback_attempted: boolean;
@@ -120,6 +153,9 @@ export default function ReliabilityEvaluationPage() {
   const [benchmarks, setBenchmarks] = useState<Benchmark[]>([]);
   const [scorecard, setScorecard] = useState<ReliabilityScorecard | null>(null);
   const [simulation, setSimulation] = useState<FailureSimulation | null>(null);
+  const [suites, setSuites] = useState<BenchmarkSuite[]>([]);
+  const [reliabilityHistory, setReliabilityHistory] = useState<ReliabilitySnapshot[]>([]);
+  const [candidateReport, setCandidateReport] = useState<CandidateReport | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
@@ -128,12 +164,14 @@ export default function ReliabilityEvaluationPage() {
     setLoading(true);
     setError("");
     try {
-      const [runResult, benchmarkResult, reliabilityResult, gateHistoryResult, trendResult] = await Promise.allSettled([
+      const [runResult, benchmarkResult, reliabilityResult, gateHistoryResult, trendResult, suiteResult, reliabilityHistoryResult] = await Promise.allSettled([
         redpaFetch<RunList>("/api/v1/evaluations?limit=100"),
         redpaFetch<BenchmarkList>("/api/v1/evaluations/benchmark-history?limit=100"),
         redpaFetch<ReliabilityScorecard>("/api/v1/model-gateway/reliability/scorecard", {}, true),
         redpaFetch<ReleaseGateHistory>("/api/v1/evaluations/release-gates?limit=100"),
         redpaFetch<BenchmarkTrendResponse>("/api/v1/evaluations/benchmark-trends?limit=100"),
+        redpaFetch<BenchmarkSuiteList>("/api/v1/evaluations/benchmark-suites?limit=100"),
+        redpaFetch<ReliabilityHistory>("/api/v1/model-gateway/reliability/history?limit=100", {}, true),
       ]);
       if (runResult.status === "fulfilled") {
         const payload = runResult.value;
@@ -147,6 +185,8 @@ export default function ReliabilityEvaluationPage() {
       if (reliabilityResult.status === "fulfilled") setScorecard(reliabilityResult.value);
       if (gateHistoryResult.status === "fulfilled") setGateHistory(gateHistoryResult.value.items);
       if (trendResult.status === "fulfilled") setTrends(trendResult.value.items);
+      if (suiteResult.status === "fulfilled") setSuites(suiteResult.value.items);
+      if (reliabilityHistoryResult.status === "fulfilled") setReliabilityHistory(reliabilityHistoryResult.value.items);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load evaluation runs");
     } finally {
@@ -181,6 +221,27 @@ export default function ReliabilityEvaluationPage() {
       setError(err instanceof Error ? err.message : "Quality gate evaluation failed");
     } finally {
       setEvaluating(false);
+    }
+  }
+
+  async function captureReliability() {
+    setError("");
+    try {
+      await redpaFetch("/api/v1/model-gateway/reliability/capture", { method: "POST" }, true);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Reliability capture failed");
+    }
+  }
+
+  async function buildCandidateReport() {
+    if (!candidate) return;
+    setError("");
+    try {
+      setCandidateReport(await redpaFetch<CandidateReport>(`/api/v1/evaluations/release-candidates/${candidate}/report`));
+    } catch (err) {
+      setCandidateReport(null);
+      setError(err instanceof Error ? err.message : "Candidate report failed");
     }
   }
 
@@ -252,6 +313,26 @@ export default function ReliabilityEvaluationPage() {
     </> : null}
 
     <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Release evidence</span><h2>Candidate report</h2></div>{candidateReport ? <StatusBadge value={candidateReport.promotion_ready ? "ready" : "blocked"} /> : null}</div>
+      <div className="cpActions"><button onClick={() => void buildCandidateReport()} disabled={!candidate}>Build candidate report</button></div>
+      {candidateReport ? <section className="cpMetrics">
+        <MetricCard label="Candidate score" value={candidateReport.candidate_score.toFixed(3)} />
+        <MetricCard label="Quality gate" value={candidateReport.latest_gate_decision || "missing"} />
+        <MetricCard label="Benchmark" value={candidateReport.latest_benchmark_score?.toFixed(3) ?? "—"} />
+        <MetricCard label="Reliability" value={candidateReport.reliability_score?.toFixed(3) ?? "—"} />
+      </section> : null}
+      {candidateReport ? <div className={candidateReport.promotion_ready ? "cpSuccess" : "cpNotice"}>{candidateReport.promotion_ready ? "Promotion evidence is ready." : `Blocked: ${candidateReport.blockers.join(" · ")}`}</div> : null}
+    </section>
+
+    <section className="cpPanel">
+      <div className="cpPanelHead"><div><span>Benchmark registry</span><h2>Persisted suites</h2></div><span>{suites.length} suites</span></div>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Suite</th><th>Cases</th><th>Threshold</th><th>Status</th><th>Created</th></tr></thead><tbody>
+        {suites.map((item) => <tr key={item.id}><td><strong>{item.name}</strong><small>{item.description || item.id}</small></td><td>{item.cases.length}</td><td>{item.pass_threshold.toFixed(2)}</td><td><StatusBadge value={item.enabled ? "enabled" : "disabled"} /></td><td>{new Date(item.created_at).toLocaleString()}</td></tr>)}
+      </tbody></table></div>
+      {!suites.length ? <p className="cpMuted">Create suites through the benchmark-suite API to reuse the same evaluation corpus across candidate versions.</p> : null}
+    </section>
+
+    <section className="cpPanel">
       <div className="cpPanelHead"><div><span>Promotion history</span><h2>Release quality gates</h2></div><span>{gateHistory.length} decisions</span></div>
       <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Time</th><th>Release</th><th>Decision</th><th>Baseline</th><th>Candidate</th><th>Delta</th><th>Reasons</th></tr></thead><tbody>
         {gateHistory.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString()}</td><td><strong>{item.release_label || "—"}</strong><small>{item.id}</small></td><td><StatusBadge value={item.decision} /></td><td>{item.baseline_score.toFixed(3)}</td><td>{item.candidate_score.toFixed(3)}</td><td>{item.aggregate_delta.toFixed(3)}</td><td>{item.reasons.join(", ")}</td></tr>)}
@@ -279,7 +360,10 @@ export default function ReliabilityEvaluationPage() {
       <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Provider</th><th>Status</th><th>Score</th><th>Circuit</th><th>Failures</th></tr></thead><tbody>
         {(scorecard?.providers || []).map((item) => <tr key={item.provider}><td><strong>{item.provider}</strong></td><td><StatusBadge value={item.status} /></td><td>{item.score.toFixed(3)}</td><td><StatusBadge value={item.circuit_state} /></td><td>{item.failures} / {item.failure_threshold}</td></tr>)}
       </tbody></table></div>
-      <div className="cpActions"><button onClick={() => void simulateFailure()}>Validate retry + fallback scenario</button></div>
+      <div className="cpActions"><button onClick={() => void captureReliability()}>Capture reliability snapshot</button><button onClick={() => void simulateFailure()}>Validate retry + fallback scenario</button></div>
+      <div className="cpTableWrap"><table className="cpTable"><thead><tr><th>Captured</th><th>Score</th><th>Healthy</th><th>Degraded</th><th>Unavailable</th></tr></thead><tbody>
+        {reliabilityHistory.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString()}</td><td>{item.overall_score.toFixed(3)}</td><td>{item.healthy_providers}</td><td>{item.degraded_providers}</td><td>{item.unavailable_providers}</td></tr>)}
+      </tbody></table></div>
       {simulation ? <div className={simulation.recovered ? "cpSuccess" : "cpNotice"}><strong>{simulation.expected_outcome}</strong> · {simulation.events.join(" → ")}</div> : null}
     </section>
 

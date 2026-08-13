@@ -115,6 +115,13 @@ The platform can:
 
 V5.5 extends RedPA's existing evaluation and reliability foundations with release-oriented quality controls.
 
+**Batch 4 implemented:**
+
+- persisted benchmark suite registry with reusable evaluation cases;
+- persisted execution of benchmark suites;
+- reliability snapshot history;
+- release candidate evidence reports combining evaluation, quality gate, benchmark, and provider reliability.
+
 **Batch 3 implemented:**
 
 - persisted release promotion quality gates and decision history;

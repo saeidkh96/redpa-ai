@@ -2,6 +2,14 @@
 
 ## V5.5.0 — Evaluation & Reliability (in progress)
 
+### Batch 4
+
+- added persisted benchmark suite registry and reusable evaluation corpora;
+- added persisted suite execution through the evaluation API;
+- added provider reliability snapshot history;
+- added release candidate evidence reports combining evaluation, gate, benchmark, and reliability state;
+- extended the V5.5 Control Plane with suite, reliability-history, and candidate-report views.
+
 ### Batch 3
 
 - added persisted release quality-gate history;

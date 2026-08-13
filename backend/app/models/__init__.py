@@ -1,3 +1,4 @@
+from app.models.quality_registry import BenchmarkSuiteRecord, ReliabilitySnapshotRecord
 from app.models.release_quality_gate import ReleaseQualityGateRecord
 from app.models.benchmark import BenchmarkRunRecord
 from app.models.conversation import Conversation
@@ -20,7 +21,7 @@ from app.models.tenant import Tenant, TenantMembership
 from app.models.user import User
 
 __all__ = [
-    "ReleaseQualityGateRecord", "BenchmarkRunRecord", "User", "Conversation", "Message", "MessageRole", "MessageStatus",
+    "BenchmarkSuiteRecord", "ReliabilitySnapshotRecord", "ReleaseQualityGateRecord", "BenchmarkRunRecord", "User", "Conversation", "Message", "MessageRole", "MessageStatus",
     "HumanReview", "HumanReviewStatus", "Document", "DocumentSource",
     "DocumentStatus", "DocumentContent", "DocumentChunk", "EvaluationRun",
     "EvaluationResult", "EvaluationRunStatus", "EvaluationMetric",

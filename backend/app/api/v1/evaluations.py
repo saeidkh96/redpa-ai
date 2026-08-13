@@ -36,6 +36,14 @@ from app.schemas.evaluation_regression import (
     QualityGateRequest,
     QualityGateResponse,
 )
+from app.schemas.quality_registry import (
+    BenchmarkSuiteCreateRequest,
+    BenchmarkSuiteListResponse,
+    BenchmarkSuiteResponse,
+    BenchmarkSuiteRunRequest,
+    BenchmarkSuiteRunResponse,
+    ReleaseCandidateReportResponse,
+)
 from app.schemas.release_quality import (
     BenchmarkTrendResponse,
     ReleaseQualityGateHistoryResponse,
@@ -52,6 +60,10 @@ from app.services.evaluation_service import (
 )
 from app.services.evaluation_regression_service import (
     EvaluationRegressionService,
+)
+from app.services.quality_registry_service import (
+    BenchmarkSuiteNotFoundError,
+    QualityRegistryService,
 )
 from app.services.release_quality_gate_service import (
     ReleaseQualityGateService,
@@ -70,6 +82,7 @@ benchmark_engine = BenchmarkEngine(
 regression_service = EvaluationRegressionService()
 benchmark_store = BenchmarkPersistenceService()
 release_quality_service = ReleaseQualityGateService(evaluation_service=service, regression_service=regression_service)
+quality_registry = QualityRegistryService()
 
 
 @router.post(
@@ -281,6 +294,98 @@ async def benchmark_trends(
         agent_id=agent_id,
         model_name=model_name,
     )
+
+
+@router.post(
+    "/benchmark-suites",
+    response_model=BenchmarkSuiteResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a persisted benchmark suite",
+)
+async def create_benchmark_suite(
+    request: BenchmarkSuiteCreateRequest,
+    session: DatabaseSession,
+) -> BenchmarkSuiteResponse:
+    return await quality_registry.create_suite(session=session, request=request)
+
+
+@router.get(
+    "/benchmark-suites",
+    response_model=BenchmarkSuiteListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List persisted benchmark suites",
+)
+async def list_benchmark_suites(
+    session: DatabaseSession,
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+    enabled: bool | None = Query(default=None),
+) -> BenchmarkSuiteListResponse:
+    return await quality_registry.list_suites(
+        session=session,
+        limit=limit,
+        offset=offset,
+        enabled=enabled,
+    )
+
+
+@router.get(
+    "/benchmark-suites/{suite_id}",
+    response_model=BenchmarkSuiteResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a persisted benchmark suite",
+)
+async def get_benchmark_suite(
+    suite_id: uuid.UUID,
+    session: DatabaseSession,
+) -> BenchmarkSuiteResponse:
+    try:
+        item = await quality_registry.get_suite(session=session, suite_id=suite_id)
+    except BenchmarkSuiteNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return BenchmarkSuiteResponse.model_validate(item)
+
+
+@router.post(
+    "/benchmark-suites/{suite_id}/run",
+    response_model=BenchmarkSuiteRunResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Run a persisted benchmark suite and persist its result",
+)
+async def run_benchmark_suite(
+    suite_id: uuid.UUID,
+    request: BenchmarkSuiteRunRequest,
+    session: DatabaseSession,
+) -> BenchmarkSuiteRunResponse:
+    try:
+        return await quality_registry.run_suite(
+            session=session,
+            suite_id=suite_id,
+            request=request,
+        )
+    except BenchmarkSuiteNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.get(
+    "/release-candidates/{candidate_run_id}/report",
+    response_model=ReleaseCandidateReportResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Build a release candidate report from persisted evaluation, gate, benchmark, and reliability evidence",
+)
+async def release_candidate_report(
+    candidate_run_id: uuid.UUID,
+    session: DatabaseSession,
+) -> ReleaseCandidateReportResponse:
+    try:
+        return await quality_registry.release_candidate_report(
+            session=session,
+            candidate_run_id=candidate_run_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
 
 @router.get(

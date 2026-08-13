@@ -7,6 +7,10 @@ from app.model_gateway.bootstrap import model_gateway
 from app.model_gateway.contracts import LLMMessage, LLMProviderError, LLMRequest
 from app.model_gateway.registry import ProviderNotFoundError
 from app.security.rbac import Permission, authorize
+from app.schemas.quality_registry import (
+    ReliabilityCaptureResponse,
+    ReliabilityHistoryResponse,
+)
 from app.schemas.reliability_validation import (
     FailureSimulationRequest,
     FailureSimulationResponse,
@@ -26,6 +30,7 @@ from app.services.platform_v4_model_governance_service import (
     ModelPricingCatalog,
     PlatformModelGovernanceService,
 )
+from app.services.quality_registry_service import QualityRegistryService
 from app.services.reliability_validation_service import ReliabilityValidationService
 from app.services.tenant_service import TenantMembershipNotFoundError, TenantService
 
@@ -33,6 +38,7 @@ from app.services.tenant_service import TenantMembershipNotFoundError, TenantSer
 router = APIRouter(prefix="/model-gateway", tags=["Model Gateway"])
 pricing_catalog = ModelPricingCatalog.from_environment()
 reliability_validation = ReliabilityValidationService()
+quality_registry = QualityRegistryService()
 
 
 @router.get("/providers", response_model=list[ProviderDescriptorResponse])
@@ -271,3 +277,39 @@ async def simulate_provider_failure(
 ) -> FailureSimulationResponse:
     del current_user
     return reliability_validation.simulate(request)
+
+
+@router.post("/reliability/capture", response_model=ReliabilityCaptureResponse)
+async def capture_reliability_snapshot(
+    current_user: CurrentUser,
+    session: DatabaseSession,
+) -> ReliabilityCaptureResponse:
+    del current_user
+    scorecard = reliability_validation.scorecard(
+        health=await model_gateway.health(),
+        circuits=model_gateway.executor.circuit_snapshot(),
+    )
+    return await quality_registry.capture_reliability(
+        session=session,
+        scorecard=scorecard,
+    )
+
+
+@router.get("/reliability/history", response_model=ReliabilityHistoryResponse)
+async def reliability_history(
+    current_user: CurrentUser,
+    session: DatabaseSession,
+    limit: int = 100,
+    offset: int = 0,
+) -> ReliabilityHistoryResponse:
+    del current_user
+    if limit < 1 or limit > 500 or offset < 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="limit must be 1..500 and offset must be non-negative",
+        )
+    return await quality_registry.reliability_history(
+        session=session,
+        limit=limit,
+        offset=offset,
+    )

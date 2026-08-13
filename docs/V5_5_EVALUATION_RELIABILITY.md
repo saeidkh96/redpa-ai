@@ -100,3 +100,29 @@ Exit codes:
 ```
 
 This creates a real promotion boundary without claiming that RedPA automatically deploys a candidate after a PASS decision.
+
+
+## Batch 4: Benchmark Registry and Release Evidence
+
+Implemented:
+
+- persisted benchmark suite registry with reusable evaluation cases;
+- execution of a persisted benchmark suite with persisted benchmark results;
+- reliability snapshot capture and historical reliability evidence;
+- release candidate reports combining candidate evaluation, latest quality gate, matching benchmark evidence, and provider reliability;
+- Control Plane views for benchmark suites, reliability history, and release candidate evidence.
+
+API:
+
+```text
+POST /api/v1/evaluations/benchmark-suites
+GET  /api/v1/evaluations/benchmark-suites
+GET  /api/v1/evaluations/benchmark-suites/{suite_id}
+POST /api/v1/evaluations/benchmark-suites/{suite_id}/run
+GET  /api/v1/evaluations/release-candidates/{candidate_run_id}/report
+
+POST /api/v1/model-gateway/reliability/capture
+GET  /api/v1/model-gateway/reliability/history
+```
+
+The repository already contains a background-job scheduler, but Batch 4 does not claim scheduled benchmark execution. Persisted suites can be invoked explicitly through the API or CI; scheduler integration remains separate work.
