@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "redpa-ai-sdk"
+version = "6.0.0a1"
+description = "Python SDK and CLI for the RedPA AI agentic platform"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "RedPA AI Contributors"}]
+dependencies = [
+  "httpx>=0.28,<1",
+  "pydantic>=2.10,<3",
+  "typer>=0.16,<1",
+]
+
+[project.scripts]
+redpa = "redpa_sdk.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/redpa_sdk"]

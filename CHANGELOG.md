@@ -1,5 +1,17 @@
 # Changelog
 
+## V6.0.0 — Developer Platform (in progress)
+
+### Batch 1
+
+- added installable `redpa-ai-sdk` Python package;
+- added `RedPA` client with token/config handling and typed core responses;
+- added `redpa` CLI;
+- added status and doctor commands;
+- added agent discovery, provider, tool, reliability, release-gate, and candidate-report commands;
+- added SDK contract and HTTP mock tests.
+
+
 ## V5.5.0 — Evaluation & Reliability (in progress)
 
 ### Batch 4

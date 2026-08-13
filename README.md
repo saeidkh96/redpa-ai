@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V6.0 Developer Platform](#v60-developer-platform)
 -   [V5.5 Evaluation & Reliability](#v55-evaluation--reliability)
 -   [V5.0 Control Plane](#v50-control-plane)
 -   [V4.2 Production Agentic Systems Readiness](#v42-production-agentic-systems-readiness)
@@ -110,6 +111,29 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V6.0 Developer Platform
+
+V6.0 begins the developer-platform layer for RedPA.
+
+**Batch 1 implemented:**
+
+- installable Python SDK under `sdk/python`;
+- `RedPA` API client with typed core responses;
+- environment-based API URL, token, and timeout configuration;
+- structured SDK errors;
+- `redpa` CLI with platform status and doctor checks;
+- CLI/API access to agents, model providers, unified tools, reliability scorecards, release quality gates, and release candidate reports.
+
+Install from the repository:
+
+```bash
+pip install -e sdk/python
+```
+
+See [`docs/V6_DEVELOPER_PLATFORM.md`](docs/V6_DEVELOPER_PLATFORM.md).
+
+------------------------------------------------------------------------
 
 ## V5.5 Evaluation & Reliability
 
