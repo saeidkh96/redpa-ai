@@ -27,7 +27,7 @@ def test_sdk_health_and_authorization_header():
             json={
                 "status": "healthy",
                 "service": "RedPA AI",
-                "version": "5.5",
+                "version": "6.0.0",
                 "environment": "test",
                 "database": {"status": "healthy"},
             },

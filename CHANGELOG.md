@@ -23,7 +23,7 @@
 - added SDK contract and HTTP mock tests.
 
 
-## V5.5.0 — Evaluation & Reliability (in progress)
+## V5.5.0 — Evaluation & Reliability
 
 ### Batch 4
 

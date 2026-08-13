@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     app_version: str = Field(
-        default="0.1.0",
+        default="6.0.0",
         alias="APP_VERSION",
     )
 

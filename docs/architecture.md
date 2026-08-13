@@ -1,139 +1,110 @@
-# RedPA AI Architecture
+# RedPA AI V6.0 Architecture
 
-## Overview
+## Scope
 
-RedPA AI is a production-oriented Agentic AI platform built around FastAPI,
-LangGraph-style orchestration, PostgreSQL, Qdrant, Redis, MCP, A2A specialist
-agents, background jobs, human approval, durable workflows, and distributed
-observability.
+This document describes the architecture represented by the V6.0 repository. Reference deployment assets are labeled separately from runtime implementation.
 
-## High-Level Flow
+## Developer Layer
 
 ```text
-Client
-  |
-  v
-FastAPI API Gateway
-  |
-  +--> Authentication and Users
-  |
-  +--> Conversations and Messages
-  |
-  +--> Planner / Router
-  |      |
-  |      +--> Chat Agent
-  |      +--> RAG Agent
-  |      +--> Research Agent
-  |      +--> Tool Agent
-  |      +--> Human Review
-  |
-  +--> MCP Tool Layer
-  |      |
-  |      +--> Filesystem MCP
-  |      +--> GitHub MCP
-  |      +--> PostgreSQL MCP
-  |      +--> Docker MCP
-  |
-  +--> A2A Coordinator
-  |      |
-  |      +--> Research Specialist
-  |      +--> PostgreSQL Specialist
-  |      +--> Docker Specialist
-  |      +--> Filesystem Specialist
-  |      +--> GitHub Specialist
-  |
-  +--> Durable Distributed Workflows
-  |
-  +--> Agent Memory
-  |      |
-  |      +--> PostgreSQL Long-Term Memory
-  |      +--> Qdrant Semantic Memory
-  |      +--> Shared Agent Memory
-  |
-  +--> Background Runtime
-         |
-         +--> Redis
-         +--> Worker
-         +--> Scheduler
-         +--> Retry Queue
-         +--> Dead-Letter Queue
+Python Applications                         Operators / CI
+       |                                         |
+       +---- RedPA Python SDK (sync/async)        +---- redpa CLI
+                         \                         /
+                          \                       /
+                           +---- HTTP /api/v1 ---+
+                                      |
+                                      v
 ```
 
-## Data Stores
-
-### PostgreSQL
-
-Used for:
-
-- users;
-- conversations;
-- messages;
-- reviews;
-- durable workflows;
-- workflow subtasks;
-- background jobs;
-- long-term Agent Memory.
-
-### Qdrant
-
-Used for:
-
-- document embeddings;
-- RAG retrieval;
-- semantic Agent Memory search.
-
-### Redis
-
-Used for:
-
-- distributed cache;
-- rate limiting;
-- idempotency responses;
-- Worker and Scheduler heartbeats.
-
-## Observability
+## Runtime Architecture
 
 ```text
-Backend and Agents
-      |
-      +--> Prometheus Metrics
-      |
-      +--> OpenTelemetry Traces
-                |
-                v
-       OpenTelemetry Collector
-                |
-                v
-              Tempo
+                         +---------------------------+
+                         |      Next.js Control      |
+                         |           Plane           |
+                         +-------------+-------------+
+                                       |
+                                       v
++------------------+       +-----------+-----------+       +------------------+
+| Python SDK / CLI | ----> |     FastAPI API       | <---- | External Clients |
++------------------+       | Auth / Tenancy / API  |       +------------------+
+                           +-----------+-----------+
+                                       |
+             +-------------------------+-------------------------+
+             |                         |                         |
+             v                         v                         v
+    +--------+--------+       +--------+--------+       +--------+--------+
+    | Agent Runtime   |       | Model Gateway   |       | Governance /    |
+    | Planner / RAG   |       | Providers       |       | Policy / HITL   |
+    | Research / Tool |       | Reliability     |       | Reviews         |
+    +--------+--------+       +--------+--------+       +--------+--------+
+             |                         |                         |
+             +-------------+-----------+-------------------------+
+                           |
+             +-------------+---------------------------+
+             |                         |               |
+             v                         v               v
+    +--------+--------+       +--------+--------+  +---+----------------+
+    | Durable         |       | MCP Tool Layer  |  | A2A / Specialist  |
+    | Workflows       |       | + MCP Servers   |  | Agent Services    |
+    +--------+--------+       +--------+--------+  +---+----------------+
+             |                         |               |
+             +-------------------------+---------------+
+                                       |
+                                       v
+                           +-----------+-----------+
+                           | Persistence / Runtime |
+                           | PostgreSQL            |
+                           | Qdrant                |
+                           | Redis                 |
+                           +-----------+-----------+
+                                       |
+                                       v
+                           +-----------+-----------+
+                           | Observability         |
+                           | Prometheus / Grafana  |
+                           | OpenTelemetry / Tempo |
+                           +-----------------------+
 ```
 
-Grafana can use Prometheus for metrics and Tempo for distributed traces.
+## Implemented Repository Boundaries
 
-## Reliability
+### API and identity
+FastAPI exposes the V1 API surface. Authentication, tenant-aware access, API middleware, error handling, and health surfaces are implemented server-side.
 
-The platform includes:
+### Agent runtime
+The repository contains planner, RAG/retrieval, research, tool, specialist-agent, distributed-agent, and human-review capabilities. Agent registry/discovery is exposed through the API.
 
-- durable workflow persistence;
-- workflow resumption;
-- human approval;
-- idempotent request handling;
-- background retries;
-- dead-letter jobs;
-- readiness and liveness endpoints;
-- dependency health checks;
-- slow-request detection;
-- slow-query detection.
+### Durable execution
+Distributed durable workflows persist execution state and support retrieval and resume operations. Background-job and runtime-cache packages provide supporting execution infrastructure.
 
-## Security
+### Tool interoperability
+MCP server discovery, health, tool cataloging, and qualified tool execution are exposed through implemented API routes. A2A packages and specialist-agent services provide agent-to-agent integration surfaces.
 
-The platform includes:
+### Model and quality plane
+The model gateway contains provider integration, economics/reliability functionality, and related governance. Evaluation APIs include benchmark and release-quality capabilities.
 
-- JWT authentication;
-- CORS configuration;
-- API-key hashing foundation;
-- security response headers;
-- production environment validation;
-- rate limiting;
-- idempotency conflict detection;
-- Kubernetes non-root security context;
-- Secret resources and HTTPS-ready ingress.
+### Data
+PostgreSQL-backed models/repositories provide transactional persistence. Qdrant-backed vector/retrieval services support semantic retrieval. Redis-backed runtime components support cache/background coordination.
+
+### Observability
+The repository contains metrics/tracing instrumentation and Docker services for Prometheus, Grafana, OpenTelemetry/Tempo-oriented observability.
+
+### Developer platform
+V6.0 adds the installable Python SDK, asynchronous SDK client, `redpa` CLI, examples, package build metadata, and dedicated SDK CI.
+
+## Deployment Assets
+
+Docker Compose is the primary local multi-service runtime represented in the repository. Kubernetes/Helm and Azure/Pulumi assets are deployment/reference architecture surfaces and should not be interpreted as proof of a live hosted production deployment.
+
+## V6.0 Version Contract
+
+The release metadata for the V6 source tree is aligned to `6.0.0` across:
+
+- backend default application version;
+- Docker Compose backend application version;
+- frontend package metadata;
+- Python SDK package metadata.
+
+Runtime overrides can still replace configured application version through environment variables.
