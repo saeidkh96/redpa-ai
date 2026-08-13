@@ -1,5 +1,17 @@
 # Changelog
 
+## V5.5.0 — Evaluation & Reliability (in progress)
+
+### Batch 1
+
+- added persisted baseline/candidate evaluation comparison;
+- added aggregate and per-metric regression detection;
+- added missing-candidate-metric regression detection;
+- added configurable evaluation quality gates;
+- added minimum-score and candidate pass-threshold checks;
+- added `/control-plane/reliability` for baseline/candidate inspection.
+
+
 ## V5.0.0 — Control Plane
 
 ### Added

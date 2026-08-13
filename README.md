@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V5.5 Evaluation & Reliability](#v55-evaluation--reliability)
 -   [V5.0 Control Plane](#v50-control-plane)
 -   [V4.2 Production Agentic Systems Readiness](#v42-production-agentic-systems-readiness)
 -   [Control Center](#control-center)
@@ -109,6 +110,37 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V5.5 Evaluation & Reliability
+
+V5.5 extends RedPA's existing evaluation and reliability foundations with release-oriented quality controls.
+
+**Batch 1 implemented:**
+
+- persisted baseline vs candidate evaluation comparison;
+- aggregate and per-metric regression detection;
+- missing-metric regression detection;
+- configurable regression tolerances;
+- minimum candidate score checks;
+- explicit quality-gate `PASS` / `FAIL` decisions;
+- a Control Plane surface for regression analysis.
+
+API endpoints:
+
+```text
+POST /api/v1/evaluations/regression/compare
+POST /api/v1/evaluations/quality-gates/evaluate
+```
+
+Control Plane:
+
+```text
+http://localhost:3001/control-plane/reliability
+```
+
+See [`docs/V5_5_EVALUATION_RELIABILITY.md`](docs/V5_5_EVALUATION_RELIABILITY.md).
+
+------------------------------------------------------------------------
 
 ## V5.0 Control Plane
 

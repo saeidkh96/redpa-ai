@@ -26,9 +26,18 @@ from app.schemas.evaluation import (
 from app.schemas.evaluation_observability import (
     EvaluationObservabilityResponse,
 )
+from app.schemas.evaluation_regression import (
+    EvaluationRegressionRequest,
+    EvaluationRegressionResponse,
+    QualityGateRequest,
+    QualityGateResponse,
+)
 from app.services.evaluation_service import (
     EvaluationRunNotFoundError,
     EvaluationService,
+)
+from app.services.evaluation_regression_service import (
+    EvaluationRegressionService,
 )
 
 
@@ -41,6 +50,7 @@ service = EvaluationService()
 benchmark_engine = BenchmarkEngine(
     evaluation_service=service,
 )
+regression_service = EvaluationRegressionService()
 
 
 @router.post(
@@ -212,4 +222,68 @@ async def compare_benchmarks(
 
     return BenchmarkComparisonResponse(
         items=benchmark_engine.compare(runs),
+    )
+
+
+@router.post(
+    "/regression/compare",
+    response_model=EvaluationRegressionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Compare a persisted candidate evaluation against a persisted baseline",
+)
+async def compare_evaluation_regression(
+    request: EvaluationRegressionRequest,
+    session: DatabaseSession,
+) -> EvaluationRegressionResponse:
+    try:
+        baseline = await service.get_by_id(
+            session=session,
+            run_id=request.baseline_run_id,
+        )
+        candidate = await service.get_by_id(
+            session=session,
+            run_id=request.candidate_run_id,
+        )
+    except EvaluationRunNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    return regression_service.compare(
+        baseline=baseline,
+        candidate=candidate,
+        request=request,
+    )
+
+
+@router.post(
+    "/quality-gates/evaluate",
+    response_model=QualityGateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Evaluate a persisted candidate evaluation against regression quality gates",
+)
+async def evaluate_quality_gate(
+    request: QualityGateRequest,
+    session: DatabaseSession,
+) -> QualityGateResponse:
+    try:
+        baseline = await service.get_by_id(
+            session=session,
+            run_id=request.baseline_run_id,
+        )
+        candidate = await service.get_by_id(
+            session=session,
+            run_id=request.candidate_run_id,
+        )
+    except EvaluationRunNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    return regression_service.quality_gate(
+        baseline=baseline,
+        candidate=candidate,
+        request=request,
     )

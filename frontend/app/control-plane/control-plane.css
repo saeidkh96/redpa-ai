@@ -16,3 +16,9 @@
 .cpResultSummary{display:flex;gap:7px;align-items:center;margin-top:8px}.cpResultSummary strong{font-size:9px}
 @media(max-width:900px){.cpGovernanceForm{grid-template-columns:1fr 1fr}.cpGovernanceForm .wide{grid-column:1/-1}}
 @media(max-width:600px){.cpFormRow,.cpGovernanceForm{grid-template-columns:1fr}.cpGovernanceForm .wide{grid-column:auto}}
+
+.cpReliabilityForm{display:grid;grid-template-columns:1.4fr 1.4fr repeat(3,.7fr);gap:9px;margin-bottom:12px}
+.cpReliabilityForm label{display:grid;gap:5px}.cpReliabilityForm label>span{font-size:8px;color:#70798d;text-transform:uppercase;letter-spacing:.6px}
+.cpReliabilityForm input,.cpReliabilityForm select{width:100%;border:1px solid #dfe4ec;border-radius:8px;background:#fff;padding:9px;font-size:9px;color:#172033}
+@media(max-width:1100px){.cpReliabilityForm{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.cpReliabilityForm{grid-template-columns:1fr}}

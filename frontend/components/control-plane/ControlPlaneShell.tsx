@@ -11,6 +11,7 @@ const nav = [
   ["Tools & MCP", "/control-plane/tools"],
   ["Workflows", "/control-plane/workflows"],
   ["Executions", "/control-plane/executions"],
+  ["Eval & Reliability", "/control-plane/reliability"],
   ["Memory", "/control-plane/memory"],
   ["Usage & Cost", "/control-plane/usage"],
   ["Human Reviews", "/control-plane/reviews"],
