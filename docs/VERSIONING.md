@@ -1,9 +1,13 @@
 # Versioning
 
-Current milestone: **v0.5.0**
+Current stable milestone: **v6.0.0**
 
-Major: breaking API changes
+RedPA AI follows semantic versioning for public release milestones:
 
-Minor: new features
+- **Major** — breaking platform/API contracts or a major platform milestone.
+- **Minor** — backward-compatible platform features.
+- **Patch** — backward-compatible fixes, security hardening, and documentation corrections.
 
-Patch: bug fixes and documentation updates.
+Release identity for v6.0.0 is aligned across the FastAPI application, Docker Compose runtime, Next.js frontend, Python SDK, and Helm `appVersion`.
+
+Historical release documents remain under `docs/archive/` or `docs/release/` where they are retained as project history.

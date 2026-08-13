@@ -1,110 +1,94 @@
-# RedPA AI V6.0 Architecture
+# RedPA AI v6.0.0 Architecture
 
-## Scope
+This document is the concise architecture entry point for the V6 source tree. Detailed views are maintained in:
 
-This document describes the architecture represented by the V6.0 repository. Reference deployment assets are labeled separately from runtime implementation.
+- [`architecture/c4.md`](architecture/c4.md)
+- [`architecture/arc42.md`](architecture/arc42.md)
+- [`architecture/ddd.md`](architecture/ddd.md)
+- [`architecture/adr/`](architecture/adr/)
 
-## Developer Layer
+![RedPA AI v6.0.0 architecture](images/architecture.png)
 
-```text
-Python Applications                         Operators / CI
-       |                                         |
-       +---- RedPA Python SDK (sync/async)        +---- redpa CLI
-                         \                         /
-                          \                       /
-                           +---- HTTP /api/v1 ---+
-                                      |
-                                      v
-```
+## Runtime Topology
 
-## Runtime Architecture
+The validated local integration environment is composed from `docker-compose.yml` and `docker-compose.phase13.yml`.
 
-```text
-                         +---------------------------+
-                         |      Next.js Control      |
-                         |           Plane           |
-                         +-------------+-------------+
-                                       |
-                                       v
-+------------------+       +-----------+-----------+       +------------------+
-| Python SDK / CLI | ----> |     FastAPI API       | <---- | External Clients |
-+------------------+       | Auth / Tenancy / API  |       +------------------+
-                           +-----------+-----------+
-                                       |
-             +-------------------------+-------------------------+
-             |                         |                         |
-             v                         v                         v
-    +--------+--------+       +--------+--------+       +--------+--------+
-    | Agent Runtime   |       | Model Gateway   |       | Governance /    |
-    | Planner / RAG   |       | Providers       |       | Policy / HITL   |
-    | Research / Tool |       | Reliability     |       | Reviews         |
-    +--------+--------+       +--------+--------+       +--------+--------+
-             |                         |                         |
-             +-------------+-----------+-------------------------+
-                           |
-             +-------------+---------------------------+
-             |                         |               |
-             v                         v               v
-    +--------+--------+       +--------+--------+  +---+----------------+
-    | Durable         |       | MCP Tool Layer  |  | A2A / Specialist  |
-    | Workflows       |       | + MCP Servers   |  | Agent Services    |
-    +--------+--------+       +--------+--------+  +---+----------------+
-             |                         |               |
-             +-------------------------+---------------+
-                                       |
-                                       v
-                           +-----------+-----------+
-                           | Persistence / Runtime |
-                           | PostgreSQL            |
-                           | Qdrant                |
-                           | Redis                 |
-                           +-----------+-----------+
-                                       |
-                                       v
-                           +-----------+-----------+
-                           | Observability         |
-                           | Prometheus / Grafana  |
-                           | OpenTelemetry / Tempo |
-                           +-----------------------+
-```
+### Entry points
 
-## Implemented Repository Boundaries
+- FastAPI backend — `:8000`
+- Next.js Control Plane — `:3001`
+- Python SDK and `redpa` CLI — HTTP clients of the backend API
 
-### API and identity
-FastAPI exposes the V1 API surface. Authentication, tenant-aware access, API middleware, error handling, and health surfaces are implemented server-side.
+### Core runtime
 
-### Agent runtime
-The repository contains planner, RAG/retrieval, research, tool, specialist-agent, distributed-agent, and human-review capabilities. Agent registry/discovery is exposed through the API.
+- planner/agent runtime, RAG, research and tool workflows;
+- distributed durable workflows with checkpoint/resume behavior;
+- Human Review approval/rejection and gated continuation;
+- Agent Memory and semantic retrieval;
+- Model Gateway, usage/economics and reliability controls;
+- evaluation, benchmarks, regression analysis and release quality gates;
+- authentication, tenancy/RBAC foundations and OAuth provider/PKCE foundations;
+- guardrails and policy enforcement;
+- transactional outbox and event APIs.
 
-### Durable execution
-Distributed durable workflows persist execution state and support retrieval and resume operations. Background-job and runtime-cache packages provide supporting execution infrastructure.
+### Policy boundary
 
-### Tool interoperability
-MCP server discovery, health, tool cataloging, and qualified tool execution are exposed through implemented API routes. A2A packages and specialist-agent services provide agent-to-agent integration surfaces.
+`docker-compose.phase13.yml` adds the Spring Boot Policy Service on `:8090` and configures the backend to call it for policy decisions.
 
-### Model and quality plane
-The model gateway contains provider integration, economics/reliability functionality, and related governance. Evaluation APIs include benchmark and release-quality capabilities.
+### MCP tool plane
 
-### Data
-PostgreSQL-backed models/repositories provide transactional persistence. Qdrant-backed vector/retrieval services support semantic retrieval. Redis-backed runtime components support cache/background coordination.
+The main Docker Compose stack contains four MCP services:
+
+- Filesystem MCP — `:8010`
+- GitHub MCP — `:8020`
+- PostgreSQL MCP — `:8030`
+- Docker MCP — `:8040`
+
+MCP is the tool-interoperability boundary: server registration/health, tool discovery, structured arguments, qualified execution, and policy/Human Review integration.
+
+### A2A agent plane
+
+The distributed agent topology contains:
+
+- A2A Coordinator — `:8050`
+- Research Agent — `:8061`
+- PostgreSQL Agent — `:8062`
+- Docker Agent — `:8063`
+- Filesystem Agent — `:8064`
+- GitHub Agent — `:8065`
+
+A2A is the agent-delegation boundary: capability discovery, specialist selection, distributed subtasks, parallel execution, and result aggregation.
+
+### Background and event runtime
+
+- Background Worker
+- Background Scheduler
+- Outbox Publisher
+- Redis-backed runtime coordination
+- Redis Streams event publication
+
+### Persistence
+
+- PostgreSQL — transactional and relational platform state
+- Qdrant — vector retrieval for RAG and semantic memory
+- Redis — caching, runtime coordination and event streams
 
 ### Observability
-The repository contains metrics/tracing instrumentation and Docker services for Prometheus, Grafana, OpenTelemetry/Tempo-oriented observability.
 
-### Developer platform
-V6.0 adds the installable Python SDK, asynchronous SDK client, `redpa` CLI, examples, package build metadata, and dedicated SDK CI.
+- Prometheus — metrics
+- Grafana — dashboards
+- OpenTelemetry Collector — trace collection
+- Tempo — distributed trace storage/query path
+- structured application logging and correlation identifiers
 
-## Deployment Assets
+## Developer Platform Boundary
 
-Docker Compose is the primary local multi-service runtime represented in the repository. Kubernetes/Helm and Azure/Pulumi assets are deployment/reference architecture surfaces and should not be interpreted as proof of a live hosted production deployment.
+V6 adds an installable Python SDK, asynchronous client, CLI, examples, package build configuration, and dedicated SDK CI. These are clients of the platform API; orchestration, durable state, policy, and governance remain server-side.
 
-## V6.0 Version Contract
+## Deployment Boundary
 
-The release metadata for the V6 source tree is aligned to `6.0.0` across:
+Docker Compose is the local integration runtime validated during the V6 release process. Kubernetes/Helm and Azure/Pulumi are deployment/reference assets. Their presence in the repository does not by itself establish a live production deployment.
 
-- backend default application version;
-- Docker Compose backend application version;
-- frontend package metadata;
-- Python SDK package metadata.
+## Release Identity
 
-Runtime overrides can still replace configured application version through environment variables.
+V6 release metadata is aligned to `6.0.0` across the FastAPI application default, Docker runtime, Next.js package, Python SDK, and Helm `appVersion`.

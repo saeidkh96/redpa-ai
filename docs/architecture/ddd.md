@@ -1,171 +1,195 @@
-# Domain-Driven Design
+# RedPA AI V6.0 — Domain-Driven Design
 
-## Strategic Design
+RedPA uses bounded contexts to describe platform responsibilities. These boundaries are architectural guidance over an evolving codebase; they do not imply that every context is a separately deployed service.
 
-RedPA is split into bounded contexts that reflect business and runtime
-responsibilities rather than technical folders.
-
-### Agent Orchestration
+## Agent Orchestration
 
 Responsibilities:
 
-- planning;
-- routing;
-- agent coordination;
-- workflow execution;
-- durable execution state.
+- planning and routing;
+- agent registry and capability discovery;
+- chat, research, RAG, and tool workflows;
+- A2A specialist delegation;
+- distributed execution.
 
-Core concepts:
+Core concepts: Agent, Capability, Route, Task, Execution Context, Specialist.
 
-- Agent
-- Route
-- Workflow
-- Task
-- Execution State
+## Durable Execution
 
-### Knowledge & Retrieval
+Responsibilities:
+
+- persistent workflow state;
+- checkpoints;
+- retries and failed-task recovery;
+- distributed subtask tracking;
+- resume and approval-gated continuation.
+
+Core concepts: Workflow, Checkpoint, Subtask, Attempt, Execution State, Resume.
+
+## Knowledge & Retrieval
 
 Responsibilities:
 
 - document ingestion;
-- chunking;
-- embeddings;
+- chunking and embeddings;
 - semantic retrieval;
 - grounded context.
 
-Core concepts:
+Core concepts: Document, Chunk, Embedding, Retrieval Query, Context.
 
-- Document
-- Chunk
-- Embedding
-- Retrieval Query
-- Context
-
-### Human Oversight
+## Human Oversight
 
 Responsibilities:
 
-- human review;
-- approval;
-- rejection;
-- workflow resume.
+- review creation;
+- approval and rejection;
+- review feedback;
+- workflow continuation.
 
-Core concepts:
+Core concepts: Review, Review Decision, Approval Gate, Reviewer.
 
-- Review
-- Review Decision
-- Approval Gate
-- Reviewer
-
-### Tooling & Integration
+## Tooling & Integration
 
 Responsibilities:
 
 - internal tools;
-- MCP servers;
-- MCP tools;
-- external capability execution.
+- MCP server registry and health;
+- unified tool discovery;
+- qualified tool invocation;
+- policy-aware execution.
 
-Core concepts:
+Core concepts: Tool, Tool Descriptor, Tool Invocation, Tool Result, MCP Server.
 
-- Tool
-- Tool Descriptor
-- Tool Invocation
-- Tool Result
-- MCP Server
+## A2A Integration
 
-### Model Runtime
+Responsibilities:
+
+- agent capability discovery;
+- specialist selection;
+- remote/specialist delegation;
+- parallel subtask execution;
+- result aggregation.
+
+Core concepts: Agent Card, Capability, Delegation, Specialist Result.
+
+## Model Runtime
 
 Responsibilities:
 
 - provider abstraction;
-- routing;
-- fallback;
-- retry;
-- circuit breaker;
-- token usage.
+- model routing;
+- fallback and retry;
+- circuit-breaker/reliability state;
+- usage and economics.
 
-Core concepts:
+Core concepts: Model Provider, Model Route, Inference Request, Inference Result, Reliability State, Usage Record.
 
-- Model Provider
-- Model Route
-- Inference Request
-- Inference Result
-
-### Policy & Governance
+## Policy & Governance
 
 Responsibilities:
 
 - policy evaluation;
 - guardrails;
-- ALLOW / REVIEW / DENY;
-- audit;
-- enforcement.
+- `ALLOW` / `REVIEW` / `DENY`;
+- policy audit;
+- tool/MCP enforcement.
 
-Core concepts:
+Core concepts: Policy, Rule, Risk, Decision, Enforcement Event.
 
-- Policy
-- Rule
-- Risk
-- Decision
-- Enforcement Event
+## Evaluation & Release Quality
 
-### Platform Operations
+Responsibilities:
+
+- evaluation runs and metrics;
+- benchmark runs and reusable suites;
+- regression comparison;
+- reliability snapshots;
+- release quality gates and candidate reports.
+
+Core concepts: Evaluation Run, Metric, Benchmark Suite, Benchmark Run, Reliability Snapshot, Release Gate.
+
+## Identity & Tenancy
 
 Responsibilities:
 
 - authentication;
-- rate limiting;
-- idempotency;
-- background jobs;
-- observability;
-- health and performance.
+- tenant/workspace records;
+- memberships and roles;
+- tenant-aware access foundations;
+- OAuth provider discovery and PKCE foundations.
 
-Core concepts:
+Core concepts: User, Tenant, Membership, Role, OAuth Provider, Identity.
 
-- User
-- Access Token
-- Job
-- Metric
-- Trace
-- Health State
+## Event Integration
+
+Responsibilities:
+
+- persisted outbox state;
+- event publication;
+- Redis Streams delivery;
+- publication-state visibility.
+
+Core concepts: Domain Event, Outbox Event, Publication State, Stream.
+
+## Agent Memory
+
+Responsibilities:
+
+- long-term and semantic memory;
+- private/shared memory;
+- search and context injection;
+- summarization, deduplication, retention.
+
+Core concepts: Memory, Scope, Semantic Match, Retention Policy.
+
+## Platform Operations
+
+Responsibilities:
+
+- API health;
+- rate limiting and idempotency;
+- background worker/scheduler;
+- runtime caching;
+- metrics, logs, traces, performance.
+
+Core concepts: Job, Runtime State, Metric, Trace, Health State.
 
 ## Context Relationships
 
-```text
-Client
-  |
-  v
-Platform Operations
-  |
-  +--> Agent Orchestration
-  |       |
-  |       +--> Knowledge & Retrieval
-  |       +--> Model Runtime
-  |       +--> Tooling & Integration
-  |       +--> Human Oversight
-  |
-  +--> Policy & Governance
-          |
-          +--> Human Oversight
-          +--> Tooling & Integration
+```mermaid
+flowchart TB
+    Client[SDK / CLI / Control Plane / API Client]
+    Ops[Platform Operations]
+    Identity[Identity & Tenancy]
+    Orchestration[Agent Orchestration]
+    Durable[Durable Execution]
+    Knowledge[Knowledge & Retrieval]
+    Models[Model Runtime]
+    Tools[Tooling & MCP]
+    A2A[A2A Integration]
+    Policy[Policy & Governance]
+    Review[Human Oversight]
+    Memory[Agent Memory]
+    Quality[Evaluation & Release Quality]
+    Events[Event Integration]
+
+    Client --> Ops
+    Ops --> Identity
+    Ops --> Orchestration
+    Orchestration --> Durable
+    Orchestration --> Knowledge
+    Orchestration --> Models
+    Orchestration --> Tools
+    Orchestration --> A2A
+    Orchestration --> Memory
+    Tools --> Policy
+    Policy --> Review
+    Durable --> Review
+    Quality --> Models
+    Quality --> Durable
+    Ops --> Events
 ```
 
-## Tactical DDD Guidance
+## Tactical Guidance
 
-Use domain objects for business decisions and state transitions.
-
-Prefer:
-
-```text
-domain/
-application/
-infrastructure/
-api/
-```
-
-when a bounded context becomes large enough to justify the split.
-
-Do not force every existing module into a new folder only for appearance.
-Phase 14 documents and tests dependency direction first; migration can remain
-incremental.
+Prefer explicit domain/application/infrastructure/API separation when a bounded context becomes large enough to benefit from it. Do not reorganize working implementation solely to make the folder tree mirror the conceptual model. Architecture tests and contracts should protect dependency direction during incremental refactoring.

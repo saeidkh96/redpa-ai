@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v6.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v6.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -107,14 +107,14 @@ The platform can:
 -   publish domain events through a transactional outbox;
 -   deliver events through Redis Streams;
 -   expose metrics, logs, traces, health, and performance data;
--   deploy locally with Docker or target Azure through Pulumi.
+-   deploy locally with Docker Compose and provide Kubernetes/Helm and Azure/Pulumi deployment/reference assets.
 
 ------------------------------------------------------------------------
 
 
 ## V6.0 Developer Platform
 
-V6.0 begins the developer-platform layer for RedPA.
+V6.0 completes the current developer-platform milestone for RedPA.
 
 **V6.0 complete developer surface:**
 
@@ -128,15 +128,6 @@ V6.0 begins the developer-platform layer for RedPA.
 - benchmark-suite and reliability-history access;
 - actionable connection and authentication diagnostics;
 - SDK examples, package build configuration and dedicated Python 3.11–3.13 CI.
-
-**Batch 1 implemented:**
-
-- installable Python SDK under `sdk/python`;
-- `RedPA` API client with typed core responses;
-- environment-based API URL, token, and timeout configuration;
-- structured SDK errors;
-- `redpa` CLI with platform status and doctor checks;
-- CLI/API access to agents, model providers, unified tools, reliability scorecards, release quality gates, and release candidate reports.
 
 Install from the repository:
 
@@ -250,7 +241,7 @@ See [`docs/V4_2_PRODUCTION_AGENTIC_READINESS.md`](docs/V4_2_PRODUCTION_AGENTIC_R
 
 ## V3 Foundation
 
-The V3 foundation, retained in V5.0, extends the v2 platform with an enterprise governance and
+The V3 foundation, retained in V6.0, extends the v2 platform with an enterprise governance and
 integration layer.
 
 ### Evaluation
@@ -417,10 +408,7 @@ flowchart TB
     Tempo --> Grafana
 ```
 
-The repository also contains C4 and arc42 documentation for architecture
-views beyond this high-level diagram.
-
-The V5 Control Plane architecture is documented in [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md).
+The repository also contains synchronized V6 C4, arc42, DDD, and ADR architecture views under [`docs/architecture/`](docs/architecture/). The V5 Control Plane design history remains documented in [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md).
 
 ------------------------------------------------------------------------
 
@@ -481,7 +469,7 @@ The V5 Control Plane architecture is documented in [`docs/V5_CONTROL_PLANE.md`](
 
 ## Policy and Guardrails
 
-RedPA AI v3 introduces a dedicated policy boundary between agent intent
+RedPA AI includes a dedicated policy boundary between agent intent
 and sensitive execution.
 
 The policy service evaluates:
@@ -592,7 +580,7 @@ These are intentionally not claimed as completed production OAuth login.
 
 ## Event-driven Architecture
 
-RedPA AI v3 adds a transactional event pipeline.
+RedPA AI includes a transactional event pipeline.
 
 ``` text
 Application transaction
@@ -958,60 +946,50 @@ deployment.
 
 ## Repository Structure
 
-``` text
+```text
 redpa-ai/
 ├── backend/
 │   ├── alembic/
 │   └── app/
-│       ├── a2a_protocol/
+│       ├── a2a*/
 │       ├── agent_memory/
 │       ├── api/v1/
 │       ├── background_jobs/
-│       ├── database/
 │       ├── distributed_durable/
+│       ├── evaluation/
 │       ├── events/
-│       ├── mcp/
-│       ├── mcp_servers/
-│       ├── middleware/
+│       ├── mcp*/
 │       ├── model_gateway/
-│       ├── monitoring/
-│       ├── observability/
-│       ├── security/
-│       ├── security_hardening/
-│       ├── services/
+│       ├── production_ai/
+│       ├── repositories/
 │       ├── specialist_agents/
 │       └── main.py
 ├── frontend/
 │   ├── app/
 │   └── components/
+├── sdk/python/
 ├── policy-service/
-├── infra/
-│   └── azure/
-├── config/
+├── infra/azure/
 ├── deploy/
 │   ├── helm/
 │   └── kubernetes/
+├── config/
 ├── docs/
 │   ├── architecture/
-│   ├── events/
+│   ├── archive/
 │   ├── release/
 │   └── security/
+├── monitoring/
 ├── observability/
 ├── scripts/
-│   ├── release/
-│   └── security/
 ├── tests/
-├── .github/
-│   └── workflows/
+├── .github/workflows/
 ├── docker-compose.yml
 ├── docker-compose.phase13.yml
-├── BUILD_V3_RELEASE.ps1
-├── RELEASE_MANIFEST_v3.0.0.json
 └── README.md
 ```
 
-The exact tree may evolve as bounded contexts and deployment assets are
-refined.
+Historical V3 release automation and manifests remain in the repository for release history and regression/source-verification compatibility; they are not the current V6 release path.
 
 ------------------------------------------------------------------------
 
@@ -1165,201 +1143,88 @@ Use Swagger UI for the current request and response schemas.
 
 ## Testing and Verification
 
-RedPA AI uses layered verification rather than relying on a single
-unit-test suite.
+RedPA AI uses layered verification across backend, contracts, security, runtime, frontend, SDK, migrations, and release metadata.
 
-Coverage includes:
+The final V6 release-candidate validation performed on the release checkout reported:
 
--   Python compilation;
--   pytest unit and contract tests;
--   API contract tests;
--   architecture tests;
--   security tests;
--   policy enforcement tests;
--   Spring Boot tests;
--   Cucumber/BDD policy scenarios;
--   database migration verification;
--   Docker Compose validation;
--   frontend production builds;
--   runtime authentication checks;
--   Human Review checks;
--   MCP policy enforcement;
--   policy audit persistence;
--   Redis Streams publication;
--   secret scanning;
--   release archive verification.
-
-### Phase 17--19 final verification
-
-``` powershell
-powershell -ExecutionPolicy Bypass -File .\VERIFY_V3_PHASES_17_18_19_RUNTIME.ps1
+```text
+300 passed
+[PASS] No obvious committed secrets detected.
 ```
 
-The verified release pipeline covers:
+The Next.js `6.0.0` production build completed successfully, and the rebuilt Docker runtime reported:
 
--   transactional outbox enqueue;
--   Redis Streams publication;
--   persisted published state;
--   Event Control Center availability;
--   Spring Boot Policy Service health;
--   metrics endpoint;
--   production security gates;
--   release packaging.
-
-### Build the v3 archive
-
-``` powershell
-powershell -ExecutionPolicy Bypass -File .\BUILD_V3_RELEASE.ps1
+```json
+{
+  "status": "healthy",
+  "service": "RedPA AI",
+  "version": "6.0.0",
+  "environment": "development",
+  "database": {
+    "status": "healthy"
+  }
+}
 ```
 
-Release output:
+The Python SDK is packaged as `redpa-ai-sdk 6.0.0`, with synchronous and asynchronous clients plus the `redpa` CLI.
 
-``` text
-dist/redpa-ai-v3.0.0.zip
-dist/redpa-ai-v3.0.0.sha256
-```
+For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELEASE_CHECKLIST.md).
 
 ------------------------------------------------------------------------
 
 ## Release
 
-### v3.0.0
+### v6.0.0 — Developer Platform
 
-RedPA AI v3 completes the current enterprise-platform roadmap.
+V6.0.0 is the current stable milestone represented by this source tree.
 
-Major v3 capabilities include:
+It combines the existing Agentic AI runtime with:
 
--   evaluation framework;
--   Model Gateway;
--   Spring Boot Policy Engine;
--   deterministic guardrails;
--   policy audit and metrics;
--   Policy Control Center;
--   DDD bounded contexts;
--   Clean Architecture rules;
--   C4 and arc42 documentation;
--   ADRs;
--   Azure reference architecture;
--   Pulumi IaC;
--   RBAC foundation;
--   multi-tenancy;
--   tenant isolation foundation;
--   OAuth PKCE foundation;
--   transactional outbox;
--   Redis Streams;
--   Event Control Center;
--   production hardening;
--   threat model;
--   secret scanning;
--   security/release CI gates;
--   automated v3 release packaging.
+- a synchronous and asynchronous Python SDK;
+- packaged `redpa` CLI;
+- agent registry and capability discovery;
+- durable workflow developer operations;
+- Human Review developer operations;
+- MCP discovery and qualified execution;
+- provider and reliability inspection;
+- benchmark suites and reliability history;
+- regression and release quality gates;
+- Next.js operator Control Plane;
+- version-aligned backend, Docker, frontend, SDK, and Helm application metadata.
 
-Release manifest:
+Release documentation:
 
-``` text
-RELEASE_MANIFEST_v3.0.0.json
-```
+- [`docs/V6_RELEASE_NOTES.md`](docs/V6_RELEASE_NOTES.md)
+- [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELEASE_CHECKLIST.md)
+- [`docs/V6_RELEASE_AUDIT.md`](docs/V6_RELEASE_AUDIT.md)
+- [`docs/V6_REPOSITORY_CLEANUP.md`](docs/V6_REPOSITORY_CLEANUP.md)
 
-Final checklist:
-
-``` text
-docs/release/V3_FINAL_CHECKLIST.md
-```
-
-Release archive:
-
-``` text
-dist/redpa-ai-v3.0.0.zip
-```
-
-> The source tree and release automation can prepare the v3.0.0 artifact
-> locally. A Git tag/repository release should only be created after the
-> final release checklist and archive contents have been reviewed.
+Historical V1–V3 release material is retained as project history and should not be interpreted as the current release path.
 
 ------------------------------------------------------------------------
 
 ## Roadmap
 
-### v1 --- Agentic Foundation
+### Completed milestones
 
--   [x] FastAPI platform
--   [x] PostgreSQL
--   [x] authentication
--   [x] conversations and messages
--   [x] planner and routing
--   [x] RAG
--   [x] tool execution
--   [x] Docker Compose
+- **V1 — Agentic Foundation:** FastAPI, persistence, authentication, conversations, planner/routing, RAG, tools, Docker.
+- **V2 — Distributed Agentic Runtime:** MCP, A2A specialists, durable workflows, Human Review, Agent Memory, background execution, Redis, observability, deployment assets.
+- **V3 — Enterprise Governance & Integration:** evaluation, Model Gateway, Spring policy service, architecture governance, tenancy/RBAC foundations, OAuth PKCE foundations, transactional outbox/Redis Streams, production hardening.
+- **V4 / V4.2 — Platform & Production Agentic Readiness:** provider routing, unified agent runtime, guardrails, economics/usage controls, runtime reliability.
+- **V5 — Control Plane:** API-backed operational surfaces for agents, models, tools, workflows, executions, memory, usage, reviews, governance, access, and reliability.
+- **V5.5 — Evaluation & Reliability:** persisted benchmarks, benchmark suites, regression comparison, reliability snapshots, release quality gates and candidate reports.
+- **V6 — Developer Platform:** Python SDK, async client, CLI, developer diagnostics, workflow/review/MCP operations, packaging, examples, and SDK CI.
 
-### v2 --- Distributed Agentic Runtime
+### Future work
 
--   [x] MCP server/client platform
--   [x] unified tool registry
--   [x] Human Review
--   [x] workflow resume
--   [x] A2A coordinator
--   [x] specialist agents
--   [x] distributed durable workflows
--   [x] Agent Memory
--   [x] Redis cache
--   [x] background worker
--   [x] scheduler
--   [x] retry and dead-letter queues
--   [x] rate limiting
--   [x] idempotency
--   [x] Prometheus
--   [x] Grafana
--   [x] OpenTelemetry
--   [x] Tempo
--   [x] structured logging
--   [x] Kubernetes
--   [x] Helm
--   [x] Web Control Center
-
-### v3 --- Enterprise Governance, Cloud, and Integration
-
--   [x] evaluation framework
--   [x] Model Gateway
--   [x] Spring Boot Policy Engine
--   [x] Human Review policy bridge
--   [x] internal-tool enforcement
--   [x] MCP enforcement
--   [x] persistent policy audit
--   [x] policy metrics
--   [x] Policy Control Center
--   [x] DDD bounded contexts
--   [x] Clean Architecture rules
--   [x] SOLID guidance
--   [x] ADRs
--   [x] C4 documentation
--   [x] arc42 documentation
--   [x] Azure reference architecture
--   [x] Pulumi Python IaC
--   [x] cloud security and cost guidance
--   [x] RBAC foundation
--   [x] multi-tenancy
--   [x] tenant isolation foundation
--   [x] OAuth PKCE foundation
--   [x] Access & Tenancy Control Center
--   [x] transactional outbox
--   [x] Redis Streams
--   [x] Event Control Center
--   [x] production hardening
--   [x] threat model
--   [x] secret scanning
--   [x] security CI
--   [x] release automation
-
-### Future Work
-
--   [ ] complete production OAuth token exchange and account linking
--   [ ] deploy and validate the Azure stack in a live Azure subscription
--   [ ] add external event consumers/connectors
--   [ ] expand tenant-level authorization policies
--   [ ] add more model providers to the Model Gateway
--   [ ] expand evaluation datasets and benchmark suites
--   [ ] add production SLO/SLA dashboards
--   [ ] perform larger-scale load and resilience testing
+- complete production OAuth token exchange and account linking;
+- validate Azure/Pulumi deployment against a live subscription;
+- add external event consumers/connectors;
+- expand tenant-level authorization policies;
+- expand evaluation datasets and benchmark suites;
+- add production SLO/SLA dashboards;
+- perform larger-scale load, chaos, and resilience testing;
+- consider additional SDK languages and hosted deployment options.
 
 ------------------------------------------------------------------------
 

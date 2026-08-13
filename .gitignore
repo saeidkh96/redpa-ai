@@ -64,3 +64,6 @@ infra/azure/Pulumi.*.yaml
 
 # TypeScript incremental build metadata
 frontend/tsconfig.tsbuildinfo
+
+# TypeScript incremental build cache
+*.tsbuildinfo
