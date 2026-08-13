@@ -53,9 +53,14 @@ frontend/.next/
 
 # Storage
 backend/storage/*
-!backend/storage/.gitkeep
+!backend/storage/uploads/
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
 *.pyc
 release-check-report.json
 
 # Local Pulumi stack configuration
 infra/azure/Pulumi.*.yaml
+
+# TypeScript incremental build metadata
+frontend/tsconfig.tsbuildinfo
