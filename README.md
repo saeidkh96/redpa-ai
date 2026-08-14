@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v6.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v7.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V7.0 Enterprise Research](#v70-enterprise-research)
 -   [V6.0 Developer Platform](#v60-developer-platform)
 -   [V5.5 Evaluation & Reliability](#v55-evaluation--reliability)
 -   [V5.0 Control Plane](#v50-control-plane)
@@ -111,6 +112,35 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V7.0 Enterprise Research
+
+V7.0 adds the first complete real-world application workflow on top of the RedPA platform: a persisted, evidence-first Enterprise Research Workspace.
+
+Implemented V7 surfaces include:
+
+- persisted enterprise research runs and execution timeline events;
+- background research execution using the existing Research Agent and ranked DDGS evidence;
+- explicit planning, web-research, synthesis, quality-gate and completion stages;
+- deterministic research-quality scoring based on evidence coverage and source diversity;
+- evidence-first Markdown reports with source URLs, snippets and retrieval scores;
+- live Control Plane polling for stage, progress, evidence, quality and final report;
+- Python SDK and async SDK research operations;
+- `redpa research start`, `redpa research list` and `redpa research get` CLI commands;
+- Alembic persistence for research runs and timeline events;
+- V7 API routes under `/api/v1/research/runs`.
+
+Local Control Plane:
+
+```text
+http://localhost:3001/control-plane/research
+```
+
+The V7 research report deliberately preserves evidence provenance instead of presenting unsupported synthesis as fact.
+
+See [`docs/V7_ENTERPRISE_RESEARCH.md`](docs/V7_ENTERPRISE_RESEARCH.md).
+
+------------------------------------------------------------------------
 
 ## V6.0 Developer Platform
 
@@ -1174,9 +1204,9 @@ For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELE
 
 ## Release
 
-### v6.0.0 — Developer Platform
+### v7.0.0 — Enterprise Research
 
-V6.0.0 is the current stable milestone represented by this source tree.
+V7.0.0 is the current source milestone represented by this tree. It adds an evidence-first Enterprise Research Workspace on top of the completed V6 Developer Platform.
 
 It combines the existing Agentic AI runtime with:
 
@@ -1214,6 +1244,7 @@ Historical V1–V3 release material is retained as project history and should no
 - **V5 — Control Plane:** API-backed operational surfaces for agents, models, tools, workflows, executions, memory, usage, reviews, governance, access, and reliability.
 - **V5.5 — Evaluation & Reliability:** persisted benchmarks, benchmark suites, regression comparison, reliability snapshots, release quality gates and candidate reports.
 - **V6 — Developer Platform:** Python SDK, async client, CLI, developer diagnostics, workflow/review/MCP operations, packaging, examples, and SDK CI.
+- **V7 — Enterprise Research:** persisted evidence-first research runs, live execution timeline, quality scoring, reports, Control Plane workspace, SDK and CLI operations.
 
 ### Future work
 

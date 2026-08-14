@@ -283,3 +283,33 @@ class RedPA:
             params={"limit": limit, "offset": offset},
         )
 
+
+    def research_runs(self, *, limit: int = 50) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            "/api/v1/research/runs",
+            params={"limit": limit},
+        )
+
+    def research_run(self, run_id: str) -> dict[str, Any]:
+        return self._request(
+            "GET",
+            f"/api/v1/research/runs/{run_id}",
+        )
+
+    def start_research(
+        self,
+        query: str,
+        *,
+        max_results: int = 8,
+        minimum_quality_score: float = 0.65,
+    ) -> dict[str, Any]:
+        return self._request(
+            "POST",
+            "/api/v1/research/runs",
+            json={
+                "query": query,
+                "max_results": max_results,
+                "minimum_quality_score": minimum_quality_score,
+            },
+        )

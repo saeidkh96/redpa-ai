@@ -18,6 +18,7 @@ reliability_app = typer.Typer(help="Inspect provider reliability.")
 workflows_app = typer.Typer(help="Operate durable distributed workflows.")
 reviews_app = typer.Typer(help="Operate human-review requests.")
 mcp_app = typer.Typer(help="Inspect and execute MCP tools.")
+research_app = typer.Typer(help="Run and inspect V7 enterprise research.")
 
 app.add_typer(agents_app, name="agents")
 app.add_typer(models_app, name="models")
@@ -27,6 +28,7 @@ app.add_typer(reliability_app, name="reliability")
 app.add_typer(workflows_app, name="workflows")
 app.add_typer(reviews_app, name="reviews")
 app.add_typer(mcp_app, name="mcp")
+app.add_typer(research_app, name="research")
 
 
 def _config(api_url: str | None, token: str | None) -> RedPAConfig:
@@ -428,6 +430,54 @@ def mcp_execute(
                     qualified_name,
                     arguments=parsed,
                     approval_granted=approval_granted,
+                ),
+                json_output=json_output,
+            )
+    _run(execute)
+
+
+@research_app.command("list")
+def research_list(
+    limit: int = typer.Option(50, min=1, max=200),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.research_runs(limit=limit), json_output=json_output)
+    _run(execute)
+
+
+@research_app.command("get")
+def research_get(
+    run_id: str,
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.research_run(run_id), json_output=json_output)
+    _run(execute)
+
+
+@research_app.command("start")
+def research_start(
+    query: str = typer.Option(..., "--query"),
+    max_results: int = typer.Option(8, min=3, max=20),
+    minimum_quality: float = typer.Option(0.65, "--minimum-quality", min=0.0, max=1.0),
+    api_url: str | None = typer.Option(None, "--api-url"),
+    token: str | None = typer.Option(None, "--token"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(
+                client.start_research(
+                    query,
+                    max_results=max_results,
+                    minimum_quality_score=minimum_quality,
                 ),
                 json_output=json_output,
             )

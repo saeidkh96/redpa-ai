@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 const nav = [
   ["Overview", "/control-plane"],
   ["Agents", "/control-plane/agents"],
+  ["Research", "/control-plane/research"],
   ["Models", "/control-plane/models"],
   ["Tools & MCP", "/control-plane/tools"],
   ["Workflows", "/control-plane/workflows"],
@@ -29,7 +30,7 @@ export default function ControlPlaneShell({ children }: { children: ReactNode })
       <aside className="cpSidebar">
         <Link href="/control-plane" className="cpBrand">
           <img src="/logo.png" alt="RedPA AI" />
-          <div><strong>RedPA AI</strong><span>V5 Control Plane</span></div>
+          <div><strong>RedPA AI</strong><span>V7 Control Plane</span></div>
         </Link>
         <nav className="cpNav">
           {nav.map(([label, href]) => {

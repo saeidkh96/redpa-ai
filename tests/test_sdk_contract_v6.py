@@ -62,8 +62,8 @@ def test_v6_async_client_and_release_version_contract():
     project = Path("sdk/python/pyproject.toml").read_text(encoding="utf-8")
     workflow = Path(".github/workflows/sdk-ci.yml").read_text(encoding="utf-8")
     assert "AsyncRedPA" in init_source
-    assert '__version__ = "6.0.0"' in init_source
-    assert 'version = "6.0.0"' in project
+    assert '__version__ = "7.0.0"' in init_source
+    assert 'version = "7.0.0"' in project
     assert 'python-version: ["3.11", "3.12", "3.13"]' in workflow
     assert "python -m build sdk/python" in workflow
 
@@ -81,3 +81,15 @@ def test_v6_sync_client_routes_match_implemented_backend():
         "/api/v1/model-gateway/reliability/history",
     ]:
         assert route in source
+
+
+def test_v7_research_sdk_contract():
+    client = Path("sdk/python/src/redpa_sdk/client.py").read_text(encoding="utf-8")
+    async_client = Path("sdk/python/src/redpa_sdk/async_client.py").read_text(encoding="utf-8")
+    cli = Path("sdk/python/src/redpa_sdk/cli.py").read_text(encoding="utf-8")
+    assert "/api/v1/research/runs" in client
+    assert "/api/v1/research/runs" in async_client
+    assert 'app.add_typer(research_app, name="research")' in cli
+    assert '@research_app.command("start")' in cli
+    assert '@research_app.command("list")' in cli
+    assert '@research_app.command("get")' in cli

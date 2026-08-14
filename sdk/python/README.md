@@ -1,6 +1,6 @@
 # RedPA AI Python SDK
 
-The RedPA AI V6 SDK is the developer-facing client for the implemented RedPA `/api/v1` platform.
+The RedPA AI V7 SDK is the developer-facing client for the implemented RedPA `/api/v1` platform.
 
 ## Install
 
@@ -95,3 +95,26 @@ Authenticated endpoints require `REDPA_TOKEN` or `--token`.
 ## SDK scope
 
 The SDK is intentionally thin. Agent orchestration, durable workflow execution, MCP permissions, human review, model routing, evaluation, and reliability remain server-side RedPA capabilities. The SDK only exposes APIs that are implemented by the repository.
+
+
+## V7 Enterprise Research
+
+```bash
+redpa research start --query "Compare enterprise AI agent platforms"
+redpa research list
+redpa research get <run-uuid>
+```
+
+Python:
+
+```python
+from redpa_sdk import RedPA
+
+with RedPA() as client:
+    run = client.start_research(
+        "Compare enterprise AI agent platforms",
+        max_results=8,
+        minimum_quality_score=0.65,
+    )
+    print(run["id"])
+```

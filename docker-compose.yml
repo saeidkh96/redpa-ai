@@ -496,7 +496,7 @@ services:
     restart: unless-stopped
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
-      APP_VERSION: "6.0.0"
+      APP_VERSION: "7.0.0"
       ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}

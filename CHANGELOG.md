@@ -1,5 +1,17 @@
 # Changelog
 
+## V7.0.0 — Enterprise Research
+
+- added persisted enterprise research runs and timeline events;
+- added background evidence-first execution using the existing Research Agent;
+- added deterministic coverage/source-diversity quality scoring;
+- added provenance-preserving Markdown research reports;
+- added `/api/v1/research/runs` create/list/detail APIs;
+- added live `/control-plane/research` workspace;
+- added sync/async SDK research operations and `redpa research` CLI commands;
+- added V7 Alembic persistence and regression/contract tests;
+- aligned backend, Docker, frontend, SDK and Helm application metadata to `7.0.0`.
+
 ## V6.0.0 — Developer Platform
 
 ### Completed V6 surface

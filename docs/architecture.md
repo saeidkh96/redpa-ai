@@ -1,13 +1,13 @@
-# RedPA AI v6.0.0 Architecture
+# RedPA AI v7.0.0 Architecture
 
-This document is the concise architecture entry point for the V6 source tree. Detailed views are maintained in:
+This document is the concise architecture entry point for the V7 source tree. Detailed views are maintained in:
 
 - [`architecture/c4.md`](architecture/c4.md)
 - [`architecture/arc42.md`](architecture/arc42.md)
 - [`architecture/ddd.md`](architecture/ddd.md)
 - [`architecture/adr/`](architecture/adr/)
 
-![RedPA AI v6.0.0 architecture](images/architecture.png)
+![RedPA AI core platform architecture](images/architecture.png)
 
 ## Runtime Topology
 
@@ -92,3 +92,29 @@ Docker Compose is the local integration runtime validated during the V6 release 
 ## Release Identity
 
 V6 release metadata is aligned to `6.0.0` across the FastAPI application default, Docker runtime, Next.js package, Python SDK, and Helm `appVersion`.
+
+
+## V7 Enterprise Research Application Layer
+
+V7 introduces a persisted application workflow above the existing platform primitives.
+
+```text
+Control Plane / SDK / CLI
+        |
+        v
+/api/v1/research/runs
+        |
+        v
+EnterpriseResearchService
+        |
+        +--> ResearchAgentService --> DDGS web retrieval
+        +--> ResearchQualityEvaluator
+        +--> EnterpriseResearchReportBuilder
+        |
+        v
+PostgreSQL
+  enterprise_research_runs
+  enterprise_research_events
+```
+
+The V7 workspace uses the existing Research Agent rather than duplicating web retrieval. Its execution timeline is persisted and surfaced through polling in the Control Plane.
