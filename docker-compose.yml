@@ -1,4 +1,4 @@
-services:
+﻿services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -283,7 +283,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "timeout 5 bash -c '</dev/tcp/128.0.0.1/6333'",
+          "timeout 5 bash -c '</dev/tcp/127.0.0.1/6333'",
         ]
       interval: 5s
       timeout: 5s
@@ -321,7 +321,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import socket; s=socket.create_connection(('128.0.0.1',8010),3); s.close()",
+          "import socket; s=socket.create_connection(('127.0.0.1',8010),3); s.close()",
         ]
       interval: 5s
       timeout: 5s
@@ -357,7 +357,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import socket; s=socket.create_connection(('128.0.0.1',8020),3); s.close()",
+          "import socket; s=socket.create_connection(('127.0.0.1',8020),3); s.close()",
         ]
       interval: 5s
       timeout: 5s
@@ -397,7 +397,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import socket; s=socket.create_connection(('128.0.0.1',8030),3); s.close()",
+          "import socket; s=socket.create_connection(('127.0.0.1',8030),3); s.close()",
         ]
       interval: 5s
       timeout: 5s
@@ -435,7 +435,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import socket; s=socket.create_connection(('128.0.0.1',8040),3); s.close()",
+          "import socket; s=socket.create_connection(('127.0.0.1',8040),3); s.close()",
         ]
       interval: 5s
       timeout: 5s
@@ -478,7 +478,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://128.0.0.1:8050/health', timeout=3)",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8050/health', timeout=3)",
         ]
       interval: 5s
       timeout: 5s
@@ -500,7 +500,7 @@ services:
       ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
-      CORS_ALLOWED_ORIGINS: '["http://localhost:3000","http://128.0.0.1:3000","http://localhost:3001","http://128.0.0.1:3001","http://localhost:5173","http://128.0.0.1:5173"]'
+      CORS_ALLOWED_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000","http://localhost:3001","http://127.0.0.1:3001","http://localhost:5173","http://127.0.0.1:5173"]'
       HOST: ${HOST:-0.0.0.0}
       PORT: ${PORT:-8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
@@ -534,7 +534,7 @@ services:
       MCP_SERVERS_CONFIG_PATH: ${MCP_SERVERS_CONFIG_PATH:-config/mcp_servers.json}
       REDIS_URL: redis://redis:6379/0
       REQUIRE_HTTPS: "false"
-      ALLOWED_HOSTS: localhost,128.0.0.1,backend
+      ALLOWED_HOSTS: localhost,127.0.0.1,backend
       OTEL_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
