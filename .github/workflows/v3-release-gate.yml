@@ -72,6 +72,19 @@ jobs:
 
 
       # ------------------------------------------------------------
+      # RedPA Python SDK
+      # ------------------------------------------------------------
+
+      - name: Install RedPA Python SDK
+        run: |
+          python -m pip install -e ./sdk/python
+
+      - name: Verify RedPA SDK import
+        run: |
+          python -c "import redpa_sdk; print('RedPA SDK version:', redpa_sdk.__version__)"
+
+
+      # ------------------------------------------------------------
       # Compile
       # ------------------------------------------------------------
 
