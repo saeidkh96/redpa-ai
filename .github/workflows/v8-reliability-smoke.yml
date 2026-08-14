@@ -1,0 +1,32 @@
+name: V8 Reliability Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Backend base URL to test
+        required: true
+        default: http://localhost:8000
+
+jobs:
+  load-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install load-test dependency
+        run: python -m pip install httpx==0.28.1
+      - name: Run V8 SLO load smoke
+        run: |
+          python scripts/reliability/load_test.py \
+            --base-url "${{ inputs.base_url }}" \
+            --requests 200 \
+            --concurrency 20 \
+            --output artifacts/load-test-v8.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v8-load-test-evidence
+          path: artifacts/load-test-v8.json

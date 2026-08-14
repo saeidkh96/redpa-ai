@@ -141,7 +141,7 @@ export default function EnterpriseResearchPage() {
   return <>
     <header className="cpHeader">
       <div>
-        <p className="cpEyebrow">REDPA AI · V7</p>
+        <p className="cpEyebrow">REDPA AI · V8</p>
         <h1>Enterprise Research Workspace</h1>
         <p>Run an evidence-first research workflow, watch its execution timeline live, inspect ranked sources, and review deterministic quality evidence.</p>
       </div>

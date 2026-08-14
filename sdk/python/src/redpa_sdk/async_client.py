@@ -154,3 +154,25 @@ class AsyncRedPA:
                 "minimum_quality_score": minimum_quality_score,
             },
         )
+
+
+    async def analytics_catalog(self) -> dict[str, Any]:
+        return await self._request("GET", "/api/v1/analytics/catalog")
+
+    async def ingest_analytics(self, items: list[dict[str, Any]]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/analytics/events", json={"items": items})
+
+    async def query_kpi(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/analytics/query", json=payload)
+
+    async def connectors(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        return await self._request("GET", "/api/v1/connectors", params={"limit": limit})
+
+    async def create_connector(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/connectors", json=payload)
+
+    async def execute_connector(self, connector_id: str, *, payload: dict[str, Any], approval_granted: bool = False, dry_run: bool = True) -> dict[str, Any]:
+        return await self._request("POST", f"/api/v1/connectors/{connector_id}/execute", json={"payload": payload, "approval_granted": approval_granted, "dry_run": dry_run})
+
+    async def evaluate_slo(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/operations/slo/evaluate", json=payload)

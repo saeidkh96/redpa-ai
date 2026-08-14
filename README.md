@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v7.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v8.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V8.0 Enterprise Operations](#v80-enterprise-operations)
 -   [V7.0 Enterprise Research](#v70-enterprise-research)
 -   [V6.0 Developer Platform](#v60-developer-platform)
 -   [V5.5 Evaluation & Reliability](#v55-evaluation--reliability)
@@ -112,6 +113,29 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V8.0 Enterprise Operations
+
+V8.0 combines analytics/KPIs, enterprise automation connectors, and cloud reliability evidence into one operator/developer milestone.
+
+Implemented V8 surfaces include:
+
+- generic analytics fact ingestion with JSON dimensions and metric catalog discovery;
+- KPI queries with sum, average, weighted-average, count, min and max aggregations;
+- Control Plane KPI explorer at `/control-plane/analytics`;
+- persisted Webhook, Slack Webhook, GitHub Dispatch and n8n connector registry;
+- dry-run, explicit approval for live side effects, bounded retry/backoff and delivery audit state;
+- Control Plane connector workspace at `/control-plane/connectors`;
+- deterministic SLO evaluation for availability and p50/p95/p99 latency;
+- reusable HTTP load-smoke evidence generator;
+- Control Plane SLO workspace at `/control-plane/operations`;
+- production Azure Pulumi profile/runbook and manually-triggered deployment workflow;
+- manually-triggered GitHub Actions reliability smoke with uploaded JSON evidence;
+- Python SDK/async SDK and CLI access to V8 operational APIs.
+
+See [`docs/V8_ENTERPRISE_OPERATIONS.md`](docs/V8_ENTERPRISE_OPERATIONS.md).
+
+------------------------------------------------------------------------
 
 ## V7.0 Enterprise Research
 
@@ -1204,6 +1228,11 @@ For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELE
 
 ## Release
 
+### v8.0.0 — Enterprise AI Operations & Automation
+
+V8.0.0 is the current source milestone. It adds Analytics & KPI, enterprise connector automation, SLO/load evidence and an Azure production deployment path on top of V7 Enterprise Research and the V6 Developer Platform.
+
+
 ### v7.0.0 — Enterprise Research
 
 V7.0.0 is the current source milestone represented by this tree. It adds an evidence-first Enterprise Research Workspace on top of the completed V6 Developer Platform.
@@ -1245,6 +1274,7 @@ Historical V1–V3 release material is retained as project history and should no
 - **V5.5 — Evaluation & Reliability:** persisted benchmarks, benchmark suites, regression comparison, reliability snapshots, release quality gates and candidate reports.
 - **V6 — Developer Platform:** Python SDK, async client, CLI, developer diagnostics, workflow/review/MCP operations, packaging, examples, and SDK CI.
 - **V7 — Enterprise Research:** persisted evidence-first research runs, live execution timeline, quality scoring, reports, Control Plane workspace, SDK and CLI operations.
+- **V8 — Enterprise Operations & Automation:** analytics/KPI engine, dimensional queries, enterprise connectors, approval-aware automation, SLO/load evidence, and Azure production deployment workflow.
 
 ### Future work
 

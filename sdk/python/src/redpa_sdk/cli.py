@@ -18,7 +18,10 @@ reliability_app = typer.Typer(help="Inspect provider reliability.")
 workflows_app = typer.Typer(help="Operate durable distributed workflows.")
 reviews_app = typer.Typer(help="Operate human-review requests.")
 mcp_app = typer.Typer(help="Inspect and execute MCP tools.")
-research_app = typer.Typer(help="Run and inspect V7 enterprise research.")
+research_app = typer.Typer(help="Run and inspect enterprise research.")
+analytics_app = typer.Typer(help="Query V8 analytics and KPI data.")
+connectors_app = typer.Typer(help="Operate V8 enterprise connectors.")
+operations_app = typer.Typer(help="Evaluate V8 SLO evidence.")
 
 app.add_typer(agents_app, name="agents")
 app.add_typer(models_app, name="models")
@@ -29,6 +32,9 @@ app.add_typer(workflows_app, name="workflows")
 app.add_typer(reviews_app, name="reviews")
 app.add_typer(mcp_app, name="mcp")
 app.add_typer(research_app, name="research")
+app.add_typer(analytics_app, name="analytics")
+app.add_typer(connectors_app, name="connectors")
+app.add_typer(operations_app, name="operations")
 
 
 def _config(api_url: str | None, token: str | None) -> RedPAConfig:
@@ -481,6 +487,39 @@ def research_start(
                 ),
                 json_output=json_output,
             )
+    _run(execute)
+
+
+@analytics_app.command("catalog")
+def analytics_catalog(api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.analytics_catalog(), json_output=json_output)
+    _run(execute)
+
+
+@analytics_app.command("query")
+def analytics_query(metric: str = typer.Option(..., "--metric"), aggregation: str = typer.Option("sum", "--aggregation"), group_by: str | None = typer.Option(None, "--group-by"), api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.query_kpi({"metric": metric, "aggregation": aggregation, "group_by": [group_by] if group_by else [], "filters": {}}), json_output=json_output)
+    _run(execute)
+
+
+@connectors_app.command("list")
+def connectors_list(limit: int = typer.Option(100, min=1, max=200), api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.connectors(limit=limit), json_output=json_output)
+    _run(execute)
+
+
+@operations_app.command("slo-demo")
+def slo_demo(api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        samples = [{"latency_ms": 200 + (i % 10) * 15, "success": i != 99} for i in range(100)]
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.evaluate_slo({"samples": samples, "availability_target": 0.99, "p95_latency_target_ms": 500}), json_output=json_output)
     _run(execute)
 
 

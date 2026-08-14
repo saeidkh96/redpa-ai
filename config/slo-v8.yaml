@@ -1,0 +1,13 @@
+version: 1
+service: redpa-ai
+objectives:
+  availability:
+    target: 0.99
+    window: release-smoke
+  api_latency:
+    percentile: 0.95
+    target_ms: 1000
+    window: release-smoke
+release_gate:
+  require_availability: true
+  require_latency: true

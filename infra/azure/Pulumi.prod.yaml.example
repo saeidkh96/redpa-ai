@@ -1,0 +1,24 @@
+config:
+  azure-native:location: germanywestcentral
+  redpa:environment: prod
+  redpa:location: germanywestcentral
+  redpa:projectName: redpa
+  redpa:backendImage: ghcr.io/saeidkh96/redpa-ai-backend:8.0.0
+  redpa:frontendImage: ghcr.io/saeidkh96/redpa-ai-frontend:8.0.0
+  redpa:policyImage: ghcr.io/saeidkh96/redpa-ai-policy-service:8.0.0
+  redpa:postgresAdmin: redpaadmin
+  redpa:postgresVersion: "16"
+  redpa:minReplicas: 2
+  redpa:maxReplicas: 6
+  redpa:workerMinReplicas: 1
+  redpa:workerMaxReplicas: 4
+  redpa:logRetentionDays: 30
+  redpa:deployApps: true
+  redpa:deployBackgroundServices: true
+  redpa:deployResearchAgent: true
+  redpa:deployA2ACoordinator: true
+# Configure secrets with `pulumi config set --secret`:
+# redpa:postgresPassword
+# redpa:secretKey
+# redpa:apiKeyPepper
+# Optional: redpa:redisUrl, redpa:qdrantUrl, redpa:ollamaBaseUrl

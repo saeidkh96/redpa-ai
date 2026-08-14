@@ -1,5 +1,21 @@
 # Changelog
 
+## V8.0.0 — Enterprise AI Operations & Automation
+
+- added generic analytics fact ingestion and KPI query engine with weighted aggregation;
+- added JSONB dimensional slicing and metric/dimension catalog discovery;
+- added Analytics Control Plane workspace;
+- added persisted enterprise connector registry and delivery audit state;
+- added Webhook, Slack Webhook, GitHub Dispatch and n8n connector kinds;
+- added dry-run, explicit approval, retries and environment-based secret indirection for external side effects;
+- added Connectors Control Plane workspace;
+- added deterministic SLO evaluation and reusable HTTP load-smoke evidence generator;
+- added Operations/SLO Control Plane workspace;
+- added Azure production stack example, runbook and manual OIDC deployment workflow;
+- added manual GitHub Actions reliability smoke workflow with artifact upload;
+- expanded sync/async SDK and CLI operations;
+- aligned current release metadata to `8.0.0`.
+
 ## V7.0.0 — Enterprise Research
 
 - added persisted enterprise research runs and timeline events;

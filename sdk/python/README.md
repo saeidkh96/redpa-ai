@@ -1,6 +1,6 @@
 # RedPA AI Python SDK
 
-The RedPA AI V7 SDK is the developer-facing client for the implemented RedPA `/api/v1` platform.
+The RedPA AI V8 SDK is the developer-facing client for the implemented RedPA `/api/v1` platform.
 
 ## Install
 
@@ -118,3 +118,15 @@ with RedPA() as client:
     )
     print(run["id"])
 ```
+
+
+## V8 Operations
+
+```bash
+redpa analytics catalog
+redpa analytics query --metric research.quality --aggregation weighted_avg --group-by workspace
+redpa connectors list
+redpa operations slo-demo
+```
+
+The SDK also exposes `ingest_analytics`, `query_kpi`, connector create/execute operations and SLO evaluation in synchronous and asynchronous clients.

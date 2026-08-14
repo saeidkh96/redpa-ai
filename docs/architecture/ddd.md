@@ -1,4 +1,4 @@
-# RedPA AI V7.0 — Domain-Driven Design
+# RedPA AI V8.0 — Domain-Driven Design
 
 RedPA uses bounded contexts to describe platform responsibilities. These boundaries are architectural guidance over an evolving codebase; they do not imply that every context is a separately deployed service.
 

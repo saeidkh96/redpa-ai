@@ -1,4 +1,4 @@
-# RedPA AI V7.0 — arc42 Architecture Documentation
+# RedPA AI V8.0 — arc42 Architecture Documentation
 
 ## 1. Introduction and Goals
 

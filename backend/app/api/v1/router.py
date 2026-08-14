@@ -1,3 +1,6 @@
+from app.api.v1.analytics_v8 import router as analytics_v8_router
+from app.api.v1.connectors_v8 import router as connectors_v8_router
+from app.api.v1.operations_v8 import router as operations_v8_router
 from app.api.v1.enterprise_research import router as enterprise_research_router
 from app.api.v1.production_ai import router as production_ai_router
 from app.api.v1.platform_v4 import router as platform_v4_router
@@ -121,3 +124,7 @@ api_router.include_router(platform_v4_router)
 api_router.include_router(production_ai_router)
 
 api_router.include_router(enterprise_research_router)
+
+api_router.include_router(analytics_v8_router)
+api_router.include_router(connectors_v8_router)
+api_router.include_router(operations_v8_router)

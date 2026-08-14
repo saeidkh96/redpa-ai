@@ -1,6 +1,6 @@
-# RedPA AI v7.0.0 Architecture
+# RedPA AI v8.0.0 Architecture
 
-This document is the concise architecture entry point for the V7 source tree. Detailed views are maintained in:
+This document is the concise architecture entry point for the V8 source tree. Detailed views are maintained in:
 
 - [`architecture/c4.md`](architecture/c4.md)
 - [`architecture/arc42.md`](architecture/arc42.md)
@@ -118,3 +118,16 @@ PostgreSQL
 ```
 
 The V7 workspace uses the existing Research Agent rather than duplicating web retrieval. Its execution timeline is persisted and surfaced through polling in the Control Plane.
+
+
+## V8 Enterprise Operations Layer
+
+V8 composes three operator-facing capabilities above the core platform:
+
+```text
+Analytics facts -> KPI Engine -> dimensional/weighted queries -> Analytics Control Plane
+Connector registry -> approval/dry-run -> outbound delivery/retry -> delivery audit
+Load evidence -> SLO evaluator -> PASS/FAIL release evidence -> Operations Control Plane
+```
+
+The Azure/Pulumi production path remains infrastructure-as-code until a real subscription deployment is completed and validated.
