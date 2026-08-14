@@ -124,6 +124,10 @@ jobs:
         run: |
           python -m pip install pytest pytest-asyncio httpx
 
+      - name: Install RedPA Python SDK
+        run: |
+          python -m pip install -e ./sdk/python
+          
       - name: Compile Python source
         shell: bash
         run: |
