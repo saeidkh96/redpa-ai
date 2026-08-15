@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V9.0 Production Cloud & Autonomous Operations](#v90-production-cloud--autonomous-operations)
 -   [V8.0 Enterprise Operations](#v80-enterprise-operations)
 -   [V7.0 Enterprise Research](#v70-enterprise-research)
 -   [V6.0 Developer Platform](#v60-developer-platform)
@@ -311,7 +312,7 @@ See [`docs/V4_2_PRODUCTION_AGENTIC_READINESS.md`](docs/V4_2_PRODUCTION_AGENTIC_R
 
 ## V3 Foundation
 
-The V3 foundation, retained in V6.0, extends the v2 platform with an enterprise governance and
+The V3 foundation, retained in V9.0, extends the v2 platform with an enterprise governance and
 integration layer.
 
 ### Evaluation
@@ -405,6 +406,7 @@ flowchart TB
         Gateway[Model Gateway]
         Eval[Evaluation]
         Events[Event API]
+        Ops[V9 Operations API]
     end
 
     subgraph Agents["Agent Runtime"]
@@ -431,6 +433,7 @@ flowchart TB
         Memory[Agent Memory]
         Worker[Background Worker]
         Scheduler[Scheduler]
+        OpsAgent[Ops Agent :8070]
         Redis[(Redis)]
     end
 
@@ -471,6 +474,8 @@ flowchart TB
     Streams --> Redis
     Worker --> Redis
     Scheduler --> Redis
+    Ops --> OpsAgent
+    OpsAgent --> Durable
     Platform --> Prometheus
     Platform --> OTEL
     OTEL --> Tempo
@@ -478,7 +483,7 @@ flowchart TB
     Tempo --> Grafana
 ```
 
-The repository also contains synchronized V6 C4, arc42, DDD, and ADR architecture views under [`docs/architecture/`](docs/architecture/). The V5 Control Plane design history remains documented in [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md).
+The repository also contains C4, arc42, DDD, and ADR architecture views under [`docs/architecture/`](docs/architecture/). The V5 Control Plane design history remains documented in [`docs/V5_CONTROL_PLANE.md`](docs/V5_CONTROL_PLANE.md).
 
 ------------------------------------------------------------------------
 
@@ -1059,7 +1064,7 @@ redpa-ai/
 └── README.md
 ```
 
-Historical V3 release automation and manifests remain in the repository for release history and regression/source-verification compatibility; they are not the current V6 release path.
+Historical release automation and manifests remain in the repository for release history and regression/source-verification compatibility; they are not the current V9 release path.
 
 ------------------------------------------------------------------------
 
@@ -1167,6 +1172,7 @@ Control Center:       http://localhost:3001
 Backend Swagger:      http://localhost:8000/docs
 Backend OpenAPI:      http://localhost:8000/openapi.json
 Policy Service:       http://localhost:8090
+Ops Agent:            http://localhost:8070
 Prometheus:           http://localhost:9090
 Grafana:              http://localhost:3000
 Tempo:                http://localhost:3200
@@ -1206,6 +1212,8 @@ Main API areas are exposed under `/api/v1`.
   `/platform`            Health
   `/performance`         Performance
   `/metrics`             Prometheus metrics
+  `/research/runs`       Enterprise research runs
+  `/operations/v9`       V9 incidents, remediation, cost, and release readiness
 
 Use Swagger UI for the current request and response schemas.
 
@@ -1215,30 +1223,34 @@ Use Swagger UI for the current request and response schemas.
 
 RedPA AI uses layered verification across backend, contracts, security, runtime, frontend, SDK, migrations, and release metadata.
 
-The final V6 release-candidate validation performed on the release checkout reported:
+The latest V9 local regression validation reported:
 
 ```text
-300 passed
+323 passed
 [PASS] No obvious committed secrets detected.
 ```
 
-The Next.js `6.0.0` production build completed successfully, and the rebuilt Docker runtime reported:
+The V9 frontend production build completed successfully with Next.js 16.3.0. Runtime verification reported the backend and dedicated Ops Agent healthy:
 
 ```json
 {
   "status": "healthy",
   "service": "RedPA AI",
-  "version": "6.0.0",
+  "version": "9.0.0",
   "environment": "development",
-  "database": {
-    "status": "healthy"
-  }
+  "database": {"status": "healthy"}
 }
 ```
 
-The Python SDK is packaged as `redpa-ai-sdk 6.0.0`, with synchronous and asynchronous clients plus the `redpa` CLI.
+```json
+{
+  "status": "healthy",
+  "service": "RedPA Ops Agent",
+  "version": "9.0.0"
+}
+```
 
-For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELEASE_CHECKLIST.md).
+V9 end-to-end operations validation also confirmed persisted incident creation, Docker-backed diagnosis, denial of unapproved side effects, approved `restart_container` remediation, and post-remediation service health. The Python SDK package identity is `redpa-ai-sdk 9.0.0`.
 
 ------------------------------------------------------------------------
 
@@ -1246,35 +1258,24 @@ For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELE
 
 ### v9.0.0 — Production Cloud & Autonomous Operations
 
-V9.0.0 is the current source milestone. It adds persisted incident response, approval-gated operations remediation, release-readiness gates, cloud cost modeling, and backup/restore tooling on top of the V8 enterprise operations platform.
+V9.0.0 is the current source milestone. It extends the V8 enterprise-operations platform with persisted incident response, Docker-backed diagnosis, approval-gated remediation, release-readiness gates, cloud cost estimation, backup/restore tooling, and dedicated operator views.
 
+Validated V9 behavior includes:
 
-### v7.0.0 — Enterprise Research
+- persisted incident creation and listing;
+- container-backed incident diagnosis through the RedPA Ops Agent;
+- Human-in-the-Loop denial when remediation approval is absent;
+- allowlisted, explicitly approved container restart remediation;
+- recovery verification after remediation;
+- production-operation APIs under `/api/v1/operations/v9`;
+- Control Plane views for incidents, cloud, cost, and operations;
+- V9-aligned backend, frontend, Python SDK, Docker, Helm, and release metadata.
 
-V7.0.0 is the current source milestone represented by this tree. It adds an evidence-first Enterprise Research Workspace on top of the completed V6 Developer Platform.
+Important scope note: live Azure deployment is not claimed until the Pulumi production stack is executed and validated against a real Azure subscription.
 
-It combines the existing Agentic AI runtime with:
+See [`docs/operations/V9_PRODUCTION_OPERATIONS.md`](docs/operations/V9_PRODUCTION_OPERATIONS.md).
 
-- a synchronous and asynchronous Python SDK;
-- packaged `redpa` CLI;
-- agent registry and capability discovery;
-- durable workflow developer operations;
-- Human Review developer operations;
-- MCP discovery and qualified execution;
-- provider and reliability inspection;
-- benchmark suites and reliability history;
-- regression and release quality gates;
-- Next.js operator Control Plane;
-- version-aligned backend, Docker, frontend, SDK, and Helm application metadata.
-
-Release documentation:
-
-- [`docs/V6_RELEASE_NOTES.md`](docs/V6_RELEASE_NOTES.md)
-- [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELEASE_CHECKLIST.md)
-- [`docs/V6_RELEASE_AUDIT.md`](docs/V6_RELEASE_AUDIT.md)
-- [`docs/V6_REPOSITORY_CLEANUP.md`](docs/V6_REPOSITORY_CLEANUP.md)
-
-Historical V1–V3 release material is retained as project history and should not be interpreted as the current release path.
+Historical V1–V8 release material is retained as project history and regression/source-verification context.
 
 ------------------------------------------------------------------------
 
@@ -1291,6 +1292,7 @@ Historical V1–V3 release material is retained as project history and should no
 - **V6 — Developer Platform:** Python SDK, async client, CLI, developer diagnostics, workflow/review/MCP operations, packaging, examples, and SDK CI.
 - **V7 — Enterprise Research:** persisted evidence-first research runs, live execution timeline, quality scoring, reports, Control Plane workspace, SDK and CLI operations.
 - **V8 — Enterprise Operations & Automation:** analytics/KPI engine, dimensional queries, enterprise connectors, approval-aware automation, SLO/load evidence, and Azure production deployment workflow.
+- **V9 — Production Cloud & Autonomous Operations:** persisted incidents, Docker-backed diagnosis, Human-approved remediation, recovery verification, release-readiness gates, cloud cost estimation, backup/restore tooling, and dedicated operations views.
 
 ### Future work
 
