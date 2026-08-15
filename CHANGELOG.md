@@ -1,5 +1,17 @@
 # Changelog
 
+## V9.0.0 — Production Cloud & Autonomous Operations
+
+- added persisted incident and remediation action records;
+- added Docker-backed V9 Ops Agent with explicit approval and stateful-service denylist;
+- added incident diagnosis and approval-gated stateless restart;
+- added release-readiness gate combining SLO, incidents, security and regression evidence;
+- added cloud cost estimator;
+- added PostgreSQL backup and explicitly confirmed restore tooling;
+- added V9 incidents, release gate and cloud cost Control Plane views;
+- added V9 Alembic migration and contract tests;
+- aligned application, frontend, SDK, Helm and CI release metadata to `9.0.0`.
+
 ## V8.0.0 — Enterprise AI Operations & Automation
 
 - added generic analytics fact ingestion and KPI query engine with weighted aggregation;

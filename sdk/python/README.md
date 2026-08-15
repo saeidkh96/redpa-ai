@@ -130,3 +130,14 @@ redpa operations slo-demo
 ```
 
 The SDK also exposes `ingest_analytics`, `query_kpi`, connector create/execute operations and SLO evaluation in synchronous and asynchronous clients.
+
+## V9 Production Operations
+
+```bash
+redpa operations incidents
+redpa operations incident-create --service redpa-backend --summary "Backend degraded"
+redpa operations cost-demo
+redpa operations release-demo
+```
+
+V9 restart remediation is intentionally not exposed as a one-line CLI command. Side-effecting recovery remains an explicit Control Plane/API approval flow.

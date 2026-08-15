@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     app_version: str = Field(
-        default="8.0.0",
+        default="9.0.0",
         alias="APP_VERSION",
     )
 
@@ -58,9 +58,9 @@ class Settings(BaseSettings):
     cors_allowed_origins: list[str] = Field(
         default=[
             "http://localhost:3000",
-            "http://128.0.0.1:3000",
+            "http://127.0.0.1:3000",
             "http://localhost:5173",
-            "http://128.0.0.1:5173",
+            "http://127.0.0.1:5173",
         ],
         alias="CORS_ALLOWED_ORIGINS",
     )

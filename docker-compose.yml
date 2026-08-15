@@ -1,4 +1,4 @@
-﻿services:
+services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -487,6 +487,31 @@
     networks:
       - redpa-network
 
+  ops-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: redpa-ai-backend
+    container_name: redpa-ops-agent
+    restart: unless-stopped
+    command: ["python", "-m", "app.ops_v9.agent_server"]
+    working_dir: /app/backend
+    environment:
+      PYTHONPATH: /app/backend
+      OPS_AGENT_PORT: 8070
+    ports:
+      - "8070:8070"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - redpa-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8070/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+
   backend:
     build:
       context: .
@@ -496,7 +521,7 @@
     restart: unless-stopped
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
-      APP_VERSION: "8.0.0"
+      APP_VERSION: "9.0.0"
       ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
@@ -533,6 +558,7 @@
       STORAGE_DIRECTORY: ${STORAGE_DIRECTORY:-/app/backend/storage}
       MCP_SERVERS_CONFIG_PATH: ${MCP_SERVERS_CONFIG_PATH:-config/mcp_servers.json}
       REDIS_URL: redis://redis:6379/0
+      OPS_AGENT_URL: http://ops-agent:8070
       REQUIRE_HTTPS: "false"
       ALLOWED_HOSTS: localhost,127.0.0.1,backend
       OTEL_ENABLED: "true"
@@ -555,6 +581,8 @@
       docker-mcp:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      ops-agent:
         condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"

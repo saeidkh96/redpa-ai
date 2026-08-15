@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v8.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v9.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -113,6 +113,22 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+## V9.0 Production Cloud & Autonomous Operations
+
+V9 adds a production-operations layer on top of V8: persisted incidents, Docker-backed diagnosis, explicit Human-in-the-Loop remediation for allowlisted stateless services, release-readiness gates, cloud cost estimation, backup/restore tooling, and dedicated Control Plane views.
+
+Key V9 routes:
+
+- `/control-plane/incidents`
+- `/control-plane/cloud`
+- `/control-plane/cost`
+
+The local Ops Agent intentionally blocks automatic restart of PostgreSQL, Qdrant, and Redis. Live Azure deployment is not claimed until Pulumi is executed against a real subscription.
+
+See [`docs/operations/V9_PRODUCTION_OPERATIONS.md`](docs/operations/V9_PRODUCTION_OPERATIONS.md).
+
+------------------------------------------------------------------------
 
 ## V8.0 Enterprise Operations
 
@@ -1228,9 +1244,9 @@ For the complete release gate, see [`docs/V6_RELEASE_CHECKLIST.md`](docs/V6_RELE
 
 ## Release
 
-### v8.0.0 — Enterprise AI Operations & Automation
+### v9.0.0 — Production Cloud & Autonomous Operations
 
-V8.0.0 is the current source milestone. It adds Analytics & KPI, enterprise connector automation, SLO/load evidence and an Azure production deployment path on top of V7 Enterprise Research and the V6 Developer Platform.
+V9.0.0 is the current source milestone. It adds persisted incident response, approval-gated operations remediation, release-readiness gates, cloud cost modeling, and backup/restore tooling on top of the V8 enterprise operations platform.
 
 
 ### v7.0.0 — Enterprise Research

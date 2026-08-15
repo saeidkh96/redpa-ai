@@ -3,9 +3,9 @@ config:
   redpa:environment: prod
   redpa:location: germanywestcentral
   redpa:projectName: redpa
-  redpa:backendImage: ghcr.io/saeidkh96/redpa-ai-backend:8.0.0
-  redpa:frontendImage: ghcr.io/saeidkh96/redpa-ai-frontend:8.0.0
-  redpa:policyImage: ghcr.io/saeidkh96/redpa-ai-policy-service:8.0.0
+  redpa:backendImage: ghcr.io/saeidkh96/redpa-ai-backend:9.0.0
+  redpa:frontendImage: ghcr.io/saeidkh96/redpa-ai-frontend:9.0.0
+  redpa:policyImage: ghcr.io/saeidkh96/redpa-ai-policy-service:9.0.0
   redpa:postgresAdmin: redpaadmin
   redpa:postgresVersion: "16"
   redpa:minReplicas: 2

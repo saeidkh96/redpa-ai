@@ -335,3 +335,15 @@ class RedPA:
 
     def evaluate_slo(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self._request("POST", "/api/v1/operations/slo/evaluate", json=payload)
+
+    def list_incidents(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        return self._request("GET", "/api/v1/operations/v9/incidents", params={"limit": limit})
+
+    def create_incident(self, service: str, summary: str, *, severity: str = "warning") -> dict[str, Any]:
+        return self._request("POST", "/api/v1/operations/v9/incidents", json={"service": service, "summary": summary, "severity": severity, "source": "sdk", "metadata": {}})
+
+    def estimate_cloud_cost(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request("POST", "/api/v1/operations/v9/cost/estimate", json=payload)
+
+    def release_readiness(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._request("POST", "/api/v1/operations/v9/release/readiness", json=payload)

@@ -176,3 +176,15 @@ class AsyncRedPA:
 
     async def evaluate_slo(self, payload: dict[str, Any]) -> dict[str, Any]:
         return await self._request("POST", "/api/v1/operations/slo/evaluate", json=payload)
+
+    async def list_incidents(self, *, limit: int = 100) -> list[dict[str, Any]]:
+        return await self._request("GET", "/api/v1/operations/v9/incidents", params={"limit": limit})
+
+    async def create_incident(self, service: str, summary: str, *, severity: str = "warning") -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/operations/v9/incidents", json={"service": service, "summary": summary, "severity": severity, "source": "sdk", "metadata": {}})
+
+    async def estimate_cloud_cost(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/operations/v9/cost/estimate", json=payload)
+
+    async def release_readiness(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("POST", "/api/v1/operations/v9/release/readiness", json=payload)

@@ -21,7 +21,7 @@ mcp_app = typer.Typer(help="Inspect and execute MCP tools.")
 research_app = typer.Typer(help="Run and inspect enterprise research.")
 analytics_app = typer.Typer(help="Query V8 analytics and KPI data.")
 connectors_app = typer.Typer(help="Operate V8 enterprise connectors.")
-operations_app = typer.Typer(help="Evaluate V8 SLO evidence.")
+operations_app = typer.Typer(help="Operate V9 release readiness and incident response.")
 
 app.add_typer(agents_app, name="agents")
 app.add_typer(models_app, name="models")
@@ -520,6 +520,38 @@ def slo_demo(api_url: str | None = typer.Option(None, "--api-url"), token: str |
         samples = [{"latency_ms": 200 + (i % 10) * 15, "success": i != 99} for i in range(100)]
         with RedPA(_config(api_url, token)) as client:
             _print(client.evaluate_slo({"samples": samples, "availability_target": 0.99, "p95_latency_target_ms": 500}), json_output=json_output)
+    _run(execute)
+
+
+@operations_app.command("incidents")
+def operations_incidents(limit: int = typer.Option(100, min=1, max=500), api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.list_incidents(limit=limit), json_output=json_output)
+    _run(execute)
+
+
+@operations_app.command("incident-create")
+def operations_incident_create(service: str = typer.Option(..., "--service"), summary: str = typer.Option(..., "--summary"), severity: str = typer.Option("warning", "--severity"), api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.create_incident(service, summary, severity=severity), json_output=json_output)
+    _run(execute)
+
+
+@operations_app.command("cost-demo")
+def operations_cost_demo(api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.estimate_cloud_cost({"backend_replicas":2,"worker_replicas":2}), json_output=json_output)
+    _run(execute)
+
+
+@operations_app.command("release-demo")
+def operations_release_demo(api_url: str | None = typer.Option(None, "--api-url"), token: str | None = typer.Option(None, "--token"), json_output: bool = typer.Option(False, "--json")) -> None:
+    def execute() -> None:
+        with RedPA(_config(api_url, token)) as client:
+            _print(client.release_readiness({"availability":0.997,"p95_latency_ms":420,"open_critical_incidents":0,"security_gate_passed":True,"regression_gate_passed":True}), json_output=json_output)
     _run(execute)
 
 

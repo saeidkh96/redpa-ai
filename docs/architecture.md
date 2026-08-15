@@ -1,4 +1,4 @@
-# RedPA AI v8.0.0 Architecture
+# RedPA AI v9.0.0 Architecture
 
 This document is the concise architecture entry point for the V8 source tree. Detailed views are maintained in:
 
