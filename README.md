@@ -23,7 +23,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v9.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v10.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
@@ -52,6 +52,7 @@ separated so that each subsystem can evolve independently.
 ## Table of Contents
 
 -   [Overview](#overview)
+-   [V10.0 Governed Agent Runtime](#v100-governed-agent-runtime)
 -   [V9.0 Production Cloud & Autonomous Operations](#v90-production-cloud--autonomous-operations)
 -   [V8.0 Enterprise Operations](#v80-enterprise-operations)
 -   [V7.0 Enterprise Research](#v70-enterprise-research)
@@ -114,6 +115,93 @@ The platform can:
 
 ------------------------------------------------------------------------
 
+
+
+## V10.0 Governed Agent Runtime
+
+V10 turns governance from a tool-boundary check into a persisted runtime control layer for agent execution. Agent runs now carry lifecycle state, trace events, policy decisions, evaluation linkage, and explicit Human-in-the-Loop recovery semantics.
+
+### V10 governed lifecycle
+
+```text
+Agent request
+    |
+    v
+Governance Run
+    |
+    +--> policy / risk decision
+    |        |
+    |        +--> executable --------------------+
+    |        |                                    |
+    |        +--> review required                 |
+    |                 |                           |
+    |                 v                           |
+    |              BLOCKED                        |
+    |                 |                           |
+    |           human approval                    |
+    |                 |                           |
+    |                 v                           |
+    +-------------> RUNNING <---------------------+
+                       |
+                       v
+                 agent / tool work
+                       |
+                       v
+                recovery / result
+                       |
+                       v
+                   COMPLETED
+                       |
+                       v
+                  evaluation
+```
+
+Implemented V10 capabilities include:
+
+- persisted governance runs with lifecycle states and immutable-style execution events;
+- governance trace correlation across agent, workflow, policy, operations, and evaluation stages;
+- explicit `BLOCKED -> RUNNING` resume semantics after valid human approval;
+- policy decisions recorded with risk, decision, matched rules, policy version, and executability;
+- governed integration in planner, research, tool, Human Review, and chat/orchestration paths;
+- governed autonomous-operations recovery with diagnosis, denial, approval, remediation, recovery verification, and evaluation;
+- a dedicated Spring Boot Policy Service on port `8090`, promoted to the primary Docker Compose stack;
+- evaluation linkage on completed runs, including aggregate score and evaluation-run identity;
+- CI governance gates covering V10 governance, runtime integration, Ops governance, lifecycle recovery, release hardening, regression tests, and secret scanning;
+- release-hardening across Docker Compose, OpenTelemetry/Tempo startup behavior, SDK, frontend, Helm, CI, and application version contracts.
+
+### Verified V10 recovery path
+
+The release candidate was exercised end-to-end against a deliberately stopped `redpa-research-agent` container:
+
+```text
+RUNNING
+ -> policy REVIEW / executable=false
+ -> BLOCKED
+ -> human approval
+ -> policy REVIEW / executable=true
+ -> RUNNING
+ -> ops.remediation_started
+ -> ops.recovery_verified
+ -> COMPLETED
+ -> evaluation.completed
+```
+
+The verified run restored the container to `running`, completed the governance run, and produced an evaluation score of `1.0`.
+
+### V10 service surfaces
+
+| Surface | Purpose |
+| --- | --- |
+| `/api/v1/governance/v10` | Governed run lifecycle, events, policy/evaluation-linked execution records |
+| `/api/v1/operations/v9` | Operations domain, now integrated with V10 governance lifecycle |
+| `redpa-ops-agent:8070` | Docker-backed diagnosis and approval-aware remediation |
+| `policy-service:8090` | Dedicated Spring Boot policy decision service |
+| OpenTelemetry + Tempo | Distributed trace export and trace storage |
+| Prometheus + Grafana | Metrics and operational dashboards |
+
+See [`docs/V10_GOVERNED_AGENT_RUNTIME.md`](docs/V10_GOVERNED_AGENT_RUNTIME.md) and [`docs/releases/V10.0.0.md`](docs/releases/V10.0.0.md).
+
+------------------------------------------------------------------------
 
 ## V9.0 Production Cloud & Autonomous Operations
 

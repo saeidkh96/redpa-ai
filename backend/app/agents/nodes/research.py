@@ -5,6 +5,7 @@ from typing import Any
 from langgraph.config import get_stream_writer
 
 from app.agents.state import AgentState
+from app.governance_v10.runtime import record_runtime_event
 from app.core.exceptions import LLMInvalidResponseError
 from app.services.research_service import (
     ResearchService,
@@ -56,6 +57,9 @@ async def research_node(
     query = _get_latest_user_message(
         state,
     )
+    await record_runtime_event(
+        event_type="research.started", stage="research", payload={"query": query}
+    )
 
     writer = get_stream_writer()
 
@@ -82,6 +86,13 @@ async def research_node(
             "The research agent could not complete the request: "
             f"{exception}"
         ) from exception
+
+    await record_runtime_event(
+        event_type="research.completed",
+        stage="research",
+        payload={"provider": result.provider, "evidence_count": len(result.evidence),
+                 "execution_time_ms": result.execution_time_ms},
+    )
 
     serialized_evidence = [
         item.model_dump(

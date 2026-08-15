@@ -2,6 +2,7 @@ services:
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
+    restart: unless-stopped
     container_name: redpa-otel-collector
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
@@ -16,6 +17,7 @@ services:
 
   tempo:
     image: grafana/tempo:latest
+    restart: unless-stopped
     container_name: redpa-tempo
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
@@ -512,6 +514,28 @@ services:
       retries: 15
       start_period: 10s
 
+  policy-service:
+    build:
+      context: ./policy-service
+      dockerfile: Dockerfile
+    image: redpa-ai-policy-service
+    container_name: redpa-policy-service
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    networks:
+      - redpa-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O - http://localhost:8090/actuator/health | grep -q UP"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
   backend:
     build:
       context: .
@@ -521,7 +545,7 @@ services:
     restart: unless-stopped
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
-      APP_VERSION: "9.0.0"
+      APP_VERSION: "10.0.0"
       ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
@@ -559,6 +583,7 @@ services:
       MCP_SERVERS_CONFIG_PATH: ${MCP_SERVERS_CONFIG_PATH:-config/mcp_servers.json}
       REDIS_URL: redis://redis:6379/0
       OPS_AGENT_URL: http://ops-agent:8070
+      POLICY_SERVICE_URL: http://policy-service:8090
       REQUIRE_HTTPS: "false"
       ALLOWED_HOSTS: localhost,127.0.0.1,backend
       OTEL_ENABLED: "true"
@@ -584,6 +609,10 @@ services:
         condition: service_healthy
       ops-agent:
         condition: service_healthy
+      policy-service:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

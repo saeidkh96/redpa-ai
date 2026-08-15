@@ -1,6 +1,35 @@
+﻿## [10.0.0] - 2026-08-16
+
+### Added
+- Persistent V10 governed agent runs and execution-event tracing.
+- Governance API and runtime orchestration integration.
+- Explicit Human-in-the-Loop lifecycle resume for blocked runs.
+- Governed autonomous-operations integration with diagnosis, policy, remediation, recovery verification, and evaluation.
+- Dedicated Spring Boot Policy Service in the primary Docker Compose stack.
+- V10 governance, runtime, Ops, lifecycle, and release-hardening CI gates.
+
+### Changed
+- Promoted governance from tool-boundary enforcement to a persisted runtime lifecycle.
+- Integrated policy decisions and evaluation metadata with governed runs.
+- Updated backend, frontend, SDK, Helm, Compose, CI, and environment version contracts to `10.0.0`.
+- Hardened OpenTelemetry Collector and Tempo startup/restart behavior.
+- Operations remediation now resumes an approved blocked run before executing the side effect.
+
+### Fixed
+- Fixed the V10 lifecycle path where a blocked run could not correctly continue to completion after valid approval.
+- Separated physical recovery failure from governance-finalization failure in Ops tracing.
+
+### Verified
+- 344 Python tests passed.
+- Frontend production build passed.
+- Primary Docker Compose stack validated and started successfully.
+- Backend and Ops Agent reported version `10.0.0`; Policy Service reported `UP`.
+- End-to-end governed recovery completed with evaluation score `1.0`.
+
+
 # Changelog
 
-## V9.0.0 — Production Cloud & Autonomous Operations
+## V9.0.0 â€” Production Cloud & Autonomous Operations
 
 - added persisted incident and remediation action records;
 - added Docker-backed V9 Ops Agent with explicit approval and stateful-service denylist;
@@ -12,7 +41,7 @@
 - added V9 Alembic migration and contract tests;
 - aligned application, frontend, SDK, Helm and CI release metadata to `9.0.0`.
 
-## V8.0.0 — Enterprise AI Operations & Automation
+## V8.0.0 â€” Enterprise AI Operations & Automation
 
 - added generic analytics fact ingestion and KPI query engine with weighted aggregation;
 - added JSONB dimensional slicing and metric/dimension catalog discovery;
@@ -28,7 +57,7 @@
 - expanded sync/async SDK and CLI operations;
 - aligned current release metadata to `8.0.0`.
 
-## V7.0.0 — Enterprise Research
+## V7.0.0 â€” Enterprise Research
 
 - added persisted enterprise research runs and timeline events;
 - added background evidence-first execution using the existing Research Agent;
@@ -40,7 +69,7 @@
 - added V7 Alembic persistence and regression/contract tests;
 - aligned backend, Docker, frontend, SDK and Helm application metadata to `7.0.0`.
 
-## V6.0.0 — Developer Platform
+## V6.0.0 â€” Developer Platform
 
 ### Completed V6 surface
 
@@ -63,7 +92,7 @@
 - added SDK contract and HTTP mock tests.
 
 
-## V5.5.0 — Evaluation & Reliability
+## V5.5.0 â€” Evaluation & Reliability
 
 ### Batch 4
 
@@ -100,7 +129,7 @@
 - added `/control-plane/reliability` for baseline/candidate inspection.
 
 
-## V5.0.0 — Control Plane
+## V5.0.0 â€” Control Plane
 
 ### Added
 
@@ -165,3 +194,4 @@ The V5 Control Plane only surfaces capabilities backed by existing repository AP
 - request and SQL performance monitoring;
 - Docker Compose;
 - Kubernetes and Helm deployment resources.
+

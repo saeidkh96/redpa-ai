@@ -1,0 +1,41 @@
+name: V10 Governance Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  governance-contract:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: RedPA AI
+      APP_VERSION: "10.0.0"
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai
+      JWT_SECRET_KEY: ci-only-secret-key-for-tests
+      OTEL_ENABLED: "false"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: V10 governance tests
+        run: python -m pytest tests/test_v10_agent_governance.py -q
+      - name: V10 runtime integration tests
+        run: python -m pytest tests/test_v10_phase2_runtime_integration.py -q
+      - name: V10 Ops governance tests
+        run: python -m pytest tests/test_v10_phase3_ops_governance.py -q
+      - name: V10 phase 3.1 lifecycle tests
+        run: python -m pytest tests/test_v10_phase3_1_lifecycle.py -q
+      - name: V10 release hardening tests
+        run: python -m pytest tests/test_v10_release_hardening.py -q
+      - name: Regression suite
+        run: python -m pytest tests -q
+      - name: Secret scan
+        run: python scripts/security/secret_scan.py

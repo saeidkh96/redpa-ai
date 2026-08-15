@@ -25,6 +25,7 @@ from app.services.message_service import MessageService
 from app.services.orchestrator_service import (
     OrchestratorService,
 )
+from app.services.governed_orchestrator_service import GovernedOrchestratorService
 
 
 class ChatService:
@@ -61,7 +62,8 @@ class ChatService:
 
         try:
             orchestrator_result = (
-                await OrchestratorService.run(
+                await GovernedOrchestratorService.run(
+                    session=session,
                     conversation_id=conversation.id,
                     user_id=conversation.user_id,
                     history=history,
@@ -180,7 +182,8 @@ class ChatService:
 
         try:
             async for stream_event in (
-                OrchestratorService.stream(
+                GovernedOrchestratorService.stream(
+                    session=session,
                     conversation_id=conversation.id,
                     user_id=conversation.user_id,
                     history=history,

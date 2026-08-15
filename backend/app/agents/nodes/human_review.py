@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.agents.state import AgentState
+from app.governance_v10.runtime import record_runtime_event
 
 
 def _get_latest_user_message(
@@ -82,6 +83,12 @@ async def human_review_node(
                 review_reason,
             ),
         }
+
+    await record_runtime_event(
+        event_type="hitl.requested",
+        stage="human_review",
+        payload={"requested_action": requested_action, "reason": review_reason},
+    )
 
     return {
         "requires_human_review": True,

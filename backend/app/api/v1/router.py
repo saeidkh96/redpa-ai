@@ -1,3 +1,4 @@
+from app.api.v1.governance_v10 import router as governance_v10_router
 from app.api.v1.operations_v9 import router as operations_v9_router
 from app.api.v1.analytics_v8 import router as analytics_v8_router
 from app.api.v1.connectors_v8 import router as connectors_v8_router
@@ -130,3 +131,5 @@ api_router.include_router(analytics_v8_router)
 api_router.include_router(connectors_v8_router)
 api_router.include_router(operations_v8_router)
 api_router.include_router(operations_v9_router)
+
+api_router.include_router(governance_v10_router)

@@ -6,6 +6,7 @@ import re
 from typing import Any
 
 from app.agents.state import AgentState
+from app.governance_v10.runtime import record_runtime_event, runtime_policy_check
 from app.formatters.mcp_tool_formatter import (
     format_mcp_tool_response,
 )
@@ -83,6 +84,31 @@ async def tool_node(
         selected_tool=selected_tool,
     )
 
+    policy = await runtime_policy_check(
+        action=selected_tool,
+        arguments=arguments,
+        resource=selected_tool,
+        request_content=str(state.get("request_content") or "") or None,
+        approval_granted=bool(state.get("approval_granted", False)),
+    )
+    if policy is not None and not policy.executable:
+        error_message = f"Governance policy blocked tool execution: {policy.reason}"
+        await record_runtime_event(
+            event_type="tool.blocked", stage="tool",
+            payload={"tool": selected_tool, "decision": policy.decision, "risk": policy.risk},
+        )
+        return {
+            "selected_tool": selected_tool, "tool_arguments": arguments,
+            "tool_result": None, "tool_success": False, "tool_error": error_message,
+            "tool_execution_time_ms": 0.0, "tool_metadata": {"governance_blocked": True},
+            "response_content": error_message, "provider": "redpa-governance",
+            "model": "policy-engine", "usage": {}, "completed": True, "error": None,
+        }
+    await record_runtime_event(
+        event_type="tool.execution_started", stage="tool",
+        payload={"tool": selected_tool, "arguments": arguments},
+    )
+
     if selected_tool.startswith(
         "mcp:",
     ):
@@ -95,6 +121,12 @@ async def tool_node(
     execution_result = await ToolService.execute(
         tool_name=selected_tool,
         arguments=arguments,
+    )
+    await record_runtime_event(
+        event_type="tool.execution_completed", stage="tool",
+        payload={"tool": selected_tool, "success": execution_result.success,
+                 "execution_time_ms": execution_result.execution_time_ms,
+                 "error": execution_result.error},
     )
 
     return {

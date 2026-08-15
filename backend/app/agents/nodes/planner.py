@@ -222,6 +222,17 @@ async def planner_node(
         latest_user_message,
     )
 
+    await record_runtime_event(
+        event_type="planner.decision",
+        stage="planner",
+        payload={
+            "route": planner_result.plan.route,
+            "confidence": planner_result.plan.confidence,
+            "provider": planner_result.provider,
+            "fallback_used": planner_result.fallback_used,
+        },
+    )
+
     route = planner_result.plan.route
     reason = planner_result.plan.reasoning
     requires_human_review = route == "human_review"
