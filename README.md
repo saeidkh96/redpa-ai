@@ -11,7 +11,7 @@
 <p align="center">
   Production-oriented multi-agent orchestration, MCP tool execution, A2A communication,
   durable workflows, semantic memory, policy enforcement, human approval, multi-tenancy,
-  event-driven integration, and distributed observability.
+  event-driven integration, autonomous operations, and distributed observability.
 </p>
 
 <p align="center">
@@ -117,15 +117,33 @@ The platform can:
 
 ## V9.0 Production Cloud & Autonomous Operations
 
-V9 adds a production-operations layer on top of V8: persisted incidents, Docker-backed diagnosis, explicit Human-in-the-Loop remediation for allowlisted stateless services, release-readiness gates, cloud cost estimation, backup/restore tooling, and dedicated Control Plane views.
+V9 adds a production-operations layer on top of V8: persisted incidents, Docker-backed diagnosis, explicit Human-in-the-Loop remediation for allowlisted services, release-readiness gates, cloud cost estimation, backup/restore tooling, and dedicated Control Plane views.
 
-Key V9 routes:
+### V9 operational flow
 
-- `/control-plane/incidents`
-- `/control-plane/cloud`
-- `/control-plane/cost`
+```text
+Incident -> Persist -> Diagnose -> Recommend -> Human approval -> Allowlisted remediation -> Verify recovery
+```
 
-The local Ops Agent intentionally blocks automatic restart of PostgreSQL, Qdrant, and Redis. Live Azure deployment is not claimed until Pulumi is executed against a real subscription.
+The dedicated **RedPA Ops Agent** runs on port `8070` and provides container diagnosis plus approval-aware restart execution. The backend exposes the governed operations API under `/api/v1/operations/v9`. Unapproved side effects are denied, while explicitly approved and allowlisted remediation can be executed and recorded.
+
+Key V9 API operations include:
+
+- `POST /api/v1/operations/v9/incidents` — create an incident;
+- `GET /api/v1/operations/v9/incidents` — list persisted incidents;
+- `POST /api/v1/operations/v9/incidents/{incident_id}/diagnose` — collect runtime diagnosis;
+- `POST /api/v1/operations/v9/incidents/{incident_id}/remediate` — execute approval-gated remediation;
+- `POST /api/v1/operations/v9/cost/estimate` — estimate cloud/runtime cost;
+- `POST /api/v1/operations/v9/release/readiness` — evaluate production release readiness.
+
+Operator-facing V9 routes include:
+
+- `/control-plane/incidents`;
+- `/control-plane/cloud`;
+- `/control-plane/cost`;
+- `/control-plane/operations`.
+
+The local Ops Agent intentionally protects stateful infrastructure from unsafe automatic remediation. Live Azure deployment is not claimed until the Pulumi production stack is executed and validated against a real Azure subscription.
 
 See [`docs/operations/V9_PRODUCTION_OPERATIONS.md`](docs/operations/V9_PRODUCTION_OPERATIONS.md).
 
@@ -373,7 +391,7 @@ Main areas include:
 
 Local Control Center:
 
-``` text
+```text
 http://localhost:3001
 ```
 
@@ -393,7 +411,7 @@ http://localhost:3001
 ### Logical Architecture
 
 
-``` mermaid
+```mermaid
 flowchart TB
     Client[Client / API Consumer]
     UI[Next.js Control Center]
@@ -434,6 +452,7 @@ flowchart TB
         Worker[Background Worker]
         Scheduler[Scheduler]
         OpsAgent[Ops Agent :8070]
+        DockerRuntime[Docker Runtime]
         Redis[(Redis)]
     end
 
@@ -475,7 +494,8 @@ flowchart TB
     Worker --> Redis
     Scheduler --> Redis
     Ops --> OpsAgent
-    OpsAgent --> Durable
+    OpsAgent --> DockerRuntime
+    Reviews --> Ops
     Platform --> Prometheus
     Platform --> OTEL
     OTEL --> Tempo
@@ -559,7 +579,7 @@ The policy service evaluates:
 
 Policy outcomes are:
 
-``` text
+```text
 ALLOW
 REVIEW
 DENY
@@ -657,7 +677,7 @@ These are intentionally not claimed as completed production OAuth login.
 
 RedPA AI includes a transactional event pipeline.
 
-``` text
+```text
 Application transaction
         |
         v
@@ -698,7 +718,7 @@ RedPA AI uses MCP as a dedicated enterprise tool layer.
 
 Validated MCP services include:
 
-``` text
+```text
 Filesystem MCP   : 8010
 GitHub MCP       : 8020
 PostgreSQL MCP   : 8030
@@ -740,7 +760,7 @@ The coordinator can:
 
 Specialist services include:
 
-``` text
+```text
 A2A Coordinator      : 8050
 Research Agent       : 8061
 PostgreSQL Agent     : 8062
@@ -751,7 +771,7 @@ GitHub Agent         : 8065
 
 Remote services expose Agent Cards through:
 
-``` text
+```text
 /.well-known/agent-card.json
 ```
 
@@ -772,7 +792,7 @@ Typical examples:
 
 Lifecycle:
 
-``` text
+```text
 Create
   |
 Persist
@@ -859,7 +879,7 @@ policy/event visibility.
 
 The backend exposes Prometheus-compatible metrics.
 
-``` text
+```text
 GET /api/v1/metrics
 ```
 
@@ -869,7 +889,7 @@ OpenTelemetry instrumentation integrates application tracing with Tempo.
 
 OTLP endpoints:
 
-``` text
+```text
 4317 gRPC
 4318 HTTP
 ```
@@ -1093,7 +1113,7 @@ cd redpa-ai
 
 Windows PowerShell:
 
-``` powershell
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
@@ -1116,7 +1136,7 @@ python -m pip install -r requirements.txt
 
 Windows:
 
-``` powershell
+```powershell
 Copy-Item .env.example .env
 ```
 
@@ -1131,47 +1151,34 @@ files.
 
 ### Validate Docker configuration
 
-``` powershell
-docker compose `
-  -f docker-compose.yml `
-  -f docker-compose.phase13.yml `
-  config
+```powershell
+docker compose config
 ```
 
 ### Start the platform
 
-``` powershell
-docker compose `
-  -f docker-compose.yml `
-  -f docker-compose.phase13.yml `
-  up -d --build
+```powershell
+docker compose up -d --build
 ```
 
 ### Apply database migrations
 
-``` powershell
-docker compose `
-  -f docker-compose.yml `
-  -f docker-compose.phase13.yml `
-  exec backend alembic upgrade head
+```powershell
+docker compose exec backend python -m alembic upgrade head
 ```
 
 ### Check services
 
-``` powershell
-docker compose `
-  -f docker-compose.yml `
-  -f docker-compose.phase13.yml `
-  ps
+```powershell
+docker compose ps
 ```
 
 ### Main local endpoints
 
-``` text
+```text
 Control Center:       http://localhost:3001
 Backend Swagger:      http://localhost:8000/docs
 Backend OpenAPI:      http://localhost:8000/openapi.json
-Policy Service:       http://localhost:8090
 Ops Agent:            http://localhost:8070
 Prometheus:           http://localhost:9090
 Grafana:              http://localhost:3000
@@ -1183,39 +1190,34 @@ Qdrant:               http://localhost:6333
 
 ## API Overview
 
-Main API areas are exposed under `/api/v1`.
+Main API areas are exposed under `/api/v1`. The table below follows the V9 OpenAPI surface rather than historical shorthand names.
 
-  Area                   Purpose
-  ---------------------- -----------------------------------
-  `/auth`                Authentication
-  `/users`               User management
-  `/conversations`       Conversation lifecycle
-  `/messages`            Conversation messages
-  `/chat`                Agentic chat
-  `/documents`           Document ingestion and RAG
-  `/reviews`             Human Review
-  `/tools`               Internal tools
-  `/mcp`                 MCP operations
-  `/unified-tools`       Unified tool catalog
-  `/agents`              Agent management
-  `/remote-agents`       Remote A2A agents
-  `/multi-agents`        Multi-agent execution
-  `/durable-workflows`   Durable workflow operations
-  `/agent-memory`        Agent Memory
-  `/evaluations`         Evaluation
-  `/model-gateway`       Model Gateway
-  `/policy`              Policy enforcement and audit
-  `/tenants`             Tenant/workspace management
-  `/oauth`               OAuth provider foundation
-  `/events`              Event outbox and event operations
-  `/jobs`                Background jobs
-  `/platform`            Health
-  `/performance`         Performance
-  `/metrics`             Prometheus metrics
-  `/research/runs`       Enterprise research runs
-  `/operations/v9`       V9 incidents, remediation, cost, and release readiness
+| Area | Purpose |
+| --- | --- |
+| `/auth`, `/users` | Authentication and user identity |
+| `/conversations`, `/chat` | Conversation lifecycle and agentic chat |
+| `/documents` | Document ingestion and RAG |
+| `/reviews` | Human Review approval/rejection/resume |
+| `/tools`, `/tools/catalog` | Internal tools and unified tool catalog |
+| `/mcp` | MCP server discovery, health, tools, and execution |
+| `/agents` | Agent registry, health, and capability discovery |
+| `/agents/remotes` | Remote A2A agent registration and delegation |
+| `/agents/multi` | Multi-agent delegation |
+| `/agents/distributed` | Distributed and durable specialist workflows |
+| `/memory` | Agent Memory, shared context, search, and administration |
+| `/evaluations` | Evaluation, benchmarks, regression, and release quality gates |
+| `/model-gateway` | Provider routing, invocation, circuits, and reliability |
+| `/guardrails`, `/policy` | Guardrails, policy enforcement, and policy audit |
+| `/tenants`, `/oauth` | Tenancy, memberships, and OAuth foundations |
+| `/events` | Transactional outbox and event operations |
+| `/jobs` | Background jobs |
+| `/platform`, `/health`, `/performance` | Health, readiness, and performance |
+| `/research/runs` | Enterprise research runs |
+| `/analytics` | KPI, metric, dimensional, and analytics operations |
+| `/connectors` | Enterprise connector operations |
+| `/operations/v9` | Incidents, diagnosis, remediation, cost, and release readiness |
 
-Use Swagger UI for the current request and response schemas.
+Use Swagger UI at `http://localhost:8000/docs` for the authoritative current request/response schemas.
 
 ------------------------------------------------------------------------
 
