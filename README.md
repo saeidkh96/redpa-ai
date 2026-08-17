@@ -59,7 +59,33 @@ These capabilities share a persisted evidence model and are exposed through the 
 The current release baseline has been validated with:
 
 ```text
-359 passed
+380 passed
+0 skipped
+0 failed
+```
+
+V11 Production Validation is complete across Stage 1–10:
+
+```text
+Stage 1–2   automatic health detection -> 3 consecutive failures -> incident persisted in PostgreSQL
+Stage 3–5   governed diagnosis -> policy REVIEW/HIGH -> explicit human approval boundary
+Stage 6     controlled recovery verification failure -> fail-closed incident/run failure
+Stage 7     explicit approval + resume audit trail
+Stage 8     idempotent approved remediation -> one destructive restart
+Stage 9     blocked run survives backend/scheduler restart and resumes on the same incident/run
+Stage 10    machine-readable production readiness gate -> PASS
+```
+
+Final gate result:
+
+```text
+PRODUCTION VALIDATION: PASS
+```
+
+The production-validation evidence report is generated at:
+
+```text
+artifacts/v11-production-validation.json
 ```
 
 Additional live validation covered:
@@ -207,6 +233,29 @@ evaluation_score  : 1.0
 container         : running
 ```
 
+V11 extends this path with production validation and recovery hardening:
+
+```text
+health probe
+-> consecutive failure threshold
+-> persisted incident
+-> governed Ops run
+-> diagnosis
+-> policy REVIEW / HIGH
+-> remediation blocked
+-> human approval
+-> run resumed
+-> idempotent restart
+-> recovery verification
+-> incident resolved
+-> run completed
+-> evaluation evidence
+```
+
+Failure verification is fail-closed: if restart succeeds but recovery cannot be verified,
+the remediation action, incident, and governed run are marked failed and the incident is
+never written as resolved.
+
 ---
 
 ## Policy Management
@@ -280,7 +329,7 @@ The evolution dashboard exposes milestone counts and persisted evidence records.
 | Governance | persisted runs, lifecycle events, approval-aware resume, policy tracing |
 | Policy | Spring Boot Policy Service, persisted overrides, ALLOW/REVIEW/DENY |
 | HITL | approval/rejection, blocked-run recovery |
-| Operations | incident persistence, diagnosis, governed remediation, recovery verification |
+| Operations | automatic health detection, incident persistence, governed diagnosis/remediation, recovery verification, fail-closed validation |
 | MCP | filesystem, GitHub, PostgreSQL, Docker tools |
 | A2A | coordinator, specialist discovery and delegation |
 | Memory | PostgreSQL + Qdrant semantic memory |
@@ -340,7 +389,7 @@ docker compose exec backend `
 Expected migration head:
 
 ```text
-v180a1b2c3d4e
+v190a1b2c3d4e
 ```
 
 ---
@@ -354,7 +403,7 @@ python -m pytest tests -q
 Current validated baseline:
 
 ```text
-359 passed
+380 passed
 ```
 
 Additional release checks:
@@ -362,10 +411,17 @@ Additional release checks:
 ```powershell
 python scripts/security/secret_scan.py
 docker compose config --quiet
+python scripts/production_validation.py
 
 cd frontend
 npm.cmd run build
 cd ..
+```
+
+Expected production-validation result:
+
+```text
+PRODUCTION VALIDATION: PASS
 ```
 
 ---
@@ -374,7 +430,7 @@ cd ..
 
 | Release | Focus |
 | --- | --- |
-| **v11.0.0** | Platform Evolution: reliability, failover, adaptive governance, compliance, cloud readiness, rollout evaluation, integration governance, trusted agents |
+| **v11.0.0** | Platform Evolution + Production Validation: autonomous reliability, governed recovery, fail-closed verification, audit, idempotency, restart persistence, readiness gate |
 | **v10.0.0** | Governed Agent Runtime |
 | **v9.0.0** | Production Cloud & Autonomous Operations |
 | V8 | Enterprise Operations & Automation |
