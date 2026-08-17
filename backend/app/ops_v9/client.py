@@ -1,5 +1,8 @@
 from __future__ import annotations
+import asyncio
 import os
+import time
+
 import httpx
 
 
@@ -21,3 +24,20 @@ class OpsAgentClient:
             )
             response.raise_for_status()
             return response.json()
+
+
+    async def wait_until_healthy(
+        self, container: str, *, timeout_seconds: float = 60.0, poll_seconds: float = 2.0
+    ) -> dict:
+        deadline = time.monotonic() + timeout_seconds
+        last: dict = {}
+        while time.monotonic() < deadline:
+            last = await self.diagnose(container)
+            state = last.get("state")
+            health = last.get("health")
+            if state == "running" and health in {None, "healthy"}:
+                return last
+            await asyncio.sleep(poll_seconds)
+        raise RuntimeError(
+            f"Recovery verification timed out for {container}: {last}"
+        )

@@ -1,0 +1,28 @@
+{
+  "stage6": {
+    "recovery_failed_event": true,
+    "incident_status": "failed",
+    "run_status": "failed",
+    "resolved_written": false
+  },
+  "stage7": {
+    "events": [
+      "ops.remediation_blocked",
+      "human.approval_granted",
+      "run.resumed",
+      "ops.remediation_started",
+      "ops.recovery_verified",
+      "run.completed"
+    ]
+  },
+  "stage8": {
+    "destructive_execution_count": 1,
+    "duplicate_detected": true
+  },
+  "stage9": {
+    "incident_persisted": true,
+    "run_persisted": true,
+    "events_persisted": true,
+    "resumed_after_restart": true
+  }
+}

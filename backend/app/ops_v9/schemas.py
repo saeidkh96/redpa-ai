@@ -39,6 +39,7 @@ class RemediationRequest(BaseModel):
     action: Literal['restart_container'] = 'restart_container'
     reason: str = Field(min_length=8, max_length=500)
     approved: bool = False
+    idempotency_key: str | None = Field(default=None, min_length=8, max_length=200)
 
 
 class OpsActionRecord(BaseModel):
@@ -53,6 +54,8 @@ class OpsActionRecord(BaseModel):
     error: str | None = None
     created_at: datetime
     completed_at: datetime | None = None
+    idempotency_key: str | None = None
+    duplicate_detected: bool = False
 
 
 class ContainerDiagnosis(BaseModel):

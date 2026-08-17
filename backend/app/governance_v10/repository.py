@@ -34,6 +34,19 @@ class AgentRunRepository:
         return run
 
     @staticmethod
+    async def find_by_workflow(
+        *, session: AsyncSession, workflow_id: str, user_id: uuid.UUID
+    ) -> AgentRun | None:
+        result = await session.execute(
+            select(AgentRun)
+            .where(AgentRun.workflow_id == workflow_id, AgentRun.user_id == user_id)
+            .options(selectinload(AgentRun.events))
+            .order_by(AgentRun.created_at.desc())
+            .limit(1)
+        )
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def list(*, session: AsyncSession, user_id: uuid.UUID, limit: int, offset: int, agent_id: str | None = None, status: str | None = None) -> tuple[list[AgentRun], int]:
         filters = [AgentRun.user_id == user_id]
         if agent_id:
