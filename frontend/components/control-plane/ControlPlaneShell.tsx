@@ -22,7 +22,9 @@ const nav = [
   ["Memory", "/control-plane/memory"],
   ["Usage & Cost", "/control-plane/usage"],
   ["Human Reviews", "/control-plane/reviews"],
-  ["Governance", "/control-plane/governance"],
+  ["Governance Runs", "/control-plane/governance"],
+  ["Policy Management", "/control-plane/policy"],
+  ["Platform Evolution", "/control-plane/evolution"],
   ["Access & Tenancy", "/control-plane/access"],
   ["Evaluations", "/evaluations"],
   ["Events", "/events"],
@@ -36,7 +38,7 @@ export default function ControlPlaneShell({ children }: { children: ReactNode })
       <aside className="cpSidebar">
         <Link href="/control-plane" className="cpBrand">
           <img src="/logo.png" alt="RedPA AI" />
-          <div><strong>RedPA AI</strong><span>V9 Control Plane</span></div>
+          <div><strong>RedPA AI</strong><span>V18 Enterprise Agent Platform</span></div>
         </Link>
         <nav className="cpNav">
           {nav.map(([label, href]) => {

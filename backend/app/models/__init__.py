@@ -1,3 +1,5 @@
+from app.models.platform_evolution import PlatformEvolutionRecord
+from app.models.policy_override_v10 import PolicyOverrideV10
 from app.models.governance_v10 import AgentRun, AgentRunEvent, AgentRunStatus
 from app.models.quality_registry import BenchmarkSuiteRecord, ReliabilitySnapshotRecord
 from app.models.release_quality_gate import ReleaseQualityGateRecord
@@ -29,5 +31,5 @@ __all__ = [
     "PlatformModelBudget", "PlatformModelUsage", "PlatformWorkflowDefinition",
     "PlatformWorkflowRun", "PlatformWorkflowCheckpoint", "PlatformEventDelivery",
     "Tenant", "TenantMembership", "EventOutbox",
-    "AgentRun", "AgentRunEvent", "AgentRunStatus",
+    "AgentRun", "AgentRunEvent", "AgentRunStatus", "PolicyOverrideV10", "PlatformEvolutionRecord",
 ]

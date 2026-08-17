@@ -1,4 +1,4 @@
-name: V10 Governance Gate
+name: V11-V18 Evolution Gate
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  governance-contract:
+  evolution-contract:
     runs-on: ubuntu-latest
     env:
       APP_NAME: RedPA AI
@@ -19,39 +19,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
           cache: pip
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pytest pytest-asyncio httpx
-
-      - name: Install RedPA Python SDK
-        run: |
-          python -m pip install -e ./sdk/python
-
-      - name: V10 governance tests
-        run: python -m pytest tests/test_v10_agent_governance.py -q
-
-      - name: V10 runtime integration tests
-        run: python -m pytest tests/test_v10_phase2_runtime_integration.py -q
-
-      - name: V10 Ops governance tests
-        run: python -m pytest tests/test_v10_phase3_ops_governance.py -q
-
-      - name: V10 phase 3.1 lifecycle tests
-        run: python -m pytest tests/test_v10_phase3_1_lifecycle.py -q
-
-      - name: V10 release hardening tests
-        run: python -m pytest tests/test_v10_release_hardening.py -q
-
+      - name: V11-V18 feature contracts
+        run: python -m pytest tests/test_v11_v18_feature_pack.py -q
       - name: Regression suite
         run: python -m pytest tests -q
-
       - name: Secret scan
         run: python scripts/security/secret_scan.py

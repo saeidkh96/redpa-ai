@@ -1,4 +1,43 @@
-﻿## [10.0.0] - 2026-08-16
+## [11.0.0] - 2026-08-17
+
+### Added
+
+- V11 autonomous reliability evaluation with persisted evidence.
+- V12 health-aware multi-agent failover.
+- V13 adaptive governance recommendations with `auto_applied=false`.
+- V14 compliance evidence completeness checks.
+- V15 production-cloud readiness scoring.
+- V16 continuous evaluation and rollout decision gate.
+- V17 enterprise connector governance and approval assessment.
+- V18 trusted agent registry semantics.
+- Shared `platform_evolution_records` persistence.
+- Platform Evolution API.
+- Platform Evolution Control Plane page.
+- V11-V18 CI contract gate.
+
+### Changed
+
+- Product release version advanced to `11.0.0`.
+- Backend, Ops Agent, frontend, Python SDK, Helm, Compose, and CI release metadata aligned to `11.0.0`.
+- Control Plane expanded from V10 governance/policy visibility to platform evolution evidence.
+
+### Verified
+
+- 359 Python tests passed.
+- Alembic migration chain advanced successfully to `v180a1b2c3d4e`.
+- Eight live Platform Evolution records were persisted and displayed in the Control Plane.
+- V11 reliability returned `action_required`.
+- V12 failover returned `routable`.
+- V13 adaptive governance returned `recommendation`.
+- V14 compliance correctly identified missing evidence.
+- V15 cloud readiness returned `ready` with score `0.8`.
+- V16 rollout decision returned `PROMOTE`.
+- V17 connector assessment returned `review` with effective approval required.
+- V18 agent registration returned `trusted`.
+- V10.3 automated governed recovery remained operational.
+
+
+## [10.0.0] - 2026-08-16
 
 ### Added
 - Persistent V10 governed agent runs and execution-event tracing.
@@ -194,4 +233,3 @@ The V5 Control Plane only surfaces capabilities backed by existing repository AP
 - request and SQL performance monitoring;
 - Docker Compose;
 - Kubernetes and Helm deployment resources.
-

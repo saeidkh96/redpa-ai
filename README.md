@@ -9,527 +9,314 @@
 </p>
 
 <p align="center">
-  Governed multi-agent execution with MCP, A2A, durable workflows, Human-in-the-Loop approval,
-  semantic memory, policy enforcement, evaluation, autonomous operations, and distributed observability.
+  Governed multi-agent execution, autonomous reliability, adaptive policy recommendations,
+  enterprise integration controls, continuous evaluation, and trusted agent operations.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">
   <img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">
   <img src="https://img.shields.io/badge/Spring_Boot-Policy_Engine-6DB33F" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/Next.js-Control_Center-black" alt="Next.js">
-  <img src="https://img.shields.io/badge/Docker-Enabled-2496ED" alt="Docker">
+  <img src="https://img.shields.io/badge/Next.js-Control_Plane-black" alt="Next.js">
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
   <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
-  <img src="https://img.shields.io/badge/Azure-Pulumi-0078D4" alt="Azure">
-  <img src="https://img.shields.io/badge/Release-v10.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/OpenTelemetry-Tracing-425CC7" alt="OpenTelemetry">
+  <img src="https://img.shields.io/badge/Release-v11.0.0-success" alt="Release">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-------------------------------------------------------------------------
+---
 
-> **A production-oriented Agentic AI platform for orchestrating
-> autonomous agents, enforcing policy at tool boundaries, executing
-> durable workflows, integrating enterprise systems, and operating AI
-> workloads with security, observability, and human oversight.**
+> **A production-oriented Agentic AI platform for governed execution, multi-agent orchestration, durable workflows, policy enforcement, Human-in-the-Loop control, operational recovery, evaluation, and enterprise-grade observability.**
 
-RedPA AI is a modular platform for building real-world Agentic AI
-systems. It combines planner-based routing, Retrieval-Augmented
-Generation (RAG), Model Context Protocol (MCP), Agent-to-Agent (A2A)
-communication, Human-in-the-Loop approval, durable workflow execution,
-semantic Agent Memory, model-provider abstraction, evaluation, policy
-enforcement, RBAC, multi-tenancy, event-driven messaging, and production
-observability in one extensible architecture.
+RedPA AI is an engineering platform for exploring how autonomous agents can operate inside explicit runtime, policy, reliability, and audit boundaries.
 
-The project is designed as an engineering platform rather than a single
-LLM wrapper. APIs, orchestration, agents, tools, policy, workflows,
-memory, messaging, observability, identity, and infrastructure are
-separated so that each subsystem can evolve independently.
+The current **v11.0.0** release builds on the V10 Governed Agent Runtime and adds a broader **Platform Evolution layer** covering reliability, failover, adaptive governance, compliance evidence, cloud readiness, rollout evaluation, connector risk, and trusted agent registration.
 
-------------------------------------------------------------------------
+---
 
-## Table of Contents
+## Current Release — v11.0.0
 
--   [Overview](#overview)
--   [V10.0 Governed Agent Runtime](#v100-governed-agent-runtime)
--   [V9.0 Production Cloud & Autonomous Operations](#v90-production-cloud--autonomous-operations)
--   [V8.0 Enterprise Operations](#v80-enterprise-operations)
--   [V7.0 Enterprise Research](#v70-enterprise-research)
--   [V6.0 Developer Platform](#v60-developer-platform)
--   [V5.5 Evaluation & Reliability](#v55-evaluation--reliability)
--   [V5.0 Control Plane](#v50-control-plane)
--   [V4.2 Production Agentic Systems Readiness](#v42-production-agentic-systems-readiness)
--   [Control Center](#control-center)
--   [Architecture](#architecture)
--   [Key Capabilities](#key-capabilities)
--   [Policy and Guardrails](#policy-and-guardrails)
--   [Evaluation and Model Gateway](#evaluation-and-model-gateway)
--   [Access Control and
-    Multi-tenancy](#access-control-and-multi-tenancy)
--   [Event-driven Architecture](#event-driven-architecture)
--   [MCP Integration](#mcp-integration)
--   [A2A Multi-Agent System](#a2a-multi-agent-system)
--   [Durable Workflows](#durable-workflows)
--   [Human-in-the-Loop](#human-in-the-loop)
--   [Agent Memory](#agent-memory)
--   [Observability](#observability)
--   [Architecture Governance](#architecture-governance)
--   [Cloud and Infrastructure](#cloud-and-infrastructure)
--   [Security](#security)
--   [Technology Stack](#technology-stack)
--   [Repository Structure](#repository-structure)
--   [Quick Start](#quick-start)
--   [API Overview](#api-overview)
--   [Testing and Verification](#testing-and-verification)
--   [Release](#release)
--   [Roadmap](#roadmap)
--   [Engineering Highlights](#engineering-highlights)
--   [License](#license)
+### V11 Platform Evolution
 
-------------------------------------------------------------------------
+The v11.0.0 release bundles a sequence of platform capabilities introduced as internal milestones V11–V18:
 
-## Overview
-
-RedPA AI provides an end-to-end foundation for production-oriented
-Agentic AI applications.
-
-The platform can:
-
--   coordinate multiple agents;
--   route tasks through structured planning;
--   retrieve internal knowledge with RAG;
--   discover and execute MCP tools;
--   delegate work to remote A2A specialist agents;
--   pause risky actions for human approval;
--   persist and resume long-running workflows;
--   maintain semantic and structured agent memory;
--   evaluate model and workflow quality;
--   route requests through a model gateway;
--   enforce policy before internal-tool and MCP execution;
--   isolate tenants and enforce tenant roles;
--   publish domain events through a transactional outbox;
--   deliver events through Redis Streams;
--   expose metrics, logs, traces, health, and performance data;
--   deploy locally with Docker Compose and provide Kubernetes/Helm and Azure/Pulumi deployment/reference assets.
-
-------------------------------------------------------------------------
-
-
-
-## V10.0 Governed Agent Runtime
-
-V10 turns governance from a tool-boundary check into a persisted runtime control layer for agent execution. Agent runs now carry lifecycle state, trace events, policy decisions, evaluation linkage, and explicit Human-in-the-Loop recovery semantics.
-
-### V10 governed lifecycle
-
-```text
-Agent request
-    |
-    v
-Governance Run
-    |
-    +--> policy / risk decision
-    |        |
-    |        +--> executable --------------------+
-    |        |                                    |
-    |        +--> review required                 |
-    |                 |                           |
-    |                 v                           |
-    |              BLOCKED                        |
-    |                 |                           |
-    |           human approval                    |
-    |                 |                           |
-    |                 v                           |
-    +-------------> RUNNING <---------------------+
-                       |
-                       v
-                 agent / tool work
-                       |
-                       v
-                recovery / result
-                       |
-                       v
-                   COMPLETED
-                       |
-                       v
-                  evaluation
-```
-
-Implemented V10 capabilities include:
-
-- persisted governance runs with lifecycle states and immutable-style execution events;
-- governance trace correlation across agent, workflow, policy, operations, and evaluation stages;
-- explicit `BLOCKED -> RUNNING` resume semantics after valid human approval;
-- policy decisions recorded with risk, decision, matched rules, policy version, and executability;
-- governed integration in planner, research, tool, Human Review, and chat/orchestration paths;
-- governed autonomous-operations recovery with diagnosis, denial, approval, remediation, recovery verification, and evaluation;
-- a dedicated Spring Boot Policy Service on port `8090`, promoted to the primary Docker Compose stack;
-- evaluation linkage on completed runs, including aggregate score and evaluation-run identity;
-- CI governance gates covering V10 governance, runtime integration, Ops governance, lifecycle recovery, release hardening, regression tests, and secret scanning;
-- release-hardening across Docker Compose, OpenTelemetry/Tempo startup behavior, SDK, frontend, Helm, CI, and application version contracts.
-
-### Verified V10 recovery path
-
-The release candidate was exercised end-to-end against a deliberately stopped `redpa-research-agent` container:
-
-```text
-RUNNING
- -> policy REVIEW / executable=false
- -> BLOCKED
- -> human approval
- -> policy REVIEW / executable=true
- -> RUNNING
- -> ops.remediation_started
- -> ops.recovery_verified
- -> COMPLETED
- -> evaluation.completed
-```
-
-The verified run restored the container to `running`, completed the governance run, and produced an evaluation score of `1.0`.
-
-### V10 service surfaces
-
-| Surface | Purpose |
+| Milestone | Capability |
 | --- | --- |
-| `/api/v1/governance/v10` | Governed run lifecycle, events, policy/evaluation-linked execution records |
-| `/api/v1/operations/v9` | Operations domain, now integrated with V10 governance lifecycle |
-| `redpa-ops-agent:8070` | Docker-backed diagnosis and approval-aware remediation |
-| `policy-service:8090` | Dedicated Spring Boot policy decision service |
-| OpenTelemetry + Tempo | Distributed trace export and trace storage |
-| Prometheus + Grafana | Metrics and operational dashboards |
+| **V11** | Autonomous Reliability |
+| **V12** | Self-Healing Multi-Agent |
+| **V13** | Adaptive Governance |
+| **V14** | Security & Compliance Evidence |
+| **V15** | Production Cloud Readiness |
+| **V16** | Continuous Evaluation & Rollout Gate |
+| **V17** | Enterprise Connector Governance |
+| **V18** | Trusted Agent Registry |
 
-See [`docs/V10_GOVERNED_AGENT_RUNTIME.md`](docs/V10_GOVERNED_AGENT_RUNTIME.md) and [`docs/releases/V10.0.0.md`](docs/releases/V10.0.0.md).
+These capabilities share a persisted evidence model and are exposed through the V11 Platform Evolution API and Control Plane.
 
-------------------------------------------------------------------------
+### Verified release evidence
 
-------------------------------------------------------------------------
+The current release baseline has been validated with:
+
+```text
+359 passed
+```
+
+Additional live validation covered:
+
+```text
+V11  closed_loop_reliability  -> action_required
+V12  agent_failover           -> routable
+V13  policy_recommendation    -> recommendation
+V14  compliance_evidence      -> incomplete (intentional missing-evidence test)
+V15  cloud_readiness          -> ready
+V16  continuous_evaluation    -> promote
+V17  connector_assessment     -> review
+V18  agent_registry           -> trusted
+```
+
+Eight persisted evolution records were verified in the Control Plane.
+
+---
 
 ## Architecture
 
 <p align="center">
-  <img src="docs/images/architecture.png" alt="RedPA AI V10 Architecture" width="100%">
+  <img src="docs/images/architecture-v11.png" alt="RedPA AI V11 Architecture" width="100%">
 </p>
-
-RedPA V10 is organized around a **governed agent runtime** rather than a collection of isolated LLM calls. Agent execution, policy decisions, Human-in-the-Loop approval, operational recovery, evaluation, persistence, and observability are connected through one auditable lifecycle.
 
 ```mermaid
 flowchart TB
-    User[User / API Consumer]
-    UI[Next.js Control Plane]
+    User[User / API / Control Plane]
 
-    subgraph API["FastAPI Platform"]
-        Auth[Auth / RBAC / Tenancy]
-        Chat[Chat & Orchestration]
-        Research[Enterprise Research]
-        Ops[V9 Operations API]
-        GovAPI[V10 Governance API]
+    subgraph Platform["RedPA AI Platform"]
+      API[FastAPI Backend]
+      GOV[V10 Governed Agent Runtime]
+      EVO[V11 Platform Evolution]
+      POLICY[Spring Boot Policy Service]
+      OPS[Ops Agent]
     end
 
-    subgraph Runtime["V10 Governed Agent Runtime"]
-        Run[Governance Run]
-        Planner[Planner / Router]
-        Agents[Agent Runtime]
-        Tools[Internal Tools / MCP]
-        HITL[Human Review]
-        Eval[Evaluation]
+    subgraph Agents["Agent Runtime"]
+      Planner[Planner / Router]
+      Research[Research Agent]
+      Specialists[Specialist Agents]
+      MCP[MCP Services]
+      A2A[A2A Coordinator]
     end
 
-    subgraph Governance["Governance & Policy"]
-        Policy[Spring Boot Policy Service :8090]
-        Audit[Policy / Execution Audit]
+    subgraph Evolution["V11-V18 Evolution Capabilities"]
+      R[V11 Reliability]
+      F[V12 Failover]
+      AG[V13 Adaptive Governance]
+      C[V14 Compliance]
+      CL[V15 Cloud Readiness]
+      EV[V16 Rollout Evaluation]
+      CO[V17 Connector Governance]
+      AR[V18 Agent Registry]
     end
 
-    subgraph Distributed["Distributed Agent & Tool Layer"]
-        MCP[MCP Services]
-        A2A[A2A Coordinator]
-        Specialists[Specialist Agents]
-        OpsAgent[Ops Agent :8070]
-    end
-
-    subgraph State["State & Messaging"]
-        Postgres[(PostgreSQL)]
-        Qdrant[(Qdrant)]
-        Redis[(Redis / Streams)]
-        Durable[Durable Workflows]
-        Memory[Agent Memory]
+    subgraph Data["State & Evidence"]
+      PG[(PostgreSQL)]
+      Q[(Qdrant)]
+      Redis[(Redis)]
     end
 
     subgraph Observe["Observability"]
-        OTEL[OpenTelemetry]
-        Tempo[Tempo]
-        Prometheus[Prometheus]
-        Grafana[Grafana]
+      OTEL[OpenTelemetry]
+      Tempo[Tempo]
+      Prom[Prometheus]
+      Grafana[Grafana]
     end
 
     User --> API
-    UI --> API
-    Chat --> Run
-    Research --> Run
-    Ops --> Run
-    GovAPI --> Run
+    API --> GOV
+    API --> EVO
+    GOV --> POLICY
+    GOV --> OPS
+    GOV --> Planner
+    Planner --> Research
+    Planner --> Specialists
+    Specialists --> A2A
+    Planner --> MCP
 
-    Run --> Planner
-    Planner --> Agents
-    Agents --> Tools
-    Tools --> Policy
-    Policy -->|ALLOW| Tools
-    Policy -->|REVIEW| HITL
-    Policy -->|DENY| Audit
-    HITL -->|approved| Run
-    HITL -->|rejected| Audit
+    EVO --> R
+    EVO --> F
+    EVO --> AG
+    EVO --> C
+    EVO --> CL
+    EVO --> EV
+    EVO --> CO
+    EVO --> AR
 
-    Tools --> MCP
-    Agents --> A2A
-    A2A --> Specialists
-    Ops --> OpsAgent
-
-    Run --> Durable
-    Run --> Eval
-    Run --> Audit
-    Durable --> Postgres
-    Memory --> Postgres
-    Memory --> Qdrant
-    Run --> Postgres
-    Redis --> Durable
+    GOV --> PG
+    EVO --> PG
+    Research --> Q
+    API --> Redis
 
     API --> OTEL
-    Runtime --> OTEL
+    GOV --> OTEL
+    EVO --> OTEL
     OTEL --> Tempo
-    API --> Prometheus
-    Prometheus --> Grafana
-    Tempo --> Grafana
+    API --> Prom
+    Prom --> Grafana
 ```
 
-Architecture documentation also includes C4, arc42, DDD, Clean Architecture rules, and ADRs under [`docs/architecture/`](docs/architecture/).
+Full architecture notes: [`docs/V11_PLATFORM_EVOLUTION.md`](docs/V11_PLATFORM_EVOLUTION.md)
 
-------------------------------------------------------------------------
+---
 
-## Core Capabilities
+## Governed Runtime
 
-| Area | Capabilities |
-| --- | --- |
-| **Governed Agent Runtime** | persisted runs, lifecycle states, trace events, policy decisions, approval-aware resume, evaluation linkage |
-| **Agentic AI** | planner routing, chat, research, RAG, tool agents, structured state, multi-agent orchestration |
-| **MCP** | tool discovery, qualified execution, isolated services, guarded tool boundaries |
-| **A2A** | coordinator, specialist discovery, delegation, parallel execution, result aggregation |
-| **Human-in-the-Loop** | approval/rejection, blocked-run recovery, workflow resume, policy-to-review linkage |
-| **Durable Workflows** | persistence, checkpoints, retries, resume, distributed subtasks |
-| **Agent Memory** | PostgreSQL metadata, Qdrant semantic retrieval, private/shared memory, summarization |
-| **Evaluation** | persisted evaluations, benchmarks, regression checks, quality gates, run linkage |
-| **Model Gateway** | provider abstraction, routing, fallback, reliability, usage and cost controls |
-| **Operations** | incident persistence, diagnosis, governed remediation, recovery verification, release readiness |
-| **Enterprise Platform** | tenancy/RBAC foundations, event outbox, Redis Streams, analytics/KPIs, connectors |
-| **Observability** | Prometheus, Grafana, OpenTelemetry, Tempo, structured logs and trace correlation |
-| **Infrastructure** | Docker Compose, Kubernetes, Helm, Azure/Pulumi reference architecture, CI/CD |
-
-------------------------------------------------------------------------
-
-## V10 Governance Lifecycle
-
-Every governed execution can be correlated through a persisted run and event history.
+V10 established governance as persisted runtime state rather than a detached middleware check.
 
 ```text
 CREATED
-   |
-   v
-RUNNING
-   |
-   +--> policy ALLOW --------------------------+
-   |                                           |
-   +--> policy REVIEW --> BLOCKED              |
-   |                       |                   |
-   |                  human approval           |
-   |                       |                   |
-   |                       v                   |
-   +-------------------- RUNNING <-------------+
-   |                       |
-   +--> policy DENY         v
-   |                     execution
-   v                       |
-FAILED / BLOCKED           v
-                        recovery/result
-                           |
-                           v
-                       COMPLETED
-                           |
-                           v
-                       EVALUATED
+  -> RUNNING
+      -> policy ALLOW
+      -> policy REVIEW -> BLOCKED -> human approval -> RUNNING
+      -> policy DENY
+  -> execution
+  -> recovery / result
+  -> COMPLETED
+  -> evaluation
 ```
 
-The V10 operational recovery path was validated end-to-end by stopping the Research Agent, diagnosing the failure, denying an unapproved restart, resuming after explicit approval, restarting the container, verifying recovery, completing the governed run, and linking evaluation evidence.
-
-------------------------------------------------------------------------
-
-## Policy and Human Approval
-
-The dedicated Spring Boot Policy Service is the execution-policy authority for guarded actions.
-
-Policy outcomes:
+A real V10.3 E2E flow was automated and validated:
 
 ```text
-ALLOW   -> action may execute
-REVIEW  -> action requires Human-in-the-Loop approval
-DENY    -> action is blocked
+run.created
+-> run.running
+-> ops.diagnosis_started
+-> ops.diagnosis_completed
+-> policy.decision
+-> ops.remediation_blocked
+-> policy.decision
+-> run.running
+-> ops.remediation_started
+-> ops.recovery_verified
+-> run.completed
+-> evaluation.completed
 ```
 
-Policy records can include risk, matched rules, policy version, reason, executability, and review linkage. V10 persists these decisions into the governed execution trace so operational actions are auditable rather than hidden side effects.
-
-The policy service runs locally at:
+The test restored a deliberately stopped Research Agent and ended with:
 
 ```text
-http://localhost:8090
+status            : completed
+evaluation_score  : 1.0
+container         : running
 ```
 
-------------------------------------------------------------------------
+---
 
-## MCP and A2A
+## Policy Management
 
-### MCP services
+RedPA provides two policy layers:
+
+1. the dedicated Spring Boot Policy Service;
+2. persisted user-scoped policy overrides in the FastAPI platform.
+
+Supported outcomes:
 
 ```text
-Filesystem MCP   : 8010
-GitHub MCP       : 8020
-PostgreSQL MCP   : 8030
-Docker MCP       : 8040
+ALLOW
+REVIEW
+DENY
 ```
 
-MCP execution supports service isolation, dynamic discovery, structured arguments, policy enforcement, and Human Review for guarded actions.
+A live policy override was validated for `restart_container` at the `ops_remediation` boundary with `REVIEW / HIGH`, source `redpa-policy-override`, and `executable=false`.
 
-### A2A runtime
+The V13 Adaptive Governance capability recommends policy changes but deliberately does **not** auto-apply them.
+
+---
+
+## V11–V18 Platform Evolution
+
+### V11 — Autonomous Reliability
+Operational signals are evaluated into `observe`, `investigate`, or `governed_remediation`, with persisted evidence.
+
+### V12 — Self-Healing Multi-Agent
+Health-aware routing excludes unhealthy agents and selects a fallback candidate.
+
+### V13 — Adaptive Governance
+Produces policy recommendations from incident count, failure rate, and destructive-action context while preserving `auto_applied=false`.
+
+### V14 — Security & Compliance Evidence
+Checks structured evidence against required fields and records missing evidence.
+
+### V15 — Production Cloud Readiness
+Scores readiness across health checks, backups, secrets management, autoscaling, and telemetry.
+
+### V16 — Continuous Evaluation
+Compares candidate and baseline scores plus error-rate delta to return `PROMOTE` or `HOLD`.
+
+### V17 — Enterprise Connector Governance
+Assesses connector risk from write access, external network access, secret handling, and approval requirements.
+
+### V18 — Trusted Agent Registry
+Registers versioned agents with trust signals for signed manifests, health endpoints, and governance compatibility.
+
+---
+
+## Control Plane
+
+Main Control Plane pages:
 
 ```text
-A2A Coordinator      : 8050
-Research Agent       : 8061
-PostgreSQL Agent     : 8062
-Docker Agent         : 8063
-Filesystem Agent     : 8064
-GitHub Agent         : 8065
+/control-plane/governance
+/control-plane/policy
+/control-plane/evolution
 ```
 
-Specialist services expose Agent Cards through `/.well-known/agent-card.json` and can be selected by capability for distributed execution.
+The evolution dashboard exposes milestone counts and persisted evidence records.
 
-------------------------------------------------------------------------
+---
 
-## Data, Memory, Workflows, and Events
+## Core Platform Capabilities
 
-**PostgreSQL** stores relational platform state including users, workflows, governance records, evaluations, incidents, policy/audit data, and other persisted application state.
-
-**Qdrant** provides vector retrieval for RAG and semantic Agent Memory.
-
-**Redis** supports caching, background execution, and Redis Streams-based messaging.
-
-Durable workflows provide persisted state, checkpoints, retries, Human Review pauses, and resume semantics. The transactional outbox separates application transactions from asynchronous event publication.
-
-------------------------------------------------------------------------
-
-## Observability
-
-RedPA combines:
-
-- **Prometheus** for metrics;
-- **Grafana** for dashboards;
-- **OpenTelemetry** for distributed instrumentation;
-- **Tempo** for trace storage;
-- structured logging with request, correlation, trace, workflow, and execution identifiers.
-
-V10 extends this model with governance-run and execution-event correlation across agent, policy, operations, Human Review, recovery, and evaluation stages.
-
-------------------------------------------------------------------------
-
-## Security and Platform Controls
-
-Implemented security and governance foundations include:
-
-- JWT authentication;
-- tenant-aware access foundations and RBAC;
-- policy enforcement at guarded execution boundaries;
-- Human-in-the-Loop approval;
-- persistent policy and governance audit records;
-- rate limiting and idempotency;
-- CORS and security headers;
-- environment/configuration validation;
-- secret scanning;
-- guarded MCP execution and input validation;
-- read-only protections where applicable;
-- Kubernetes security contexts and network-policy hardening;
-- CI governance and release gates.
-
-Production OAuth completion and live cloud deployment require real provider/cloud credentials and are not represented as already deployed production infrastructure.
-
-------------------------------------------------------------------------
-
-## Technology Stack
-
-| Area | Technologies |
+| Area | Capabilities |
 | --- | --- |
-| Backend | Python 3.13, FastAPI, Pydantic, SQLAlchemy, asyncpg |
-| Governance | V10 governed runtime, Spring Boot Policy Service |
-| Frontend | Next.js, TypeScript |
-| Agentic AI | planner routing, RAG, stateful agent workflows |
-| Protocols | MCP, A2A |
-| Data | PostgreSQL 17, Qdrant |
-| Messaging / Runtime | Redis, Redis Streams |
-| Evaluation | persisted evaluation, benchmarks, regression and quality gates |
+| Agentic Runtime | planner routing, research, RAG, multi-agent orchestration |
+| Governance | persisted runs, lifecycle events, approval-aware resume, policy tracing |
+| Policy | Spring Boot Policy Service, persisted overrides, ALLOW/REVIEW/DENY |
+| HITL | approval/rejection, blocked-run recovery |
+| Operations | incident persistence, diagnosis, governed remediation, recovery verification |
+| MCP | filesystem, GitHub, PostgreSQL, Docker tools |
+| A2A | coordinator, specialist discovery and delegation |
+| Memory | PostgreSQL + Qdrant semantic memory |
+| Evaluation | persisted evaluation, release and quality gates |
+| Platform Evolution | reliability, failover, compliance, rollout, connectors, agent trust |
 | Observability | Prometheus, Grafana, OpenTelemetry, Tempo |
-| Containers | Docker, Docker Compose |
-| Deployment | Kubernetes, Helm |
-| Cloud IaC | Pulumi Python, Azure Native |
-| Architecture | DDD, Clean Architecture, C4, arc42, ADR |
-| Testing | pytest, JUnit/Spring tests, contract and architecture tests |
-| CI/CD | GitHub Actions |
+| Infrastructure | Docker Compose, Kubernetes, Helm, Azure/Pulumi reference architecture |
 
-------------------------------------------------------------------------
+---
 
-## Repository Structure
+## API Overview
+
+| API | Purpose |
+| --- | --- |
+| `/api/v1/governance/v10` | governed run lifecycle and execution evidence |
+| `/api/v1/policy` | enforcement and persisted policy overrides |
+| `/api/v1/operations/v9` | incident diagnosis and governed remediation |
+| `/api/v1/platform/evolution` | V11–V18 platform evolution capabilities |
+| `/api/v1/reviews` | Human-in-the-Loop |
+| `/api/v1/evaluations` | evaluation and quality |
+| `/api/v1/mcp` | MCP execution |
+| `/api/v1/agents` | agent operations |
+| `/api/v1/memory` | semantic Agent Memory |
+| `/api/v1/events` | event/outbox operations |
+| `/api/v1/model-gateway` | provider routing |
+| `/api/v1/health` | platform health |
+
+Swagger:
 
 ```text
-redpa-ai/
-├── backend/
-│   ├── alembic/
-│   └── app/
-│       ├── agents/
-│       ├── api/v1/
-│       ├── governance_v10/
-│       ├── ops_v9/
-│       ├── evaluation/
-│       ├── model_gateway/
-│       ├── agent_memory/
-│       ├── distributed_durable/
-│       ├── events/
-│       ├── mcp_servers/
-│       ├── specialist_agents/
-│       └── main.py
-├── policy-service/
-├── frontend/
-├── sdk/python/
-├── infra/azure/
-├── deploy/
-│   ├── helm/
-│   └── kubernetes/
-├── monitoring/
-├── observability/
-├── docs/
-├── scripts/
-├── tests/
-├── .github/workflows/
-├── docker-compose.yml
-└── README.md
+http://localhost:8000/docs
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Quick Start
-
-### Requirements
-
-- Python 3.13+
-- Docker Desktop / Docker Compose
-- Git
-- Node.js when running the frontend outside Docker
-- Java/Maven when building the policy service outside Docker
-- Ollama when using a local model runtime outside Docker
-
-### Clone and configure
 
 ```powershell
 git clone https://github.com/saeidkh96/redpa-ai.git
@@ -542,172 +329,79 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
 Copy-Item .env.example .env
-docker compose config
+
+docker compose config --quiet
+docker compose up -d --build
+
+docker compose exec backend `
+  python -m alembic -c alembic.ini upgrade head
 ```
 
-Review `.env` before startup and never commit local secrets.
+Expected migration head:
 
-### Start the platform
+```text
+v180a1b2c3d4e
+```
+
+---
+
+## Testing
 
 ```powershell
-docker compose up -d --build
-docker compose exec backend python -m alembic -c alembic.ini upgrade head
-docker compose ps
+python -m pytest tests -q
 ```
 
-### Local services
-
-| Service | URL |
-| --- | --- |
-| Control Plane | `http://localhost:3001` |
-| Backend / Swagger | `http://localhost:8000/docs` |
-| Policy Service | `http://localhost:8090` |
-| Ops Agent | `http://localhost:8070` |
-| Prometheus | `http://localhost:9090` |
-| Grafana | `http://localhost:3000` |
-| Tempo | `http://localhost:3200` |
-| Qdrant | `http://localhost:6333` |
-
-------------------------------------------------------------------------
-
-## API Overview
-
-Main API areas are exposed under `/api/v1`.
-
-| API | Purpose |
-| --- | --- |
-| `/auth`, `/users` | authentication and identity |
-| `/conversations`, `/chat` | conversation and governed agent orchestration |
-| `/documents` | document ingestion and RAG |
-| `/reviews` | Human Review |
-| `/governance/v10` | V10 governed run lifecycle, events and execution records |
-| `/operations/v9` | incidents, diagnosis, governed remediation, cost and readiness |
-| `/tools`, `/mcp` | internal and MCP tool discovery/execution |
-| `/agents` | agent registry and distributed agent operations |
-| `/memory` | Agent Memory |
-| `/evaluations` | evaluation, benchmarks, regression and quality gates |
-| `/model-gateway` | model routing and provider operations |
-| `/guardrails`, `/policy` | policy and guardrail surfaces |
-| `/tenants`, `/oauth` | tenancy and OAuth foundations |
-| `/events` | transactional outbox and event operations |
-| `/research/runs` | Enterprise Research |
-| `/analytics` | KPI and analytics operations |
-| `/connectors` | enterprise automation connectors |
-| `/health`, `/platform`, `/performance` | platform health and operational state |
-
-Use Swagger at `http://localhost:8000/docs` for authoritative request and response schemas.
-
-------------------------------------------------------------------------
-
-## Testing and Verification
-
-V10 release validation includes dedicated governance, runtime-integration, operations-governance, lifecycle-recovery, regression, CI, and secret-scanning gates.
-
-Latest full local regression:
+Current validated baseline:
 
 ```text
-344 passed
+359 passed
 ```
 
-The V10 governed operations lifecycle was also validated against a deliberately stopped Research Agent:
+Additional release checks:
 
-```text
-RUNNING
- -> policy REVIEW / executable=false
- -> BLOCKED
- -> human approval
- -> policy REVIEW / executable=true
- -> RUNNING
- -> ops.remediation_started
- -> ops.recovery_verified
- -> COMPLETED
- -> evaluation.completed
+```powershell
+python scripts/security/secret_scan.py
+docker compose config --quiet
+
+cd frontend
+npm.cmd run build
+cd ..
 ```
 
-Observed validation evidence included:
-
-```text
-container state      : running
-governance run       : completed
-evaluation score     : 1.0
-```
-
-This validates the critical V10 behavior: policy does not merely describe what should happen; it participates in an executable, persisted, approval-aware lifecycle.
-
-------------------------------------------------------------------------
-
-## Release
-
-### v10.0.0 — Governed Agent Runtime
-
-V10 promotes governance into the runtime lifecycle of RedPA AI.
-
-Release highlights:
-
-- persisted governance runs and execution events;
-- trace correlation across agent, workflow, policy, operations, and evaluation;
-- explicit `BLOCKED -> RUNNING` Human-in-the-Loop resume semantics;
-- persisted policy decision evidence;
-- governed planner, research, tool, Human Review, and orchestration paths;
-- governed autonomous-operations recovery;
-- dedicated Spring Boot Policy Service in the primary runtime;
-- recovery verification and evaluation linkage;
-- OpenTelemetry/Tempo integration and release hardening;
-- V10 governance and release CI gates.
-
-See [`docs/V10_GOVERNED_AGENT_RUNTIME.md`](docs/V10_GOVERNED_AGENT_RUNTIME.md) and [`docs/releases/V10.0.0.md`](docs/releases/V10.0.0.md).
-
-------------------------------------------------------------------------
+---
 
 ## Release History
 
-| Version | Milestone |
+| Release | Focus |
 | --- | --- |
-| **V10** | Governed Agent Runtime |
-| **V9** | Production Cloud & Autonomous Operations |
-| **V8** | Enterprise Operations & Automation |
-| **V7** | Enterprise Research |
-| **V6** | Developer Platform |
-| **V5.5** | Evaluation & Reliability |
-| **V5** | Control Plane |
-| **V4.2** | Production Agentic Systems Readiness |
-| **V3** | Enterprise Governance & Integration |
-| **V2** | Distributed Agentic Runtime |
-| **V1** | Agentic Foundation |
+| **v11.0.0** | Platform Evolution: reliability, failover, adaptive governance, compliance, cloud readiness, rollout evaluation, integration governance, trusted agents |
+| **v10.0.0** | Governed Agent Runtime |
+| **v9.0.0** | Production Cloud & Autonomous Operations |
+| V8 | Enterprise Operations & Automation |
+| V7 | Enterprise Research |
+| V6 | Developer Platform |
+| V5.5 | Evaluation & Reliability |
+| V5 | Control Plane |
+| V4.2 | Production Agentic Systems Readiness |
+| V3 | Enterprise Governance & Integration |
+| V2 | Distributed Agentic Runtime |
+| V1 | Agentic Foundation |
 
-Historical implementation and release documentation remains under `docs/`.
+---
 
-------------------------------------------------------------------------
+## Engineering Principles
 
-## Roadmap
+- autonomous reasoning does not imply autonomous permission;
+- destructive or high-risk actions remain policy- and approval-aware;
+- governance state should be persisted and auditable;
+- recovery is not complete until it is verified;
+- adaptive governance may recommend policy changes without silently applying them;
+- production readiness must be demonstrated with evidence rather than inferred from architecture diagrams alone.
 
-### Completed
-
-**V1 → V10** establish the current RedPA platform foundation: agent orchestration, RAG, MCP, A2A, durable execution, Human Review, semantic memory, enterprise governance, model/evaluation infrastructure, Control Plane, SDK/CLI, enterprise research, automation/analytics, autonomous operations, and the V10 governed execution lifecycle.
-
-### Next
-
-- validate the Azure/Pulumi production stack against a live subscription;
-- complete production OAuth token exchange and account linking;
-- deepen tenant-level authorization and policy isolation;
-- expand evaluation datasets and benchmark coverage;
-- add larger-scale load, chaos, and resilience validation;
-- extend production SLO/SLA operational dashboards;
-- expand enterprise connectors and event consumers;
-- continue hardening governed autonomous execution.
-
-------------------------------------------------------------------------
-
-## Engineering Focus
-
-RedPA AI demonstrates practical engineering across:
-
-**Agentic AI · Multi-Agent Systems · RAG · MCP · A2A · Governed Agent Runtime · Human-in-the-Loop · Durable Workflows · Semantic Memory · Model Routing · AI Evaluation · Policy Enforcement · Autonomous Operations · Event-Driven Architecture · PostgreSQL · Qdrant · Redis Streams · FastAPI · Spring Boot · Next.js · Docker · Kubernetes · Helm · OpenTelemetry · Prometheus · Grafana · Azure · Pulumi · CI/CD**
-
-------------------------------------------------------------------------
+---
 
 ## License
 
-This project is licensed under the MIT License.
+MIT License
 
 Copyright (c) 2026 Saeid Khalilian

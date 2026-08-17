@@ -8,7 +8,7 @@ import docker
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-app = FastAPI(title='RedPA Ops Agent', version='10.0.0')
+app = FastAPI(title='RedPA Ops Agent', version='11.0.0')
 _client = docker.from_env()
 _ALLOWED = re.compile(r'^redpa-[a-z0-9-]+$')
 _STATEFUL_DENY = {'redpa-postgres','redpa-qdrant','redpa-redis'}
@@ -31,7 +31,7 @@ def _container(name: str):
 @app.get('/health')
 def health() -> dict[str, str]:
     _client.ping()
-    return {'status':'healthy','service':'RedPA Ops Agent','version':'10.0.0'}
+    return {'status':'healthy','service':'RedPA Ops Agent','version':'11.0.0'}
 
 
 @app.get('/containers/{name}/diagnose')

@@ -31,3 +31,10 @@
 .cpTimeline{display:grid;gap:0;margin-top:8px}.cpTimeline article{position:relative;display:grid;grid-template-columns:18px 1fr;gap:9px;padding:0 0 14px}.cpTimeline article:not(:last-child):before{content:"";position:absolute;left:4px;top:12px;bottom:0;width:1px;background:#dfe4ec}.cpTimelineDot{width:9px;height:9px;border-radius:50%;background:#ff3b45;margin-top:4px;z-index:1}.cpTimeline p{font-size:9px;color:#5f6879;margin:5px 0}.cpTimeline small{font-size:8px;color:#8a93a3}
 .cpEvidenceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cpEvidenceGrid article{border:1px solid #e5e9f0;border-radius:10px;padding:13px}.cpEvidenceGrid article p{font-size:9px;line-height:1.55;color:#5f6879}.cpEvidenceGrid article a{font-size:8px;color:#b82e38;text-decoration:none}.cpEvidenceGrid .cpPanelHead{margin-bottom:8px}
 @media(max-width:850px){.cpResearchForm,.cpEvidenceGrid{grid-template-columns:1fr}.cpResearchForm .wide{grid-column:auto}}
+
+.cpSelect{border:1px solid #dfe4ec;border-radius:8px;background:#fff;padding:8px 10px;font-size:9px;color:#172033}
+.cpObjective{max-width:420px;line-height:1.45}
+.cpRunError{color:#b92e39!important}
+.cpTimelineTitle{display:flex;align-items:center;gap:8px;margin-bottom:3px}.cpTimeline pre{margin:7px 0 0;background:#f7f8fa;border:1px solid #edf0f4;border-radius:8px;padding:9px;font-size:8px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.cpPolicyGrid{display:grid;grid-template-columns:1.2fr 1fr .7fr .7fr;gap:10px;margin-bottom:12px}.cpPolicyGrid label{display:grid;gap:5px}.cpPolicyGrid label>span{font-size:8px;color:#70798d;text-transform:uppercase;letter-spacing:.6px}.cpPolicyGrid input,.cpPolicyGrid select,.cpPolicyGrid textarea{width:100%;border:1px solid #dfe4ec;border-radius:8px;background:#fff;padding:9px;font-size:10px;color:#172033}.cpPolicyGrid .wide{grid-column:1/-1}.cpPolicyGrid textarea{resize:vertical}
+@media(max-width:950px){.cpPolicyGrid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.cpPolicyGrid{grid-template-columns:1fr}.cpPolicyGrid .wide{grid-column:auto}}

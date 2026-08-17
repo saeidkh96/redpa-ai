@@ -23,6 +23,10 @@ from app.monitoring.policy_metrics import (
 )
 from app.services.human_review_service import HumanReviewService
 from app.services.policy_audit_service import PolicyAuditService
+from app.services.policy_override_v10_service import (
+    PolicyOverrideV10Service,
+    policy_override_v10_service,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,8 +41,12 @@ class PolicyEnforcementService:
         self,
         *,
         guardrails: GuardrailService | None = None,
+        policy_overrides: PolicyOverrideV10Service | None = None,
     ) -> None:
         self.guardrails = guardrails or GuardrailService()
+        self.policy_overrides = (
+            policy_overrides or policy_override_v10_service
+        )
 
     async def enforce(
         self,
@@ -58,23 +66,40 @@ class PolicyEnforcementService:
     ) -> PolicyEnforcementResult:
         started_at = time.perf_counter()
 
-        evaluation = await self.guardrails.evaluate(
-            GuardrailRequest(
-                action=GuardrailAction(
-                    action=action,
-                    resource=resource,
-                    arguments=arguments,
-                ),
-                agent_id=(metadata or {}).get("agent_id"),
-                user_id=str(user_id),
-                workflow_id=workflow_id,
-                metadata=metadata or {},
-            )
+        evaluation = await self.policy_overrides.evaluate(
+            session=session,
+            user_id=user_id,
+            boundary=boundary,
+            action=action,
+            resource=resource,
         )
+
+        if evaluation is None:
+            evaluation = await self.guardrails.evaluate(
+                GuardrailRequest(
+                    action=GuardrailAction(
+                        action=action,
+                        resource=resource,
+                        arguments=arguments,
+                    ),
+                    agent_id=(metadata or {}).get("agent_id"),
+                    user_id=str(user_id),
+                    workflow_id=workflow_id,
+                    metadata={
+                        **(metadata or {}),
+                        "boundary": boundary,
+                    },
+                )
+            )
 
         POLICY_EVALUATION_DURATION_SECONDS.labels(
             source=evaluation.source,
-        ).observe(max(time.perf_counter() - started_at, 0.0))
+        ).observe(
+            max(
+                time.perf_counter() - started_at,
+                0.0,
+            )
+        )
 
         POLICY_EVALUATIONS_TOTAL.labels(
             decision=evaluation.decision.value,
@@ -88,6 +113,7 @@ class PolicyEnforcementService:
             if approval_granted:
                 executable = True
                 outcome = "approved_review"
+
             elif conversation_id is not None:
                 review = await HumanReviewService.create(
                     session=session,
@@ -110,15 +136,20 @@ class PolicyEnforcementService:
                         "matched_rules": list(
                             evaluation.matched_rules
                         ),
-                        "policy_version": evaluation.policy_version,
+                        "policy_version": (
+                            evaluation.policy_version
+                        ),
                     },
                     commit=False,
                 )
+
                 executable = False
                 outcome = "review_created"
+
                 POLICY_REVIEW_CREATED_TOTAL.labels(
                     boundary=boundary,
                 ).inc()
+
             else:
                 executable = False
                 outcome = "review_required"
@@ -143,7 +174,11 @@ class PolicyEnforcementService:
             evaluation=evaluation,
             user_id=user_id,
             conversation_id=conversation_id,
-            review_id=(review.id if review else None),
+            review_id=(
+                review.id
+                if review
+                else None
+            ),
             resource=resource,
             metadata={
                 **(metadata or {}),

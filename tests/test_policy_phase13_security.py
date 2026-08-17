@@ -7,7 +7,9 @@ from app.guardrails.contracts import (
     GuardrailEvaluation,
     RiskLevel,
 )
-from app.services.policy_enforcement_service import PolicyEnforcementService
+from app.services.policy_enforcement_service import (
+    PolicyEnforcementService,
+)
 
 
 class StubGuardrails:
@@ -20,6 +22,7 @@ class StubGuardrails:
             GuardrailDecision.REVIEW: RiskLevel.HIGH,
             GuardrailDecision.DENY: RiskLevel.CRITICAL,
         }[self.decision]
+
         return GuardrailEvaluation(
             decision=self.decision,
             risk=risk,
@@ -27,6 +30,19 @@ class StubGuardrails:
             matched_rules=("PHASE13_SECURITY_TEST",),
             policy_version="13.9-test",
         )
+
+
+class StubPolicyOverrides:
+    async def evaluate(
+        self,
+        *,
+        session,
+        user_id,
+        boundary,
+        action,
+        resource,
+    ):
+        return None
 
 
 class FakeSession:
@@ -52,8 +68,12 @@ class FakeSession:
 @pytest.mark.asyncio
 async def test_deny_cannot_be_overridden_by_approval_flag() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.DENY)
+        guardrails=StubGuardrails(
+            GuardrailDecision.DENY,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     result = await service.enforce(
         session=FakeSession(),
         boundary="mcp",
@@ -70,8 +90,12 @@ async def test_deny_cannot_be_overridden_by_approval_flag() -> None:
 @pytest.mark.asyncio
 async def test_review_without_conversation_fails_closed() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.REVIEW)
+        guardrails=StubGuardrails(
+            GuardrailDecision.REVIEW,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     result = await service.enforce(
         session=FakeSession(),
         boundary="mcp",
@@ -89,8 +113,12 @@ async def test_review_without_conversation_fails_closed() -> None:
 @pytest.mark.asyncio
 async def test_review_with_explicit_approval_can_continue() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.REVIEW)
+        guardrails=StubGuardrails(
+            GuardrailDecision.REVIEW,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     result = await service.enforce(
         session=FakeSession(),
         boundary="mcp",
@@ -101,4 +129,7 @@ async def test_review_with_explicit_approval_can_continue() -> None:
     )
 
     assert result.executable is True
-    assert result.evaluation.decision == GuardrailDecision.REVIEW
+    assert (
+        result.evaluation.decision
+        == GuardrailDecision.REVIEW
+    )

@@ -22,6 +22,7 @@ class StubGuardrails:
             GuardrailDecision.REVIEW: RiskLevel.HIGH,
             GuardrailDecision.DENY: RiskLevel.CRITICAL,
         }[self.decision]
+
         return GuardrailEvaluation(
             decision=self.decision,
             risk=risk,
@@ -29,6 +30,19 @@ class StubGuardrails:
             matched_rules=("TEST_RULE",),
             policy_version="13.6-test",
         )
+
+
+class StubPolicyOverrides:
+    async def evaluate(
+        self,
+        *,
+        session,
+        user_id,
+        boundary,
+        action,
+        resource,
+    ):
+        return None
 
 
 class FakeSession:
@@ -54,8 +68,12 @@ class FakeSession:
 @pytest.mark.asyncio
 async def test_allow_is_executable() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.ALLOW)
+        guardrails=StubGuardrails(
+            GuardrailDecision.ALLOW,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     session = FakeSession()
 
     result = await service.enforce(
@@ -73,8 +91,12 @@ async def test_allow_is_executable() -> None:
 @pytest.mark.asyncio
 async def test_deny_is_not_executable() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.DENY)
+        guardrails=StubGuardrails(
+            GuardrailDecision.DENY,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     session = FakeSession()
 
     result = await service.enforce(
@@ -92,8 +114,12 @@ async def test_deny_is_not_executable() -> None:
 @pytest.mark.asyncio
 async def test_review_with_approval_becomes_executable() -> None:
     service = PolicyEnforcementService(
-        guardrails=StubGuardrails(GuardrailDecision.REVIEW)
+        guardrails=StubGuardrails(
+            GuardrailDecision.REVIEW,
+        ),
+        policy_overrides=StubPolicyOverrides(),
     )
+
     session = FakeSession()
 
     result = await service.enforce(
