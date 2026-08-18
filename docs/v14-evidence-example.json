@@ -1,0 +1,29 @@
+{
+  "stage1": {
+    "control_versioned": true
+  },
+  "stage2": {
+    "evidence_persisted": true
+  },
+  "stage3": {
+    "missing_detected": true
+  },
+  "stage4": {
+    "hash_verified": true
+  },
+  "stage5": {
+    "expiry_enforced": true
+  },
+  "stage6": {
+    "risk_scored": true
+  },
+  "stage7": {
+    "high_risk_requires_approval": true
+  },
+  "stage8": {
+    "record_persisted": true
+  },
+  "stage9": {
+    "export_verified": true
+  }
+}
