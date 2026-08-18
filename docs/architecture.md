@@ -1,133 +1,478 @@
-# RedPA AI v9.0.0 Architecture
+# RedPA AI v18.1.0 Architecture
 
-This document is the concise architecture entry point for the V8 source tree. Detailed views are maintained in:
+This document describes the architecture represented by the **v18.1.0** repository snapshot. RedPA AI is a production-oriented Agentic AI platform built around explicit execution, governance, reliability, integration, and audit boundaries.
 
-- [`architecture/c4.md`](architecture/c4.md)
-- [`architecture/arc42.md`](architecture/arc42.md)
-- [`architecture/ddd.md`](architecture/ddd.md)
-- [`architecture/adr/`](architecture/adr/)
+The architecture separates **reasoning** from **permission**, **agent delegation** from **tool execution**, and **runtime capability** from **release-readiness evidence**.
 
-![RedPA AI core platform architecture](images/architecture.png)
+## 1. System Context
 
-## Runtime Topology
+```mermaid
+flowchart LR
+    User[Operator / Developer]
+    CP[Next.js Control Plane]
+    SDK[Python SDK / CLI]
+    API[FastAPI Platform API]
+    External[External Models / Services]
+    Infra[Managed / Local Infrastructure]
 
-The validated local integration environment is composed from `docker-compose.yml` and `docker-compose.phase13.yml`.
-
-### Entry points
-
-- FastAPI backend — `:8000`
-- Next.js Control Plane — `:3001`
-- Python SDK and `redpa` CLI — HTTP clients of the backend API
-
-### Core runtime
-
-- planner/agent runtime, RAG, research and tool workflows;
-- distributed durable workflows with checkpoint/resume behavior;
-- Human Review approval/rejection and gated continuation;
-- Agent Memory and semantic retrieval;
-- Model Gateway, usage/economics and reliability controls;
-- evaluation, benchmarks, regression analysis and release quality gates;
-- authentication, tenancy/RBAC foundations and OAuth provider/PKCE foundations;
-- guardrails and policy enforcement;
-- transactional outbox and event APIs.
-
-### Policy boundary
-
-`docker-compose.phase13.yml` adds the Spring Boot Policy Service on `:8090` and configures the backend to call it for policy decisions.
-
-### MCP tool plane
-
-The main Docker Compose stack contains four MCP services:
-
-- Filesystem MCP — `:8010`
-- GitHub MCP — `:8020`
-- PostgreSQL MCP — `:8030`
-- Docker MCP — `:8040`
-
-MCP is the tool-interoperability boundary: server registration/health, tool discovery, structured arguments, qualified execution, and policy/Human Review integration.
-
-### A2A agent plane
-
-The distributed agent topology contains:
-
-- A2A Coordinator — `:8050`
-- Research Agent — `:8061`
-- PostgreSQL Agent — `:8062`
-- Docker Agent — `:8063`
-- Filesystem Agent — `:8064`
-- GitHub Agent — `:8065`
-
-A2A is the agent-delegation boundary: capability discovery, specialist selection, distributed subtasks, parallel execution, and result aggregation.
-
-### Background and event runtime
-
-- Background Worker
-- Background Scheduler
-- Outbox Publisher
-- Redis-backed runtime coordination
-- Redis Streams event publication
-
-### Persistence
-
-- PostgreSQL — transactional and relational platform state
-- Qdrant — vector retrieval for RAG and semantic memory
-- Redis — caching, runtime coordination and event streams
-
-### Observability
-
-- Prometheus — metrics
-- Grafana — dashboards
-- OpenTelemetry Collector — trace collection
-- Tempo — distributed trace storage/query path
-- structured application logging and correlation identifiers
-
-## Developer Platform Boundary
-
-V6 adds an installable Python SDK, asynchronous client, CLI, examples, package build configuration, and dedicated SDK CI. These are clients of the platform API; orchestration, durable state, policy, and governance remain server-side.
-
-## Deployment Boundary
-
-Docker Compose is the local integration runtime validated during the V6 release process. Kubernetes/Helm and Azure/Pulumi are deployment/reference assets. Their presence in the repository does not by itself establish a live production deployment.
-
-## Release Identity
-
-V6 release metadata is aligned to `6.0.0` across the FastAPI application default, Docker runtime, Next.js package, Python SDK, and Helm `appVersion`.
-
-
-## V7 Enterprise Research Application Layer
-
-V7 introduces a persisted application workflow above the existing platform primitives.
-
-```text
-Control Plane / SDK / CLI
-        |
-        v
-/api/v1/research/runs
-        |
-        v
-EnterpriseResearchService
-        |
-        +--> ResearchAgentService --> DDGS web retrieval
-        +--> ResearchQualityEvaluator
-        +--> EnterpriseResearchReportBuilder
-        |
-        v
-PostgreSQL
-  enterprise_research_runs
-  enterprise_research_events
+    User --> CP
+    User --> SDK
+    CP --> API
+    SDK --> API
+    API --> External
+    API --> Infra
 ```
 
-The V7 workspace uses the existing Research Agent rather than duplicating web retrieval. Its execution timeline is persisted and surfaced through polling in the Control Plane.
+The FastAPI backend is the primary platform boundary. The Control Plane, SDK, CLI, background services, agents, MCP services, and policy service compose around that API and the shared persistence/event infrastructure.
 
+## 2. Container / Runtime View
 
-## V8 Enterprise Operations Layer
+```mermaid
+flowchart TB
+    Client[Control Plane / SDK / CLI]
 
-V8 composes three operator-facing capabilities above the core platform:
+    subgraph APIPlane[API & Governance Plane]
+        API[FastAPI Backend :8000]
+        Policy[Spring Boot Policy Service :8090]
+        Ops[Ops Agent]
+        Worker[Background Worker]
+        Scheduler[Background Scheduler]
+        Outbox[Outbox Publisher]
+    end
 
-```text
-Analytics facts -> KPI Engine -> dimensional/weighted queries -> Analytics Control Plane
-Connector registry -> approval/dry-run -> outbound delivery/retry -> delivery audit
-Load evidence -> SLO evaluator -> PASS/FAIL release evidence -> Operations Control Plane
+    subgraph AgentPlane[A2A Agent Plane]
+        Coord[A2A Coordinator :8050]
+        Research[Research Agent :8061]
+        PGAgent[PostgreSQL Agent :8062]
+        DockerAgent[Docker Agent :8063]
+        FSAgent[Filesystem Agent :8064]
+        GHAgent[GitHub Agent :8065]
+    end
+
+    subgraph ToolPlane[MCP Tool Plane]
+        FSMCP[Filesystem MCP :8010]
+        GHMCP[GitHub MCP :8020]
+        PGMCP[PostgreSQL MCP :8030]
+        DockerMCP[Docker MCP :8040]
+    end
+
+    subgraph Data[Persistence & Coordination]
+        PG[(PostgreSQL 17)]
+        Q[(Qdrant)]
+        Redis[(Redis / Streams)]
+    end
+
+    subgraph Observe[Observability]
+        Prom[Prometheus]
+        Grafana[Grafana]
+        OTEL[OpenTelemetry Collector]
+        Tempo[Tempo]
+    end
+
+    Client --> API
+    API --> Policy
+    API --> Ops
+    API --> Coord
+    Coord --> Research
+    Coord --> PGAgent
+    Coord --> DockerAgent
+    Coord --> FSAgent
+    Coord --> GHAgent
+
+    API --> FSMCP
+    API --> GHMCP
+    API --> PGMCP
+    API --> DockerMCP
+
+    API --> PG
+    API --> Q
+    API --> Redis
+    Worker --> PG
+    Scheduler --> PG
+    Outbox --> Redis
+
+    API --> Prom
+    API --> OTEL
+    OTEL --> Tempo
+    Prom --> Grafana
 ```
 
-The Azure/Pulumi production path remains infrastructure-as-code until a real subscription deployment is completed and validated.
+### Runtime responsibilities
+
+| Component | Responsibility |
+| --- | --- |
+| FastAPI backend | API surface, orchestration, governance integration, platform services |
+| Next.js Control Plane | operator-facing platform views and controls |
+| Spring Boot Policy Service | externalized ALLOW/REVIEW/DENY policy boundary |
+| Ops Agent | operational diagnosis/remediation path |
+| A2A Coordinator | specialist-agent discovery/delegation boundary |
+| MCP services | structured tool interoperability boundary |
+| Background Worker/Scheduler | asynchronous and scheduled platform work |
+| Outbox Publisher | event publication from transactional state |
+| PostgreSQL | durable relational/runtime/audit state |
+| Qdrant | vector retrieval and semantic memory |
+| Redis | coordination, caching and event streams |
+| Prometheus/Grafana | metrics and dashboards |
+| OpenTelemetry/Tempo | distributed tracing path |
+
+## 3. Core Agentic Runtime
+
+The platform's agent runtime composes planner/router behavior, research/RAG, specialist agents, MCP tools, A2A delegation, durable workflows, memory, and evaluation.
+
+```mermaid
+flowchart LR
+    Request[Request]
+    Router[Planner / Router]
+    Research[Research / RAG]
+    A2A[A2A Delegation]
+    MCP[MCP Tool Execution]
+    Review[Human Review]
+    Result[Result]
+
+    Request --> Router
+    Router --> Research
+    Router --> A2A
+    Router --> MCP
+    Router --> Review
+    Research --> Result
+    A2A --> Result
+    MCP --> Result
+    Review --> Result
+```
+
+MCP and A2A are intentionally distinct:
+
+- **MCP** is the tool boundary: discovery, structured arguments and controlled execution of filesystem, GitHub, PostgreSQL and Docker capabilities.
+- **A2A** is the agent boundary: capability discovery, specialist selection, delegation, parallel/distributed work and result aggregation.
+
+## 4. Governed Execution Boundary
+
+V10 establishes governance as runtime state rather than a detached pre-request check.
+
+```mermaid
+stateDiagram-v2
+    [*] --> CREATED
+    CREATED --> RUNNING
+    RUNNING --> RUNNING: policy ALLOW
+    RUNNING --> BLOCKED: policy REVIEW
+    BLOCKED --> RUNNING: explicit approval / resume
+    BLOCKED --> FAILED: rejection / invalid continuation
+    RUNNING --> FAILED: policy DENY / execution failure
+    RUNNING --> COMPLETED: execution + verification succeeds
+    COMPLETED --> [*]
+    FAILED --> [*]
+```
+
+The important architectural rule is that autonomous reasoning does not grant autonomous permission. Potentially destructive or high-risk operations remain behind policy and/or explicit Human-in-the-Loop approval.
+
+## 5. Production Operations and Recovery
+
+The operations path composes detection, diagnosis, policy, approval, remediation, and verification.
+
+```mermaid
+flowchart LR
+    Detect[Detect Incident]
+    Persist[Persist Incident]
+    Diagnose[Ops Agent Diagnosis]
+    Action[Remediation Proposal]
+    Policy[Policy Decision]
+    HITL[Human Approval]
+    Execute[Controlled Execution]
+    Verify[Recovery Verification]
+    Close[Recovered / Closed]
+    Fail[Fail Closed]
+
+    Detect --> Persist --> Diagnose --> Action --> Policy
+    Policy -->|ALLOW| Execute
+    Policy -->|REVIEW| HITL
+    HITL -->|Approved| Execute
+    HITL -->|Rejected| Fail
+    Policy -->|DENY| Fail
+    Execute --> Verify
+    Verify -->|Pass| Close
+    Verify -->|Fail| Fail
+```
+
+Recovery is considered successful only after verification. A failed verification does not silently convert into success.
+
+## 6. V12 Self-Healing Multi-Agent Runtime
+
+V12 extends operational reliability into agent routing and failover.
+
+```text
+agent failure
+-> failure record
+-> capability discovery
+-> health-aware replacement
+-> policy / optional approval
+-> context handoff
+-> replacement execution
+-> verification
+-> persisted checkpoint
+-> recovery
+-> controlled rejoin
+```
+
+Key invariants implemented by the V12 layer:
+
+- the failed agent cannot be selected as its own replacement;
+- high-risk failover remains approval-aware;
+- replacement execution is verification-gated;
+- duplicate failover execution is idempotent;
+- checkpoint state persists across backend restart;
+- rejoin requires a healthy state and cleared failure streak.
+
+## 7. V13 Adaptive Governance
+
+V13 turns runtime governance signals into auditable recommendations while preserving an explicit application boundary.
+
+```mermaid
+flowchart LR
+    Signals[Runtime Signals]
+    History[Historical Aggregation]
+    Recommend[Recommendation]
+    Risk[Risk / Confidence]
+    Proposal[Versioned Proposal]
+    Review[Human Review]
+    Shadow[Shadow Evaluation]
+    Apply[Explicit Apply]
+    Rollback[Rollback]
+
+    Signals --> History --> Recommend --> Risk --> Proposal
+    Proposal --> Review --> Shadow --> Apply
+    Apply --> Rollback
+```
+
+Adaptive governance may recommend policy changes; it does **not** silently auto-apply them.
+
+## 8. V14 Security & Compliance Evidence
+
+V14 provides an evidence-oriented compliance lifecycle:
+
+```text
+versioned control
+-> evidence collection
+-> completeness
+-> SHA-256 integrity
+-> freshness / expiry
+-> risk assessment
+-> approval boundary
+-> persisted audit record
+-> export
+-> validation gate
+```
+
+The data model separates compliance controls, collected evidence, and assessment records. Evidence metadata is persisted separately from SQLAlchemy's declarative `metadata` attribute while retaining the database column name `metadata`.
+
+## 9. V15 Cloud Readiness
+
+V15 models cloud-readiness as an explicit assessment/gate rather than assuming readiness from the presence of infrastructure files.
+
+Assessment areas include inventory, health dependencies, backup/restore, secrets/IAM, capacity, observability, resilience, risk scoring, deployment gate, and validation gate.
+
+The repository also contains Kubernetes/Helm and Azure/Pulumi assets. These are deployment/reference assets; their presence does not establish a live production deployment.
+
+## 10. V16 Continuous Evaluation
+
+V16 introduces a controlled model/agent change path:
+
+```text
+dataset
+-> baseline
+-> candidate
+-> quality evaluation
+-> safety evaluation
+-> regression analysis
+-> shadow evaluation
+-> rollout decision
+-> rollback capability
+-> validation gate
+```
+
+A candidate is not promoted solely because it exists or scores higher on one metric. Rollout is a governed decision with regression/safety boundaries.
+
+## 11. V17 Enterprise Integration Hub
+
+V17 treats integrations as governed capabilities rather than unrestricted outbound access.
+
+```text
+connector registry
+-> auth scope
+-> secret handling
+-> network boundary
+-> write boundary
+-> audit
+-> rate limit
+-> risk assessment
+-> approval gate
+-> validation gate
+```
+
+Write access, external-network access, secret handling and approval requirements contribute to connector risk and runtime restrictions.
+
+## 12. V18 Trusted Agent Registry
+
+V18 adds a trust boundary before agents become routable platform participants.
+
+```text
+identity
+-> signed manifest
+-> provenance
+-> declared capabilities
+-> health
+-> governance compatibility
+-> policy profile
+-> trust score/state
+-> routing boundary
+-> validation gate
+```
+
+Trust is not equivalent to simple registration. Agent identity, health and governance compatibility influence whether the agent can participate in routing.
+
+## 13. V18.1 Production Hardening
+
+V18.1 is a release-validation layer over V12–V18 rather than another autonomous capability.
+
+```mermaid
+flowchart LR
+    Integration[V12-V18 Integration]
+    Migration[Migration Chain]
+    APIE2E[Authenticated API E2E]
+    Restart[Persistence / Restart]
+    Failure[Failure Injection]
+    Security[Security Boundaries]
+    Docker[Docker Runtime]
+    Obs[Observability]
+    Evidence[Release Evidence]
+    Gate[Regression Gate]
+
+    Integration --> Migration --> APIE2E --> Restart --> Failure
+    Failure --> Security --> Docker --> Obs --> Evidence --> Gate
+```
+
+The machine-readable report for the validated repository snapshot records all ten stages as PASS and identifies the V18.1 migration head as `v270a1b2c3d4e`.
+
+## 14. Persistence Model
+
+PostgreSQL is the durable system of record for relational platform state, including governed runtime state, incidents, evolution records, self-healing checkpoints, adaptive-governance data, compliance data, and production-hardening evidence.
+
+Qdrant is used for vector retrieval/semantic memory. Redis supports runtime coordination, caching, and stream-based event publication.
+
+A central architectural principle is that important governance/recovery state should survive process restart rather than live only in memory.
+
+## 15. Event and Background Processing
+
+The repository includes:
+
+- transactional outbox/event APIs;
+- an Outbox Publisher;
+- background worker and scheduler services;
+- Redis-backed coordination and Redis Streams publication.
+
+This separates synchronous request handling from asynchronous platform work and provides a path for auditable event-driven processing.
+
+## 16. Observability
+
+The local integration stack includes:
+
+```text
+application metrics -> Prometheus -> Grafana
+application traces  -> OpenTelemetry Collector -> Tempo
+application events/logs -> structured/correlated runtime evidence
+```
+
+Observability is part of the V18.1 hardening gate; the architecture does not treat telemetry as an optional diagram-only component.
+
+## 17. Security and Governance Boundaries
+
+The main control boundaries are:
+
+1. **Authentication and tenancy/RBAC foundations** at the API/platform layer.
+2. **Policy enforcement** for governed operations.
+3. **Human Review** for actions requiring explicit approval.
+4. **MCP execution controls** around tool invocation.
+5. **Connector governance** around secrets, networks and write access.
+6. **Trusted-agent routing** around identity, provenance, health and governance compatibility.
+7. **Fail-closed recovery** when execution or verification cannot establish a safe result.
+8. **Persisted audit/evidence** for governance and release decisions.
+
+## 18. Deployment View
+
+### Validated local integration target
+
+The primary integrated runtime is `docker-compose.yml`, containing the backend, frontend, data services, policy service, agents, MCP services, background processes and observability components.
+
+### Kubernetes / Helm
+
+The repository contains Kubernetes networking/namespace assets and a Helm chart. These represent a deployment path and packaging boundary; they should not be interpreted as proof of a currently running production cluster.
+
+### Azure / Pulumi
+
+`infra/azure/` contains Pulumi-based Azure infrastructure modules and production-oriented runbook/configuration assets. This is infrastructure-as-code/reference architecture until validated against an actual target subscription/environment.
+
+## 19. API Architecture
+
+The API is versioned under `/api/v1`. Important runtime/evolution boundaries include:
+
+```text
+/api/v1/governance/v10
+/api/v1/operations/v9
+/api/v1/platform/evolution
+/api/v1/adaptive-governance/v13
+/api/v1/security-compliance/v14
+/api/v1/cloud-readiness/v15
+/api/v1/continuous-evaluation/v16
+/api/v1/enterprise-integration/v17
+/api/v1/trusted-agents/v18
+/api/v1/production-hardening/v18.1
+```
+
+Additional routers cover authentication, users, conversations/messages, chat/LLM, documents/RAG, Human Review, MCP, tools, agents, memory, evaluations, guardrails, policy enforcement, tenants, OAuth, events, analytics, connectors, model gateway, monitoring and platform health.
+
+## 20. Release Validation Boundary
+
+For v18.1.0, the repository records:
+
+```text
+Full regression suite: 418 passed
+Alembic head:          v270a1b2c3d4e
+Hardening stages:      10 / 10 PASS
+Overall status:        PASS
+```
+
+The report is evidence-oriented. It demonstrates the repository's validation gates and tested local integration behavior; it does not by itself claim an external production deployment, production traffic, or an SLA.
+
+## 21. Architectural Principles
+
+- Autonomous reasoning and autonomous permission are separate concerns.
+- High-risk side effects require explicit governance boundaries.
+- Durable state is preferred for workflow, governance and recovery checkpoints.
+- Failure handling must be idempotent and restart-safe.
+- Recovery requires verification.
+- Adaptive policy changes are recommendation-first and explicit-apply.
+- External connectors and remote agents are trust boundaries.
+- Evaluation precedes rollout.
+- Observability and release evidence are part of the runtime quality model.
+- Deployment readiness is validated through evidence rather than inferred from repository structure.
+
+## 22. Related Architecture Documentation
+
+The repository also contains deeper architecture views and historical design material:
+
+- `docs/architecture/c4.md`
+- `docs/architecture/arc42.md`
+- `docs/architecture/ddd.md`
+- `docs/architecture/adr/`
+- `docs/MCP_PLATFORM.md`
+- `docs/A2A_PLATFORM.md`
+- `docs/TOOL_RUNTIME.md`
+- `docs/HUMAN_REVIEW.md`
+- `docs/V10_GOVERNED_AGENT_RUNTIME.md`
+- `docs/V12_SELF_HEALING_STAGE1_10.md`
+- `docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md`
+- `docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md`
+- `docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md`
+- `docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md`
+- `docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md`
+- `docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md`
+- `docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md`

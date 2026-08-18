@@ -9,367 +9,237 @@
 </p>
 
 <p align="center">
-  Governed multi-agent execution, autonomous reliability, adaptive policy recommendations,
-  enterprise integration controls, continuous evaluation, and trusted agent operations.
+  Governed multi-agent execution, self-healing failover, adaptive governance,
+  compliance evidence, continuous evaluation, enterprise integration controls,
+  and trusted agent operations.
 </p>
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Release-v18.1.0-success" alt="Release">
   <img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">
   <img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Spring_Boot-Policy_Engine-6DB33F" alt="Spring Boot">
-  <img src="https://img.shields.io/badge/Next.js-Control_Plane-black" alt="Next.js">
+  <img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">
   <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Redis-Streams-DC382D" alt="Redis">
   <img src="https://img.shields.io/badge/OpenTelemetry-Tracing-425CC7" alt="OpenTelemetry">
-  <img src="https://img.shields.io/badge/Release-v11.0.0-success" alt="Release">
+  <img src="https://img.shields.io/badge/Tests-418%20passed-success" alt="Tests">
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
 ---
 
-> **A production-oriented Agentic AI platform for governed execution, multi-agent orchestration, durable workflows, policy enforcement, Human-in-the-Loop control, operational recovery, evaluation, and enterprise-grade observability.**
+> **A production-oriented platform for building and validating governed Agentic AI systems with explicit policy, human approval, reliability, audit, and observability boundaries.**
 
-RedPA AI is an engineering platform for exploring how autonomous agents can operate inside explicit runtime, policy, reliability, and audit boundaries.
+RedPA AI explores a central production question: **what should happen when autonomous agents are allowed to reason about—and potentially act on—real systems?**
 
-The current **v11.0.0** release builds on the V10 Governed Agent Runtime and adds a broader **Platform Evolution layer** covering reliability, failover, adaptive governance, compliance evidence, cloud readiness, rollout evaluation, connector risk, and trusted agent registration.
+The platform combines multi-agent orchestration, RAG, MCP tools, A2A delegation, durable workflows, Human-in-the-Loop controls, policy enforcement, operational recovery, self-healing failover, adaptive governance, compliance evidence, continuous evaluation, connector governance, trusted-agent routing, and release validation.
 
----
+RedPA is intentionally **production-oriented**, not a claim of a live production deployment. Kubernetes/Helm and Azure/Pulumi assets are deployment/reference paths; the repository's strongest validated integration target is the Docker Compose environment and its automated release evidence.
 
-## Current Release — v11.0.0
+## Current Release — v18.1.0
 
-### V11 Platform Evolution
+**V18.1 Production Hardening & Release Validation** closes the V12–V18 platform-evolution chain with an evidence-oriented release gate.
 
-The v11.0.0 release bundles a sequence of platform capabilities introduced as internal milestones V11–V18:
-
-| Milestone | Capability |
-| --- | --- |
-| **V11** | Autonomous Reliability |
-| **V12** | Self-Healing Multi-Agent |
-| **V13** | Adaptive Governance |
-| **V14** | Security & Compliance Evidence |
-| **V15** | Production Cloud Readiness |
-| **V16** | Continuous Evaluation & Rollout Gate |
-| **V17** | Enterprise Connector Governance |
-| **V18** | Trusted Agent Registry |
-
-These capabilities share a persisted evidence model and are exposed through the V11 Platform Evolution API and Control Plane.
-
-### Verified release evidence
-
-The current release baseline has been validated with:
+Validated release evidence:
 
 ```text
-380 passed
-0 skipped
+418 passed
 0 failed
+
+Alembic head: v270a1b2c3d4e
+Production Hardening: PASS
 ```
 
-V11 Production Validation is complete across Stage 1–10:
+The V18.1 hardening gate covers:
+
+| Stage | Validation |
+| --- | --- |
+| 1 | V12–V18 cross-version integration |
+| 2 | Migration-chain continuity through `v270a1b2c3d4e` |
+| 3 | Authenticated API end-to-end flows |
+| 4 | Persistence and restart behavior |
+| 5 | Controlled failure injection and fail-closed behavior |
+| 6 | Security and governance boundaries |
+| 7 | Docker runtime health |
+| 8 | Metrics, logs, and traces |
+| 9 | Persisted/exportable release evidence |
+| 10 | Final regression gate |
+
+Machine-readable release evidence is stored at:
 
 ```text
-Stage 1–2   automatic health detection -> 3 consecutive failures -> incident persisted in PostgreSQL
-Stage 3–5   governed diagnosis -> policy REVIEW/HIGH -> explicit human approval boundary
-Stage 6     controlled recovery verification failure -> fail-closed incident/run failure
-Stage 7     explicit approval + resume audit trail
-Stage 8     idempotent approved remediation -> one destructive restart
-Stage 9     blocked run survives backend/scheduler restart and resumes on the same incident/run
-Stage 10    machine-readable production readiness gate -> PASS
+artifacts/v181-production-hardening.json
 ```
 
-Final gate result:
+## Platform Evolution
 
-```text
-PRODUCTION VALIDATION: PASS
-```
+| Release | Capability | Core boundary |
+| --- | --- | --- |
+| **V12** | Self-Healing Multi-Agent Runtime | health-aware failover, checkpoint persistence, idempotent recovery, controlled rejoin |
+| **V13** | Adaptive Governance | evidence-driven policy recommendations without silent auto-application |
+| **V14** | Security & Compliance Evidence | versioned controls, evidence integrity/freshness, risk, approval, audit export |
+| **V15** | Production Cloud Readiness | dependency, backup, secrets/IAM, capacity, observability and deployment gates |
+| **V16** | Agent Evaluation & Continuous Improvement | baseline/candidate evaluation, safety/regression checks, shadow rollout and rollback |
+| **V17** | Enterprise Integration Hub | connector registry, scopes, secret/network/write boundaries, risk and approval |
+| **V18** | Trusted Agent Registry | identity, provenance, capabilities, health, governance and trust-aware routing |
+| **V18.1** | Production Hardening | cross-version integration, restart/failure validation, observability and release evidence |
 
-The production-validation evidence report is generated at:
-
-```text
-artifacts/v11-production-validation.json
-```
-
-Additional live validation covered:
-
-```text
-V11  closed_loop_reliability  -> action_required
-V12  agent_failover           -> routable
-V13  policy_recommendation    -> recommendation
-V14  compliance_evidence      -> incomplete (intentional missing-evidence test)
-V15  cloud_readiness          -> ready
-V16  continuous_evaluation    -> promote
-V17  connector_assessment     -> review
-V18  agent_registry           -> trusted
-```
-
-Eight persisted evolution records were verified in the Control Plane.
-
----
+Earlier releases established the underlying platform primitives: Agentic foundation, distributed execution, enterprise governance, Control Plane, developer tooling, research workflows, enterprise operations, production operations, and the governed runtime.
 
 ## Architecture
 
-<p align="center">
-  <img src="docs/images/architecture-v11.png" alt="RedPA AI V11 Architecture" width="100%">
-</p>
-
 ```mermaid
 flowchart TB
-    User[User / API / Control Plane]
+    Client[Control Plane / API / SDK / CLI]
 
-    subgraph Platform["RedPA AI Platform"]
-      API[FastAPI Backend]
-      GOV[V10 Governed Agent Runtime]
-      EVO[V11 Platform Evolution]
-      POLICY[Spring Boot Policy Service]
-      OPS[Ops Agent]
+    subgraph Core[RedPA Core Platform]
+        API[FastAPI API]
+        GOV[V10 Governed Runtime]
+        Planner[Planner / Router]
+        HITL[Human Review]
+        Policy[Spring Boot Policy Service]
+        Ops[V9 Ops Agent]
     end
 
-    subgraph Agents["Agent Runtime"]
-      Planner[Planner / Router]
-      Research[Research Agent]
-      Specialists[Specialist Agents]
-      MCP[MCP Services]
-      A2A[A2A Coordinator]
+    subgraph AgentPlane[Agent & Tool Plane]
+        Research[Research Agent]
+        Specialists[Specialist A2A Agents]
+        A2A[A2A Coordinator]
+        MCP[MCP Services]
+        RAG[RAG / Semantic Memory]
     end
 
-    subgraph Evolution["V11-V18 Evolution Capabilities"]
-      R[V11 Reliability]
-      F[V12 Failover]
-      AG[V13 Adaptive Governance]
-      C[V14 Compliance]
-      CL[V15 Cloud Readiness]
-      EV[V16 Rollout Evaluation]
-      CO[V17 Connector Governance]
-      AR[V18 Agent Registry]
+    subgraph Evolution[V12–V18.1 Platform Evolution]
+        SH[V12 Self-Healing]
+        AG[V13 Adaptive Governance]
+        SC[V14 Security & Compliance]
+        CR[V15 Cloud Readiness]
+        CE[V16 Continuous Evaluation]
+        EI[V17 Integration Governance]
+        TA[V18 Trusted Agents]
+        PH[V18.1 Production Hardening]
     end
 
-    subgraph Data["State & Evidence"]
-      PG[(PostgreSQL)]
-      Q[(Qdrant)]
-      Redis[(Redis)]
+    subgraph State[State & Coordination]
+        PG[(PostgreSQL)]
+        Q[(Qdrant)]
+        Redis[(Redis / Streams)]
     end
 
-    subgraph Observe["Observability"]
-      OTEL[OpenTelemetry]
-      Tempo[Tempo]
-      Prom[Prometheus]
-      Grafana[Grafana]
+    subgraph Obs[Observability]
+        Prom[Prometheus]
+        Grafana[Grafana]
+        OTEL[OpenTelemetry Collector]
+        Tempo[Tempo]
     end
 
-    User --> API
+    Client --> API
     API --> GOV
-    API --> EVO
-    GOV --> POLICY
-    GOV --> OPS
     GOV --> Planner
+    GOV --> HITL
+    GOV --> Policy
+    GOV --> Ops
     Planner --> Research
-    Planner --> Specialists
-    Specialists --> A2A
+    Planner --> A2A
+    A2A --> Specialists
     Planner --> MCP
+    Research --> RAG
 
-    EVO --> R
-    EVO --> F
-    EVO --> AG
-    EVO --> C
-    EVO --> CL
-    EVO --> EV
-    EVO --> CO
-    EVO --> AR
+    GOV --> SH
+    SH --> AG --> SC --> CR --> CE --> EI --> TA --> PH
 
+    API --> PG
     GOV --> PG
-    EVO --> PG
-    Research --> Q
+    SH --> PG
+    AG --> PG
+    SC --> PG
+    RAG --> Q
     API --> Redis
 
-    API --> OTEL
-    GOV --> OTEL
-    EVO --> OTEL
-    OTEL --> Tempo
     API --> Prom
+    API --> OTEL
+    OTEL --> Tempo
     Prom --> Grafana
 ```
 
-Full architecture notes: [`docs/V11_PLATFORM_EVOLUTION.md`](docs/V11_PLATFORM_EVOLUTION.md)
+For the detailed component, data, governance, reliability, observability, and deployment views, see [`docs/architecture.md`](docs/architecture.md).
 
----
-
-## Governed Runtime
-
-V10 established governance as persisted runtime state rather than a detached middleware check.
-
-```text
-CREATED
-  -> RUNNING
-      -> policy ALLOW
-      -> policy REVIEW -> BLOCKED -> human approval -> RUNNING
-      -> policy DENY
-  -> execution
-  -> recovery / result
-  -> COMPLETED
-  -> evaluation
-```
-
-A real V10.3 E2E flow was automated and validated:
-
-```text
-run.created
--> run.running
--> ops.diagnosis_started
--> ops.diagnosis_completed
--> policy.decision
--> ops.remediation_blocked
--> policy.decision
--> run.running
--> ops.remediation_started
--> ops.recovery_verified
--> run.completed
--> evaluation.completed
-```
-
-The test restored a deliberately stopped Research Agent and ended with:
-
-```text
-status            : completed
-evaluation_score  : 1.0
-container         : running
-```
-
-V11 extends this path with production validation and recovery hardening:
-
-```text
-health probe
--> consecutive failure threshold
--> persisted incident
--> governed Ops run
--> diagnosis
--> policy REVIEW / HIGH
--> remediation blocked
--> human approval
--> run resumed
--> idempotent restart
--> recovery verification
--> incident resolved
--> run completed
--> evaluation evidence
-```
-
-Failure verification is fail-closed: if restart succeeds but recovery cannot be verified,
-the remediation action, incident, and governed run are marked failed and the incident is
-never written as resolved.
-
----
-
-## Policy Management
-
-RedPA provides two policy layers:
-
-1. the dedicated Spring Boot Policy Service;
-2. persisted user-scoped policy overrides in the FastAPI platform.
-
-Supported outcomes:
-
-```text
-ALLOW
-REVIEW
-DENY
-```
-
-A live policy override was validated for `restart_container` at the `ops_remediation` boundary with `REVIEW / HIGH`, source `redpa-policy-override`, and `executable=false`.
-
-The V13 Adaptive Governance capability recommends policy changes but deliberately does **not** auto-apply them.
-
----
-
-## V11–V18 Platform Evolution
-
-### V11 — Autonomous Reliability
-Operational signals are evaluated into `observe`, `investigate`, or `governed_remediation`, with persisted evidence.
-
-### V12 — Self-Healing Multi-Agent
-Health-aware routing excludes unhealthy agents and selects a fallback candidate.
-
-### V13 — Adaptive Governance
-Produces policy recommendations from incident count, failure rate, and destructive-action context while preserving `auto_applied=false`.
-
-### V14 — Security & Compliance Evidence
-Checks structured evidence against required fields and records missing evidence.
-
-### V15 — Production Cloud Readiness
-Scores readiness across health checks, backups, secrets management, autoscaling, and telemetry.
-
-### V16 — Continuous Evaluation
-Compares candidate and baseline scores plus error-rate delta to return `PROMOTE` or `HOLD`.
-
-### V17 — Enterprise Connector Governance
-Assesses connector risk from write access, external network access, secret handling, and approval requirements.
-
-### V18 — Trusted Agent Registry
-Registers versioned agents with trust signals for signed manifests, health endpoints, and governance compatibility.
-
----
-
-## Control Plane
-
-Main Control Plane pages:
-
-```text
-/control-plane/governance
-/control-plane/policy
-/control-plane/evolution
-```
-
-The evolution dashboard exposes milestone counts and persisted evidence records.
-
----
-
-## Core Platform Capabilities
+## Core Capabilities
 
 | Area | Capabilities |
 | --- | --- |
-| Agentic Runtime | planner routing, research, RAG, multi-agent orchestration |
-| Governance | persisted runs, lifecycle events, approval-aware resume, policy tracing |
-| Policy | Spring Boot Policy Service, persisted overrides, ALLOW/REVIEW/DENY |
-| HITL | approval/rejection, blocked-run recovery |
-| Operations | automatic health detection, incident persistence, governed diagnosis/remediation, recovery verification, fail-closed validation |
-| MCP | filesystem, GitHub, PostgreSQL, Docker tools |
-| A2A | coordinator, specialist discovery and delegation |
-| Memory | PostgreSQL + Qdrant semantic memory |
-| Evaluation | persisted evaluation, release and quality gates |
-| Platform Evolution | reliability, failover, compliance, rollout, connectors, agent trust |
-| Observability | Prometheus, Grafana, OpenTelemetry, Tempo |
-| Infrastructure | Docker Compose, Kubernetes, Helm, Azure/Pulumi reference architecture |
+| Agentic Runtime | planner/router, research workflows, RAG, multi-agent orchestration |
+| Governed Execution | persisted run lifecycle, policy decisions, audit events, approval-aware continuation |
+| Human-in-the-Loop | explicit approval/rejection and blocked-run resume |
+| Operations | incident persistence, diagnosis, remediation proposals, controlled execution, recovery verification |
+| Self-Healing | health-aware replacement, context handoff, idempotency, restart checkpoints, controlled rejoin |
+| MCP | filesystem, GitHub, PostgreSQL and Docker tool services |
+| A2A | coordinator plus research, PostgreSQL, Docker, filesystem and GitHub specialist agents |
+| Memory | PostgreSQL-backed state and Qdrant semantic retrieval |
+| Governance | adaptive recommendations, versioned proposals, shadow evaluation, explicit apply/rollback |
+| Compliance | control registry, evidence collection, SHA-256 integrity, freshness, risk and audit records |
+| Evaluation | quality/safety/regression evaluation and rollout/rollback gates |
+| Integration | connector scope, secrets, network and write-access boundaries |
+| Trust | agent identity, provenance, capabilities, health and trust-aware routing |
+| Observability | Prometheus, Grafana, OpenTelemetry, Tempo and structured logging |
+| Developer Platform | Python SDK, CLI, examples and API-first integration |
+| Deployment Assets | Docker Compose; Kubernetes/Helm and Azure/Pulumi reference assets |
 
----
+## Runtime Topology
 
-## API Overview
+The main Docker Compose stack defines the backend, Control Plane, PostgreSQL, Qdrant, Redis, policy service, MCP services, A2A services, Ops Agent, background workers, event publisher, and observability stack.
+
+Primary local endpoints:
+
+| Service | Port |
+| --- | ---: |
+| FastAPI backend / Swagger | `8000` |
+| Next.js Control Plane | `3001` |
+| Spring Boot Policy Service | `8090` |
+| Filesystem MCP | `8010` |
+| GitHub MCP | `8020` |
+| PostgreSQL MCP | `8030` |
+| Docker MCP | `8040` |
+| A2A Coordinator | `8050` |
+| Research Agent | `8061` |
+| PostgreSQL Agent | `8062` |
+| Docker Agent | `8063` |
+| Filesystem Agent | `8064` |
+| GitHub Agent | `8065` |
+
+## API Surface
+
+Selected versioned APIs:
 
 | API | Purpose |
 | --- | --- |
-| `/api/v1/governance/v10` | governed run lifecycle and execution evidence |
-| `/api/v1/policy` | enforcement and persisted policy overrides |
-| `/api/v1/operations/v9` | incident diagnosis and governed remediation |
-| `/api/v1/platform/evolution` | V11–V18 platform evolution capabilities |
-| `/api/v1/reviews` | Human-in-the-Loop |
-| `/api/v1/evaluations` | evaluation and quality |
-| `/api/v1/mcp` | MCP execution |
-| `/api/v1/agents` | agent operations |
-| `/api/v1/memory` | semantic Agent Memory |
-| `/api/v1/events` | event/outbox operations |
-| `/api/v1/model-gateway` | provider routing |
-| `/api/v1/health` | platform health |
+| `/api/v1/governance/v10` | governed execution lifecycle |
+| `/api/v1/operations/v9` | production operations and remediation flow |
+| `/api/v1/platform/evolution` | persisted platform-evolution records |
+| `/api/v1/adaptive-governance/v13` | governance signals and policy proposals |
+| `/api/v1/security-compliance/v14` | compliance controls/evidence |
+| `/api/v1/cloud-readiness/v15` | cloud-readiness assessment |
+| `/api/v1/continuous-evaluation/v16` | evaluation and rollout decisions |
+| `/api/v1/enterprise-integration/v17` | connector governance |
+| `/api/v1/trusted-agents/v18` | trusted-agent assessment |
+| `/api/v1/production-hardening/v18.1` | release-hardening evidence |
 
-Swagger:
+The platform also exposes APIs for authentication, conversations/messages, RAG/documents, Human Review, MCP, agents, memory, evaluations, events, policy enforcement, model gateway, analytics, connectors, and health/monitoring.
+
+Swagger UI:
 
 ```text
 http://localhost:8000/docs
 ```
 
----
-
 ## Quick Start
+
+### Windows / PowerShell
 
 ```powershell
 git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
+
+git checkout v18.1.0
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -382,79 +252,95 @@ Copy-Item .env.example .env
 docker compose config --quiet
 docker compose up -d --build
 
-docker compose exec backend `
-  python -m alembic -c alembic.ini upgrade head
+docker exec redpa-backend alembic `
+  -c /app/backend/alembic.ini upgrade head
 ```
 
-Expected migration head:
+Expected migration head for V18.1:
 
 ```text
-v190a1b2c3d4e
+v270a1b2c3d4e
 ```
 
----
+Then open:
 
-## Testing
+```text
+API docs:      http://localhost:8000/docs
+Control Plane: http://localhost:3001
+```
+
+## Validation
+
+Run the full regression suite:
 
 ```powershell
 python -m pytest tests -q
 ```
 
-Current validated baseline:
+Validated V18.1 baseline:
 
 ```text
-380 passed
+418 passed
 ```
 
-Additional release checks:
+Run the V18.1 production-hardening report using the repository evidence example:
 
 ```powershell
-python scripts/security/secret_scan.py
-docker compose config --quiet
-python scripts/production_validation.py
+New-Item -ItemType Directory -Force .\artifacts | Out-Null
 
-cd frontend
-npm.cmd run build
-cd ..
+Copy-Item `
+  .\docs\v181-evidence-example.json `
+  .\artifacts\v181-production-hardening-input.json `
+  -Force
+
+python scripts/v181_production_hardening_validation.py
 ```
 
-Expected production-validation result:
+Expected result:
 
 ```text
-PRODUCTION VALIDATION: PASS
+PRODUCTION HARDENING: PASS
 ```
 
----
-
-## Release History
-
-| Release | Focus |
-| --- | --- |
-| **v11.0.0** | Platform Evolution + Production Validation: autonomous reliability, governed recovery, fail-closed verification, audit, idempotency, restart persistence, readiness gate |
-| **v10.0.0** | Governed Agent Runtime |
-| **v9.0.0** | Production Cloud & Autonomous Operations |
-| V8 | Enterprise Operations & Automation |
-| V7 | Enterprise Research |
-| V6 | Developer Platform |
-| V5.5 | Evaluation & Reliability |
-| V5 | Control Plane |
-| V4.2 | Production Agentic Systems Readiness |
-| V3 | Enterprise Governance & Integration |
-| V2 | Distributed Agentic Runtime |
-| V1 | Agentic Foundation |
-
----
+The example evidence file is a reproducible validation fixture. A real deployment should populate release evidence from its actual environment and operational checks.
 
 ## Engineering Principles
 
-- autonomous reasoning does not imply autonomous permission;
-- destructive or high-risk actions remain policy- and approval-aware;
-- governance state should be persisted and auditable;
-- recovery is not complete until it is verified;
-- adaptive governance may recommend policy changes without silently applying them;
-- production readiness must be demonstrated with evidence rather than inferred from architecture diagrams alone.
+- **Autonomous reasoning does not imply autonomous permission.**
+- High-risk or destructive operations remain policy- and approval-aware.
+- Governance, operational state, and release evidence should be persisted and auditable.
+- Recovery is not complete until post-action verification succeeds.
+- Failover must preserve workflow context and remain idempotent across retries/restarts.
+- Adaptive governance can recommend changes but must not silently apply them.
+- Connector write access and agent trust are explicit runtime boundaries.
+- Production readiness should be demonstrated with evidence, not inferred from architecture alone.
 
----
+## Documentation
+
+Useful entry points:
+
+- [`docs/architecture.md`](docs/architecture.md) — detailed architecture
+- [`docs/V12_SELF_HEALING_STAGE1_10.md`](docs/V12_SELF_HEALING_STAGE1_10.md) — self-healing lifecycle
+- [`docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md`](docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md) — adaptive governance
+- [`docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md`](docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md) — compliance evidence
+- [`docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md`](docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md) — cloud readiness
+- [`docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md`](docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md) — evaluation and rollout
+- [`docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md`](docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md) — connector governance
+- [`docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md`](docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md) — trusted agents
+- [`docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md`](docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md) — release hardening
+- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) — API reference
+- [`docs/TESTING.md`](docs/TESTING.md) — testing guidance
+
+## Release Line
+
+```text
+V1–V4.2   Agentic foundation -> distributed runtime -> enterprise governance -> production-oriented agentic systems
+V5–V8     Control Plane -> developer platform -> enterprise research -> enterprise operations
+V9–V10    Production operations -> governed agent runtime
+V11       Platform evolution foundation
+V12–V18   Self-healing -> adaptive governance -> compliance -> cloud -> evaluation -> integrations -> trust
+V18.1     Production hardening & release validation
+```
 
 ## License
 
