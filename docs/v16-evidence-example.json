@@ -1,0 +1,11 @@
+{
+  "dataset": true,
+  "baseline": true,
+  "candidate": true,
+  "quality_eval": true,
+  "safety_eval": true,
+  "regression": true,
+  "shadow": true,
+  "rollout_decision": true,
+  "rollback": true
+}

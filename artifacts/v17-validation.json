@@ -1,0 +1,46 @@
+{
+  "version": "17.0.0",
+  "validation": "PASS",
+  "checks": [
+    {
+      "name": "Stage 1 registry",
+      "passed": true
+    },
+    {
+      "name": "Stage 2 auth scope",
+      "passed": true
+    },
+    {
+      "name": "Stage 3 secret handling",
+      "passed": true
+    },
+    {
+      "name": "Stage 4 network boundary",
+      "passed": true
+    },
+    {
+      "name": "Stage 5 write boundary",
+      "passed": true
+    },
+    {
+      "name": "Stage 6 audit",
+      "passed": true
+    },
+    {
+      "name": "Stage 7 rate limit",
+      "passed": true
+    },
+    {
+      "name": "Stage 8 risk assessment",
+      "passed": true
+    },
+    {
+      "name": "Stage 9 approval gate",
+      "passed": true
+    },
+    {
+      "name": "Stage 10 integration gate",
+      "passed": true
+    }
+  ]
+}

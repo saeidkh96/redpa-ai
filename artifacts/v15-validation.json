@@ -1,0 +1,46 @@
+{
+  "version": "15.0.0",
+  "validation": "PASS",
+  "checks": [
+    {
+      "name": "Stage 1 inventory",
+      "passed": true
+    },
+    {
+      "name": "Stage 2 health dependencies",
+      "passed": true
+    },
+    {
+      "name": "Stage 3 backup restore",
+      "passed": true
+    },
+    {
+      "name": "Stage 4 secrets iam",
+      "passed": true
+    },
+    {
+      "name": "Stage 5 capacity",
+      "passed": true
+    },
+    {
+      "name": "Stage 6 observability",
+      "passed": true
+    },
+    {
+      "name": "Stage 7 resilience",
+      "passed": true
+    },
+    {
+      "name": "Stage 8 risk score",
+      "passed": true
+    },
+    {
+      "name": "Stage 9 deployment gate",
+      "passed": true
+    },
+    {
+      "name": "Stage 10 readiness gate",
+      "passed": true
+    }
+  ]
+}

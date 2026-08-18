@@ -5,6 +5,18 @@ from app.api.v1.adaptive_governance_v13 import (
 from app.api.v1.security_compliance_v14 import (
     router as security_compliance_v14_router,
 )
+from app.api.v1.cloud_readiness_v15 import (
+    router as cloud_readiness_v15_router,
+)
+from app.api.v1.continuous_evaluation_v16 import (
+    router as continuous_evaluation_v16_router,
+)
+from app.api.v1.enterprise_integration_v17 import (
+    router as enterprise_integration_v17_router,
+)
+from app.api.v1.trusted_agents_v18 import (
+    router as trusted_agents_v18_router,
+)
 from app.api.v1.governance_v10 import router as governance_v10_router
 from app.api.v1.operations_v9 import router as operations_v9_router
 from app.api.v1.analytics_v8 import router as analytics_v8_router
@@ -144,3 +156,7 @@ api_router.include_router(governance_v10_router)
 api_router.include_router(platform_evolution_router)
 api_router.include_router(adaptive_governance_v13_router)
 api_router.include_router(security_compliance_v14_router)
+api_router.include_router(cloud_readiness_v15_router)
+api_router.include_router(continuous_evaluation_v16_router)
+api_router.include_router(enterprise_integration_v17_router)
+api_router.include_router(trusted_agents_v18_router)
