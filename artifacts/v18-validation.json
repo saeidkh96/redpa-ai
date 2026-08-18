@@ -1,0 +1,46 @@
+{
+  "version": "18.0.0",
+  "validation": "PASS",
+  "checks": [
+    {
+      "name": "Stage 1 identity",
+      "passed": true
+    },
+    {
+      "name": "Stage 2 manifest signature",
+      "passed": true
+    },
+    {
+      "name": "Stage 3 provenance",
+      "passed": true
+    },
+    {
+      "name": "Stage 4 capabilities",
+      "passed": true
+    },
+    {
+      "name": "Stage 5 health",
+      "passed": true
+    },
+    {
+      "name": "Stage 6 governance",
+      "passed": true
+    },
+    {
+      "name": "Stage 7 policy profile",
+      "passed": true
+    },
+    {
+      "name": "Stage 8 trust score",
+      "passed": true
+    },
+    {
+      "name": "Stage 9 routing boundary",
+      "passed": true
+    },
+    {
+      "name": "Stage 10 trusted-agent gate",
+      "passed": true
+    }
+  ]
+}

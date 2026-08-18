@@ -1,0 +1,11 @@
+{
+  "identity": true,
+  "manifest_signature": true,
+  "provenance": true,
+  "capabilities": true,
+  "health": true,
+  "governance": true,
+  "policy_profile": true,
+  "trust_score": true,
+  "routing_boundary": true
+}

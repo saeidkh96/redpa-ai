@@ -1,0 +1,11 @@
+{
+  "registry": true,
+  "auth_scope": true,
+  "secret_handling": true,
+  "network_boundary": true,
+  "write_boundary": true,
+  "audit": true,
+  "rate_limit": true,
+  "risk_assessment": true,
+  "approval_gate": true
+}

@@ -1,0 +1,11 @@
+{
+  "inventory": true,
+  "health_dependencies": true,
+  "backup_restore": true,
+  "secrets_iam": true,
+  "capacity": true,
+  "observability": true,
+  "resilience": true,
+  "risk_score": true,
+  "deployment_gate": true
+}

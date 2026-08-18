@@ -1,0 +1,46 @@
+{
+  "version": "16.0.0",
+  "validation": "PASS",
+  "checks": [
+    {
+      "name": "Stage 1 dataset",
+      "passed": true
+    },
+    {
+      "name": "Stage 2 baseline",
+      "passed": true
+    },
+    {
+      "name": "Stage 3 candidate",
+      "passed": true
+    },
+    {
+      "name": "Stage 4 quality eval",
+      "passed": true
+    },
+    {
+      "name": "Stage 5 safety eval",
+      "passed": true
+    },
+    {
+      "name": "Stage 6 regression",
+      "passed": true
+    },
+    {
+      "name": "Stage 7 shadow",
+      "passed": true
+    },
+    {
+      "name": "Stage 8 rollout decision",
+      "passed": true
+    },
+    {
+      "name": "Stage 9 rollback",
+      "passed": true
+    },
+    {
+      "name": "Stage 10 continuous evaluation gate",
+      "passed": true
+    }
+  ]
+}
