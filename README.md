@@ -87,6 +87,10 @@ Earlier releases established the underlying platform primitives: Agentic foundat
 
 ## Architecture
 
+<p align="center">
+  <img src="docs/images/architecture-v18.png" width="100%" alt="RedPA AI v18.1 Architecture">
+</p>
+
 ```mermaid
 flowchart TB
     Client[Control Plane / API / SDK / CLI]
