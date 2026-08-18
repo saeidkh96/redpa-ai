@@ -116,15 +116,73 @@ class PlatformEvolutionService:
         )
 
     async def compliance(self, *, session, user_id, payload):
-        missing = [key for key in payload.required_fields if key not in payload.evidence]
+        required_fields = set(
+            payload.required_fields or []
+        )
+        present_fields = set(
+            (payload.evidence or {}).keys()
+        )
+
+        missing = sorted(
+            required_fields - present_fields
+        )
+
+        required_types = set(
+            getattr(
+                payload,
+                "required_evidence_types",
+                [],
+            )
+            or []
+        )
+
+        evidence_type = getattr(
+            payload,
+            "evidence_type",
+            "generic",
+        )
+
+        missing_types = sorted(
+            required_types - {evidence_type}
+        )
+
+        complete = (
+            not missing
+            and not missing_types
+        )
+
         return await self._persist(
             session=session,
             user_id=user_id,
             version=14,
             kind="compliance_evidence",
-            status="complete" if not missing else "incomplete",
-            summary=f"{payload.control}: {'complete' if not missing else 'missing evidence'}",
-            payload={**payload.model_dump(), "missing_fields": missing},
+            status=(
+                "complete"
+                if complete
+                else "incomplete"
+            ),
+            summary=(
+                f"{payload.control}: complete"
+                if complete
+                else (
+                    f"{payload.control}: "
+                    "missing evidence"
+                )
+            ),
+            payload={
+                **payload.model_dump(),
+                "missing_fields": missing,
+                "missing_evidence_types": (
+                    missing_types
+                ),
+                "integrity_validation": (
+                    "available_via_v14_api"
+                ),
+                "full_v14_api": (
+                    "/api/v1/"
+                    "security-compliance/v14"
+                ),
+            },
         )
 
     async def cloud_readiness(self, *, session, user_id, payload):

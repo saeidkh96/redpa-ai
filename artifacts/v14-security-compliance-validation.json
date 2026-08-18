@@ -1,0 +1,46 @@
+{
+  "version": "14.0.0",
+  "validation": "PASS",
+  "checks": [
+    {
+      "name": "Stage 1 control registry",
+      "passed": true
+    },
+    {
+      "name": "Stage 2 evidence collection",
+      "passed": true
+    },
+    {
+      "name": "Stage 3 completeness",
+      "passed": true
+    },
+    {
+      "name": "Stage 4 integrity",
+      "passed": true
+    },
+    {
+      "name": "Stage 5 freshness",
+      "passed": true
+    },
+    {
+      "name": "Stage 6 risk assessment",
+      "passed": true
+    },
+    {
+      "name": "Stage 7 approval boundary",
+      "passed": true
+    },
+    {
+      "name": "Stage 8 audit record",
+      "passed": true
+    },
+    {
+      "name": "Stage 9 export",
+      "passed": true
+    },
+    {
+      "name": "Stage 10 readiness gate",
+      "passed": true
+    }
+  ]
+}
