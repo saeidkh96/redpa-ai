@@ -1,0 +1,38 @@
+{
+  "stage1": {
+    "healthy_preferred": true,
+    "offline_excluded": true
+  },
+  "stage2": {
+    "consecutive_failures": 3,
+    "status": "unavailable"
+  },
+  "stage3": {
+    "replacement_selected": true,
+    "selected_failed_agent": false
+  },
+  "stage4": {
+    "blocked_without_approval": true,
+    "approved_executable": true
+  },
+  "stage5": {
+    "workflow_preserved": true,
+    "context_preserved": true
+  },
+  "stage6": {
+    "replacement_executed": true,
+    "verification_passed": true
+  },
+  "stage7": {
+    "rejoin_requires_healthy": true,
+    "failure_streak_cleared": true
+  },
+  "stage8": {
+    "execution_count": 1,
+    "duplicate_detected": true
+  },
+  "stage9": {
+    "checkpoint_persisted": true,
+    "same_idempotency_key": true
+  }
+}
