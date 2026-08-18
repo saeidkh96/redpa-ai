@@ -1,0 +1,46 @@
+{
+  "integration": {
+    "v12_v18_chain_verified": true
+  },
+  "migration": {
+    "head": "v270a1b2c3d4e",
+    "clean_upgrade_verified": true
+  },
+  "api_e2e": {
+    "auth": true,
+    "successful_flows": 8
+  },
+  "persistence": {
+    "restart_survival": true,
+    "idempotency_survival": true
+  },
+  "failure_injection": {
+    "fail_closed": true,
+    "no_false_resolution": true
+  },
+  "security": {
+    "approval_boundary": true,
+    "connector_write_boundary": true,
+    "trusted_agent_boundary": true,
+    "policy_boundary": true
+  },
+  "docker": {
+    "healthy_services": 12,
+    "required_services": 12,
+    "backend_healthy": true
+  },
+  "observability": {
+    "metrics": true,
+    "logs": true,
+    "traces": true
+  },
+  "release_evidence": {
+    "machine_readable": true,
+    "persisted": true,
+    "exportable": true
+  },
+  "regression": {
+    "tests_passed": 418,
+    "all_stage_gates_passed": true
+  }
+}

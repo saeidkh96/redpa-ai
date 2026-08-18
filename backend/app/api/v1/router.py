@@ -17,6 +17,9 @@ from app.api.v1.enterprise_integration_v17 import (
 from app.api.v1.trusted_agents_v18 import (
     router as trusted_agents_v18_router,
 )
+from app.api.v1.production_hardening_v181 import (
+    router as production_hardening_v181_router,
+)
 from app.api.v1.governance_v10 import router as governance_v10_router
 from app.api.v1.operations_v9 import router as operations_v9_router
 from app.api.v1.analytics_v8 import router as analytics_v8_router
@@ -160,3 +163,4 @@ api_router.include_router(cloud_readiness_v15_router)
 api_router.include_router(continuous_evaluation_v16_router)
 api_router.include_router(enterprise_integration_v17_router)
 api_router.include_router(trusted_agents_v18_router)
+api_router.include_router(production_hardening_v181_router)
