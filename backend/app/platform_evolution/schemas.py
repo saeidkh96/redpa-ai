@@ -43,6 +43,14 @@ class AdaptivePolicyRequest(BaseModel):
     failure_rate: float = Field(default=0.0, ge=0.0, le=1.0)
     destructive: bool = False
 
+    # V13-compatible optional evidence dimensions.
+    agent_id: str | None = Field(default=None, max_length=150)
+    tenant_id: str | None = Field(default=None, max_length=150)
+    error_rate: float = Field(default=0.0, ge=0.0, le=1.0)
+    write_access: bool = False
+    handles_secrets: bool = False
+    external_network: bool = False
+
 
 class ComplianceEvidenceRequest(BaseModel):
     control: str = Field(min_length=1, max_length=150)

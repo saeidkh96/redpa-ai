@@ -5,6 +5,7 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.adaptive_governance_v13.engine import adaptive_policy_engine
 from app.models.platform_evolution import PlatformEvolutionRecord
 
 
@@ -57,8 +58,12 @@ class PlatformEvolutionService:
         else:
             action, status = "observe", "healthy"
         return await self._persist(
-            session=session, user_id=user_id, version=11, kind="closed_loop_reliability",
-            status=status, summary=f"{payload.service}: {action}",
+            session=session,
+            user_id=user_id,
+            version=11,
+            kind="closed_loop_reliability",
+            status=status,
+            summary=f"{payload.service}: {action}",
             payload={**payload.model_dump(), "recommended_action": action},
         )
 
@@ -66,31 +71,57 @@ class PlatformEvolutionService:
         healthy = [a for a in payload.candidates if a not in set(payload.unhealthy_agents)]
         selected = healthy[0] if healthy else None
         return await self._persist(
-            session=session, user_id=user_id, version=12, kind="agent_failover",
+            session=session,
+            user_id=user_id,
+            version=12,
+            kind="agent_failover",
             status="routable" if selected else "blocked",
             summary=f"Selected {selected}" if selected else "No healthy agent candidate",
             payload={**payload.model_dump(), "selected_agent": selected},
         )
 
     async def adaptive_policy(self, *, session, user_id, payload):
-        if payload.destructive or payload.failure_rate >= 0.25:
-            decision, risk = "REVIEW", "HIGH"
-        elif payload.failure_rate >= 0.10 or payload.incident_count >= 3:
-            decision, risk = "REVIEW", "MEDIUM"
-        else:
-            decision, risk = "ALLOW", "LOW"
+        # Backwards-compatible V13 evolution endpoint.
+        # The full V13 API persists runtime signals/proposals separately.
+        class _Signal:
+            def __init__(self, p):
+                self.failure_rate = p.failure_rate
+                self.error_rate = getattr(p, "error_rate", 0.0)
+                self.incident_count = p.incident_count
+                self.destructive = p.destructive
+                self.write_access = getattr(p, "write_access", False)
+                self.handles_secrets = getattr(p, "handles_secrets", False)
+                self.external_network = getattr(p, "external_network", False)
+
+        recommendation = adaptive_policy_engine.recommend(
+            action=payload.action,
+            signals=[_Signal(payload)],
+        )
         return await self._persist(
-            session=session, user_id=user_id, version=13, kind="policy_recommendation",
+            session=session,
+            user_id=user_id,
+            version=13,
+            kind="policy_recommendation",
             status="recommendation",
-            summary=f"{payload.action}: recommend {decision}/{risk}",
-            payload={**payload.model_dump(), "recommended_decision": decision, "recommended_risk": risk,
-                     "auto_applied": False},
+            summary=(
+                f"{payload.action}: recommend "
+                f"{recommendation.recommended_decision}/"
+                f"{recommendation.recommended_risk}"
+            ),
+            payload={
+                **payload.model_dump(),
+                **recommendation.model_dump(),
+                "auto_applied": False,
+            },
         )
 
     async def compliance(self, *, session, user_id, payload):
         missing = [key for key in payload.required_fields if key not in payload.evidence]
         return await self._persist(
-            session=session, user_id=user_id, version=14, kind="compliance_evidence",
+            session=session,
+            user_id=user_id,
+            version=14,
+            kind="compliance_evidence",
             status="complete" if not missing else "incomplete",
             summary=f"{payload.control}: {'complete' if not missing else 'missing evidence'}",
             payload={**payload.model_dump(), "missing_fields": missing},
@@ -106,7 +137,10 @@ class PlatformEvolutionService:
         }
         score = sum(bool(v) for v in checks.values()) / len(checks)
         return await self._persist(
-            session=session, user_id=user_id, version=15, kind="cloud_readiness",
+            session=session,
+            user_id=user_id,
+            version=15,
+            kind="cloud_readiness",
             status="ready" if score >= 0.8 else "not_ready",
             summary=f"{payload.environment}: readiness {score:.0%}",
             payload={**payload.model_dump(), "readiness_score": score},
@@ -117,8 +151,12 @@ class PlatformEvolutionService:
         promote = score_delta >= 0.02 and payload.error_rate_delta <= 0.01
         decision = "PROMOTE" if promote else "HOLD"
         return await self._persist(
-            session=session, user_id=user_id, version=16, kind="continuous_evaluation",
-            status=decision.lower(), summary=f"{payload.candidate}: {decision}",
+            session=session,
+            user_id=user_id,
+            version=16,
+            kind="continuous_evaluation",
+            status=decision.lower(),
+            summary=f"{payload.candidate}: {decision}",
             payload={**payload.model_dump(), "score_delta": score_delta, "decision": decision},
         )
 
@@ -127,7 +165,10 @@ class PlatformEvolutionService:
         approval = payload.approval_required or risk_points >= 2
         risk = "HIGH" if risk_points >= 2 else ("MEDIUM" if risk_points == 1 else "LOW")
         return await self._persist(
-            session=session, user_id=user_id, version=17, kind="connector_assessment",
+            session=session,
+            user_id=user_id,
+            version=17,
+            kind="connector_assessment",
             status="review" if approval else "allowed",
             summary=f"{payload.connector}: {risk}",
             payload={**payload.model_dump(), "risk": risk, "effective_approval_required": approval},
@@ -136,7 +177,10 @@ class PlatformEvolutionService:
     async def register_agent(self, *, session, user_id, payload):
         trusted = payload.signed_manifest and payload.health_endpoint and payload.governance_compatible
         return await self._persist(
-            session=session, user_id=user_id, version=18, kind="agent_registry",
+            session=session,
+            user_id=user_id,
+            version=18,
+            kind="agent_registry",
             status="trusted" if trusted else "restricted",
             summary=f"{payload.agent_id}@{payload.version}: {'trusted' if trusted else 'restricted'}",
             payload={**payload.model_dump(), "trust_state": "trusted" if trusted else "restricted"},
