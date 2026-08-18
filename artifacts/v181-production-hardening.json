@@ -1,0 +1,78 @@
+{
+  "version": "18.1.0",
+  "release_candidate": "v18.1.0-rc1",
+  "overall_status": "PASS",
+  "stages": [
+    {
+      "stage": 1,
+      "name": "V12-V18 integration",
+      "status": "pass",
+      "detail": "V12-V18 integration chain verified",
+      "evidence": {}
+    },
+    {
+      "stage": 2,
+      "name": "Migration chain",
+      "status": "pass",
+      "detail": "Migration chain reaches v270 head from clean baseline",
+      "evidence": {}
+    },
+    {
+      "stage": 3,
+      "name": "Authenticated API E2E",
+      "status": "pass",
+      "detail": "Authenticated API E2E flows verified",
+      "evidence": {}
+    },
+    {
+      "stage": 4,
+      "name": "Persistence and restart",
+      "status": "pass",
+      "detail": "Persistence survives process restart",
+      "evidence": {}
+    },
+    {
+      "stage": 5,
+      "name": "Failure injection",
+      "status": "pass",
+      "detail": "Failure injection remains fail-closed",
+      "evidence": {}
+    },
+    {
+      "stage": 6,
+      "name": "Security boundaries",
+      "status": "pass",
+      "detail": "Security/governance boundaries verified",
+      "evidence": {}
+    },
+    {
+      "stage": 7,
+      "name": "Docker runtime",
+      "status": "pass",
+      "detail": "Docker runtime health verified",
+      "evidence": {}
+    },
+    {
+      "stage": 8,
+      "name": "Observability",
+      "status": "pass",
+      "detail": "Metrics/logs/traces verified",
+      "evidence": {}
+    },
+    {
+      "stage": 9,
+      "name": "Release evidence",
+      "status": "pass",
+      "detail": "Release evidence is persisted and exportable",
+      "evidence": {}
+    },
+    {
+      "stage": 10,
+      "name": "Final regression gate",
+      "status": "pass",
+      "detail": "Final regression gate passed",
+      "evidence": {}
+    }
+  ],
+  "generated_at": "2026-08-18T21:33:13.218538Z"
+}
