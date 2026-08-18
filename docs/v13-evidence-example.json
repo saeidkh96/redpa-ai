@@ -1,0 +1,31 @@
+{
+  "stage1": {
+    "signals_persisted": true
+  },
+  "stage2": {
+    "history_used": true
+  },
+  "stage3": {
+    "recommendation_created": true
+  },
+  "stage4": {
+    "risk_scored": true
+  },
+  "stage5": {
+    "high_risk_requires_review": true,
+    "auto_applied": false
+  },
+  "stage6": {
+    "version_incremented": true
+  },
+  "stage7": {
+    "shadow_gate_enforced": true
+  },
+  "stage8": {
+    "approved_before_apply": true,
+    "auto_applied": false
+  },
+  "stage9": {
+    "rollback_verified": true
+  }
+}
