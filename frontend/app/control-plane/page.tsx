@@ -63,6 +63,7 @@ export default function ControlPlaneOverview() {
     </section>
     <section className="cpPanel"><div className="cpPanelHead"><div><span>Navigate</span><h2>Control Plane surfaces</h2></div></div>
       <div className="cpLaunchGrid">
+        <Link href="/control-plane/demo"><strong>Production E2E Demo</strong><span>Failure injection, live A2A fallback, evaluation and evidence</span></Link>
         <Link href="/control-plane/agents"><strong>Agents</strong><span>Registry, health and capability discovery</span></Link>
         <Link href="/control-plane/models"><strong>Models</strong><span>Providers, models, health and circuits</span></Link>
         <Link href="/control-plane/tools"><strong>Tools & MCP</strong><span>Unified tool catalog and MCP server health</span></Link>
