@@ -1,3 +1,22 @@
+## [18.2.0] - 2026-08-19
+
+### Added
+- Production E2E demonstration across the RedPA multi-agent runtime.
+- Controlled primary-agent failure injection and self-healing fallback.
+- Real A2A fallback execution through the shipped remote-agent runtime.
+- Trusted-agent and governance boundaries in the E2E demonstration.
+- Recovery/rejoin validation and V16 continuous evaluation integration.
+- Machine-readable E2E audit evidence.
+- Production E2E Control Plane view.
+
+### Changed
+- Release identity synchronized across backend, Ops Agent, frontend, Python SDK, Helm, Compose, and CI to `18.2.0`.
+
+### Validation
+- 420 automated tests passing.
+- V18.2 Production E2E Demo: 10/10 stages PASS.
+- Alembic head remains `v270a1b2c3d4e`.
+
 ## [11.0.0] - 2026-08-17
 
 ### Added

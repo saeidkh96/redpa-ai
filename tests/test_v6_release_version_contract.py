@@ -10,12 +10,12 @@ def test_current_release_version_contract():
     helm = Path("deploy/helm/redpa/Chart.yaml").read_text(encoding="utf-8")
     ci = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")
 
-    assert 'default="11.0.0"' in config_source
-    assert 'APP_VERSION: "11.0.0"' in compose
-    assert frontend["version"] == "11.0.0"
-    assert 'version = "11.0.0"' in sdk
-    assert 'appVersion: "11.0.0"' in helm
-    assert 'APP_VERSION: "11.0.0"' in ci
+    assert 'default="18.2.0"' in config_source
+    assert 'APP_VERSION: "18.2.0"' in compose
+    assert frontend["version"] == "18.2.0"
+    assert 'version = "18.2.0"' in sdk
+    assert 'appVersion: "18.2.0"' in helm
+    assert 'APP_VERSION: "18.2.0"' in ci
 
 
 def test_compose_release_version_is_not_overridden_by_host_app_version():
