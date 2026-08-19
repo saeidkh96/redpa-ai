@@ -171,13 +171,10 @@ operations, and the governed runtime.
 
 ## Architecture
 
-```{=html}
 <p align="center">
-```
-`<img src="docs/images/architecture-v18.png" width="100%" alt="RedPA AI v18.2 Architecture">`{=html}
-```{=html}
+  <img src="docs/images/architecture-v18.png" width="100%" alt="RedPA AI v18.2 Architecture">
 </p>
-```
+
 ``` mermaid
 flowchart TB
     Client[Control Plane / API / SDK / CLI]
