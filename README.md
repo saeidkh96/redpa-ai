@@ -31,7 +31,7 @@ integration controls, and trusted agent operations.
 ```{=html}
 <p align="center">
 ```
-`<img src="https://img.shields.io/badge/Release-v19.1.0-success" alt="Release">`{=html}
+`<img src="https://img.shields.io/badge/Release-v19.2.0-success" alt="Release">`{=html}
 `<img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">`{=html}
 `<img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">`{=html}
 `<img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">`{=html}
@@ -66,7 +66,7 @@ integration target. Kubernetes/Helm, Azure/Pulumi, and AWS/Pulumi are
 deployment or infrastructure foundations unless explicitly validated
 otherwise.
 
-## Current Release --- v19.1.0
+## Current Release --- v19.2.0
 
 **V19 Enterprise Extension & AWS Cloud Deployment Foundation** extends
 the V18.2 production E2E baseline with persistent Control Plane run
@@ -142,13 +142,15 @@ evaluation_score=0.94
 -   Pulumi stack configuration
 -   `pulumi preview` successfully validated
 
-> **AWS deployment status:** the V19.1 development foundation has been
-> deployed and validated in AWS `eu-central-1` using Pulumi. The deployed
-> foundation includes the RedPA VPC, ECS cluster, ECR repository, and
-> CloudWatch log group. This validates the infrastructure foundation only;
-> it does not claim that the complete RedPA application workload is running
-> publicly in AWS. V19 is an AWS
-> deployment foundation, not a claim of a live AWS environment.
+> **AWS deployment status:** RedPA AI V19.2 has been deployed and
+> validated as a real AWS ECS/Fargate workload in `eu-central-1` using
+> Pulumi. The deployment includes the RedPA VPC, public runtime networking,
+> ECS cluster and service, immutable ECR backend image, Redis sidecar,
+> CloudWatch logging, and a Pulumi-managed encrypted JWT secret.
+> This validates a real publicly reachable backend runtime, but does not
+> claim a complete production environment. PostgreSQL is not yet connected
+> to a managed AWS database, deep readiness is not claimed, and the direct
+> public port `8000` exposure is temporary validation ingress.
 
 ## Platform Evolution
 
@@ -618,7 +620,7 @@ http://localhost:8000/docs
 git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
 
-git checkout v19.1.0
+git checkout v19.2.0
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1

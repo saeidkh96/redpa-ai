@@ -1,4 +1,4 @@
-# RedPA AI v19.1.0 Architecture
+# RedPA AI v19.2.0 Architecture
 
 This document describes the architecture represented by the **v18.1.0**
 repository snapshot. RedPA AI is a production-oriented Agentic AI
@@ -9,7 +9,7 @@ The architecture separates **reasoning** from **permission**, **agent
 delegation** from **tool execution**, and **runtime capability** from
 **release-readiness evidence**.
 
-## Architecture Scope --- v19.1.0
+## Architecture Scope --- v19.2.0
 
 RedPA AI v19 is a production-oriented, governed Agentic AI platform
 composed of a FastAPI platform API, Next.js Control Plane, stateful

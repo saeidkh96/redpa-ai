@@ -1,0 +1,45 @@
+{
+  "release": "19.2.0",
+  "validation_date": "2026-08-20",
+  "aws": {
+    "region": "eu-central-1",
+    "pulumi_stack": "dev",
+    "runtime_deployed": true,
+    "pulumi_drift_clean": true,
+    "resources_unchanged_after_deployment": 16,
+    "ecs": {
+      "service_name": "redpa-backend-v192",
+      "service_status": "ACTIVE",
+      "desired_count": 1,
+      "running_count": 1,
+      "pending_count": 0,
+      "rollout_state": "COMPLETED",
+      "task_definition": "redpa-backend-v192:1",
+      "launch_type": "FARGATE"
+    },
+    "runtime": {
+      "backend_container": "RUNNING",
+      "backend_health": "HEALTHY",
+      "redis_container": "RUNNING",
+      "redis_health": "HEALTHY",
+      "public_liveness": "PASS",
+      "docs_http_status": 200,
+      "cloudwatch_logging": "PASS"
+    }
+  },
+  "image": {
+    "tag": "v19.2.0",
+    "digest": "sha256:07bfe25c91ce6e483d15e54bd51c05233fdd2c03e3befd73eb6499a7da55b18b"
+  },
+  "security": {
+    "jwt_secret_source": "pulumi-secret",
+    "credentials_embedded": false
+  },
+  "boundaries": {
+    "environment": "development",
+    "postgresql_cloud_connection": false,
+    "deep_readiness_claimed": false,
+    "production_https_ingress_claimed": false,
+    "public_port_8000_is_validation_only": true
+  }
+}

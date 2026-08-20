@@ -1,3 +1,34 @@
+## [19.2.0] - 2026-08-20
+
+### Added
+
+- Real AWS ECS/Fargate runtime deployment for the RedPA backend.
+- Two public subnets across multiple availability zones.
+- Internet Gateway and public routing for runtime validation.
+- Dedicated ECS task execution role.
+- Redis sidecar for middleware runtime dependencies.
+- Pulumi-managed encrypted JWT runtime secret.
+- CloudWatch runtime logging for backend and Redis containers.
+- Immutable ECR image deployment using the `v19.2.0` tag.
+
+### Validated
+
+- ECS service `ACTIVE`.
+- ECS rollout `COMPLETED`.
+- Backend container `RUNNING / HEALTHY`.
+- Redis container `RUNNING / HEALTHY`.
+- Public `/api/v1/platform/live` validation: PASS.
+- Public `/docs` validation: HTTP 200.
+- CloudWatch runtime logs: PASS.
+- Pulumi post-deployment preview: 16 resources unchanged.
+
+### Boundaries
+
+- Runtime environment remains `development`.
+- PostgreSQL is not yet connected to a managed AWS database.
+- Deep readiness is not claimed.
+- Direct port `8000` exposure is temporary runtime-validation ingress.
+- Production HTTPS / ALB ingress is not yet claimed.
 ## [19.1.0] - 2026-08-20
 
 ### Added

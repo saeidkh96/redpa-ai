@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 
-app = FastAPI(title='RedPA Ops Agent', version='19.1.0')
+app = FastAPI(title='RedPA Ops Agent', version='19.2.0')
 
 _client = docker.from_env()
 
@@ -78,7 +78,7 @@ def health() -> dict[str, str]:
     return {
         'status':'healthy',
         'service':'RedPA Ops Agent',
-        'version':'19.1.0',
+        'version':'19.2.0',
     }
 
 

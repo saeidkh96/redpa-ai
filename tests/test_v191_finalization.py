@@ -55,10 +55,13 @@ def test_v191_aws_foundation_contract():
     assert "aws.ecr.Repository" in aws
     assert "aws.cloudwatch.LogGroup" in aws
 
-    # V19.1 currently validates a deployed AWS
-    # foundation. It must not claim an ECS service
-    # deployment until that is implemented.
-    assert "aws.ecs.Service" not in aws
+    # V19.1 established the AWS deployment foundation.
+    # Later releases may extend the same Pulumi program
+    # with runtime resources while preserving this foundation.
+    assert "aws.ec2.Vpc" in aws
+    assert "aws.ecs.Cluster" in aws
+    assert "aws.ecr.Repository" in aws
+    assert "aws.cloudwatch.LogGroup" in aws
 
 
 def test_v191_aws_policy_contract():

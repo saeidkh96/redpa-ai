@@ -26,18 +26,18 @@ def test_observability_services_restart_and_backend_waits_for_collector_start():
 
 
 def test_v10_machine_readable_versions_are_consistent():
-    assert 'default="19.1.0"' in read("backend/app/core/config.py")
-    assert 'APP_VERSION: "19.1.0"' in read("docker-compose.yml")
-    assert "version='19.1.0'" in read("backend/app/ops_v9/agent_server.py")
-    assert "'version':'19.1.0'" in read("backend/app/ops_v9/agent_server.py")
-    assert json.loads(read("frontend/package.json"))["version"] == "19.1.0"
-    assert 'version = "19.1.0"' in read("sdk/python/pyproject.toml")
-    assert 'appVersion: "19.1.0"' in read("deploy/helm/redpa/Chart.yaml")
-    assert 'APP_VERSION: "19.1.0"' in read(".github/workflows/ci.yml")
+    assert 'default="19.2.0"' in read("backend/app/core/config.py")
+    assert 'APP_VERSION: "19.2.0"' in read("docker-compose.yml")
+    assert "version='19.2.0'" in read("backend/app/ops_v9/agent_server.py")
+    assert "'version':'19.2.0'" in read("backend/app/ops_v9/agent_server.py")
+    assert json.loads(read("frontend/package.json"))["version"] == "19.2.0"
+    assert 'version = "19.2.0"' in read("sdk/python/pyproject.toml")
+    assert 'appVersion: "19.2.0"' in read("deploy/helm/redpa/Chart.yaml")
+    assert 'APP_VERSION: "19.2.0"' in read(".github/workflows/ci.yml")
 
 
 def test_v10_gate_runs_phase3_lifecycle_and_full_regression():
     gate = read(".github/workflows/v10-governance-gate.yml")
-    assert 'APP_VERSION: "19.1.0"' in gate
+    assert 'APP_VERSION: "19.2.0"' in gate
     assert "tests/test_v10_agent_governance.py" in gate
     assert "python -m pytest tests -q" in gate

@@ -3,4 +3,4 @@ name: redpa
 description: RedPA AI production deployment
 type: application
 version: 0.1.0
-appVersion: "19.1.0"
+appVersion: "19.2.0"
