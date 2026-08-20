@@ -1,0 +1,33 @@
+{
+    "release":  "19.3.0",
+    "validation_date":  "2026-08-20",
+    "aws":  {
+                "region":  "eu-central-1",
+                "runtime":  "ECS Fargate",
+                "backend_service":  "redpa-backend-v192",
+                "task_definition_revision":  3,
+                "managed_database":  {
+                                         "engine":  "PostgreSQL",
+                                         "instance_class":  "db.t4g.micro",
+                                         "publicly_accessible":  false,
+                                         "storage_encrypted":  true,
+                                         "database":  "redpa"
+                                     }
+            },
+    "validation":  {
+                       "ecs_to_rds_network_path":  true,
+                       "rds_connection":  true,
+                       "select_1":  true,
+                       "alembic_upgrade":  true,
+                       "alembic_head":  "v280a1b2c3d4e",
+                       "public_table_count":  48,
+                       "main_ecs_service_healthy":  true,
+                       "pulumi_drift_clean":  true
+                   },
+    "boundaries":  {
+                       "rds_public_access":  false,
+                       "database_credentials_committed":  false,
+                       "database_password_logged":  false,
+                       "production_grade_high_availability_claimed":  false
+                   }
+}

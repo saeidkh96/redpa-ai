@@ -1,3 +1,29 @@
+## [19.3.0] - 2026-08-20
+
+### Added
+
+- Private Amazon RDS PostgreSQL managed data layer.
+- Dedicated database subnets across two availability zones.
+- ECS-to-RDS PostgreSQL security-group boundary.
+- AWS Secrets Manager database connection metadata.
+- ECS backend integration with managed PostgreSQL.
+- Real AWS database validation and Alembic migration evidence.
+
+### Validated
+
+- Real ECS/Fargate to private RDS connection: PASS.
+- PostgreSQL `SELECT 1`: PASS.
+- Target database `redpa`: PASS.
+- Alembic state: `v280a1b2c3d4e (head)`.
+- Public schema table count: 48.
+- ECS runtime remained healthy.
+- Pulumi post-deployment drift check: 23 resources unchanged.
+
+### Boundaries
+
+- RDS is private and encrypted.
+- Current RDS deployment is single-AZ.
+- No production-grade high-availability claim is made.
 ## [19.2.0] - 2026-08-20
 
 ### Added

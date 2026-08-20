@@ -12,7 +12,7 @@ jobs:
 
     env:
       APP_NAME: RedPA AI
-      APP_VERSION: "19.2.0"
+      APP_VERSION: "19.3.0"
       ENVIRONMENT: test
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/redpa_ai
       JWT_SECRET_KEY: ci-only-secret-key-for-tests

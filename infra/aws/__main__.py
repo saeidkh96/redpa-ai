@@ -10,11 +10,12 @@ stack = pulumi.get_stack()
 region = aws.config.region or "eu-central-1"
 
 jwt_secret_key = config.require_secret("jwt_secret_key")
+rds_password = config.require_secret("rds_password")
 
 project_tags = {
     "Project": "RedPA-AI",
     "Stack": stack,
-    "Release": "19.2.0",
+    "Release": "19.3.0",
 }
 
 
@@ -156,6 +157,143 @@ backend_security_group = aws.ec2.SecurityGroup(
 
 
 # ------------------------------------------------------------
+# V19.3 managed PostgreSQL data layer
+#
+# RDS is isolated from public ingress. The database is placed
+# in dedicated subnets spanning two availability zones and
+# accepts PostgreSQL traffic only from the ECS backend
+# security group.
+# ------------------------------------------------------------
+
+db_subnet_a = aws.ec2.Subnet(
+    "redpa-db-a",
+    vpc_id=vpc.id,
+    cidr_block="10.42.30.0/24",
+    availability_zone=availability_zones.names[0],
+    map_public_ip_on_launch=False,
+    tags={
+        **project_tags,
+        "Name": "redpa-db-a",
+        "Tier": "database",
+    },
+)
+
+db_subnet_b = aws.ec2.Subnet(
+    "redpa-db-b",
+    vpc_id=vpc.id,
+    cidr_block="10.42.40.0/24",
+    availability_zone=availability_zones.names[1],
+    map_public_ip_on_launch=False,
+    tags={
+        **project_tags,
+        "Name": "redpa-db-b",
+        "Tier": "database",
+    },
+)
+
+db_subnet_group = aws.rds.SubnetGroup(
+    "redpa-db-subnet-group",
+    name="redpa-v193-db-subnets",
+    subnet_ids=[
+        db_subnet_a.id,
+        db_subnet_b.id,
+    ],
+    tags={
+        **project_tags,
+        "Name": "redpa-v193-db-subnets",
+    },
+)
+
+db_security_group = aws.ec2.SecurityGroup(
+    "redpa-db-sg",
+    vpc_id=vpc.id,
+    description="RedPA AI V19.3 PostgreSQL access from ECS only",
+    ingress=[
+        {
+            "protocol": "tcp",
+            "from_port": 5432,
+            "to_port": 5432,
+            "security_groups": [
+                backend_security_group.id,
+            ],
+            "description": "PostgreSQL from RedPA ECS backend",
+        }
+    ],
+    egress=[
+        {
+            "protocol": "-1",
+            "from_port": 0,
+            "to_port": 0,
+            "cidr_blocks": ["0.0.0.0/0"],
+        }
+    ],
+    tags={
+        **project_tags,
+        "Name": "redpa-db-sg",
+        "Tier": "database",
+    },
+)
+
+database = aws.rds.Instance(
+    "redpa-postgres",
+    identifier="redpa-v193-postgres",
+    engine="postgres",
+    instance_class="db.t4g.micro",
+    allocated_storage=20,
+    storage_type="gp3",
+    storage_encrypted=True,
+    db_name="redpa",
+    username="redpa",
+    password=rds_password,
+    port=5432,
+    db_subnet_group_name=db_subnet_group.name,
+    vpc_security_group_ids=[
+        db_security_group.id,
+    ],
+    publicly_accessible=False,
+    multi_az=False,
+    backup_retention_period=1,
+    deletion_protection=False,
+    skip_final_snapshot=True,
+    auto_minor_version_upgrade=True,
+    apply_immediately=True,
+    tags={
+        **project_tags,
+        "Name": "redpa-v193-postgres",
+        "Tier": "database",
+    },
+)
+
+database_secret = aws.secretsmanager.Secret(
+    "redpa-database-secret",
+    name="redpa-v193/database",
+    description="RedPA AI V19.3 managed PostgreSQL connection metadata",
+    recovery_window_in_days=0,
+    tags=project_tags,
+)
+
+database_secret_value = aws.secretsmanager.SecretVersion(
+    "redpa-database-secret-value",
+    secret_id=database_secret.id,
+    secret_string=pulumi.Output.all(
+        database.address,
+        database.port,
+        rds_password,
+    ).apply(
+        lambda values: json.dumps(
+            {
+                "engine": "postgresql",
+                "host": values[0],
+                "port": values[1],
+                "database": "redpa",
+                "username": "redpa",
+                "password": values[2],
+            }
+        )
+    ),
+)
+
+# ------------------------------------------------------------
 # ECS task execution role
 # ------------------------------------------------------------
 
@@ -195,7 +333,7 @@ execution_role_attachment = aws.iam.RolePolicyAttachment(
 
 image_uri = ecr.repository_url.apply(
     lambda repository_url:
-        f"{repository_url}:v19.2.0"
+        f"{repository_url}:v19.3.0"
 )
 
 task_definition = aws.ecs.TaskDefinition(
@@ -210,6 +348,9 @@ task_definition = aws.ecs.TaskDefinition(
         image_uri,
         logs.name,
         jwt_secret_key,
+        database.address,
+        database.port,
+        rds_password,
     ).apply(
         lambda values: json.dumps(
             [
@@ -231,7 +372,7 @@ task_definition = aws.ecs.TaskDefinition(
                         },
                         {
                             "name": "APP_VERSION",
-                            "value": "19.2.0",
+                            "value": "19.3.0",
                         },
                         {
                             "name": "ENVIRONMENT",
@@ -245,7 +386,8 @@ task_definition = aws.ecs.TaskDefinition(
                             "name": "DATABASE_URL",
                             "value": (
                                 "postgresql+asyncpg://"
-                                "redpa:redpa@127.0.0.1:5432/redpa"
+                                f"redpa:{values[5]}@"
+                                f"{values[3]}:{values[4]}/redpa"
                             ),
                         },
                         {
@@ -424,4 +566,29 @@ pulumi.export(
 pulumi.export(
     "backend_service_name",
     service.name,
+)
+
+pulumi.export(
+    "db_subnet_a",
+    db_subnet_a.id,
+)
+
+pulumi.export(
+    "db_subnet_b",
+    db_subnet_b.id,
+)
+
+pulumi.export(
+    "db_security_group",
+    db_security_group.id,
+)
+
+pulumi.export(
+    "database_endpoint",
+    database.endpoint,
+)
+
+pulumi.export(
+    "database_secret_arn",
+    database_secret.arn,
 )

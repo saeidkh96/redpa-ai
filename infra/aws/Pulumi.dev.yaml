@@ -2,3 +2,5 @@ config:
   aws:region: eu-central-1
   redpa-ai-aws:jwt_secret_key:
     secure: AAABAAaWf+GshBeiuNKDSZzDdt5B9Oyxrc6/L4SMIOyeP0hjCfPGFnTEZZoMjYz2VlFMOiMNEKBido5ZRzDirtGBWz25vM4uKIRhuwK628HCKoFBC1jZqomOXRXGq7KK
+  redpa-ai-aws:rds_password:
+    secure: AAABAPlJo2PDS87vBPrPD9fRWv4MHH9m9h+0S2YTnQsxntwZDiA9MCjS18XXJ4Pr4OMvHzmA3VDwOtAkoHhwcQ==

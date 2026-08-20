@@ -31,7 +31,7 @@ integration controls, and trusted agent operations.
 ```{=html}
 <p align="center">
 ```
-`<img src="https://img.shields.io/badge/Release-v19.2.0-success" alt="Release">`{=html}
+`<img src="https://img.shields.io/badge/Release-v19.3.0-success" alt="Release">`{=html}
 `<img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">`{=html}
 `<img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">`{=html}
 `<img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">`{=html}
@@ -66,7 +66,7 @@ integration target. Kubernetes/Helm, Azure/Pulumi, and AWS/Pulumi are
 deployment or infrastructure foundations unless explicitly validated
 otherwise.
 
-## Current Release --- v19.2.0
+## Current Release --- v19.3.0
 
 **V19 Enterprise Extension & AWS Cloud Deployment Foundation** extends
 the V18.2 production E2E baseline with persistent Control Plane run
@@ -142,15 +142,18 @@ evaluation_score=0.94
 -   Pulumi stack configuration
 -   `pulumi preview` successfully validated
 
-> **AWS deployment status:** RedPA AI V19.2 has been deployed and
+> **AWS deployment status:** RedPA AI V19.3 has been deployed and
 > validated as a real AWS ECS/Fargate workload in `eu-central-1` using
 > Pulumi. The deployment includes the RedPA VPC, public runtime networking,
 > ECS cluster and service, immutable ECR backend image, Redis sidecar,
-> CloudWatch logging, and a Pulumi-managed encrypted JWT secret.
-> This validates a real publicly reachable backend runtime, but does not
-> claim a complete production environment. PostgreSQL is not yet connected
-> to a managed AWS database, deep readiness is not claimed, and the direct
-> public port `8000` exposure is temporary validation ingress.
+> CloudWatch logging, and a private encrypted Amazon RDS PostgreSQL database.
+> ECS-to-RDS connectivity has been validated with a real PostgreSQL
+> `SELECT 1`, and the managed database has been migrated to Alembic
+> `v280a1b2c3d4e (head)` with 48 public-schema tables.
+> The current deployment remains a development validation environment:
+> RDS is single-AZ and the backend is still exposed directly on public
+> port `8000`, so production-grade high availability and ingress are not
+> claimed.
 
 ## Platform Evolution
 
@@ -620,7 +623,7 @@ http://localhost:8000/docs
 git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
 
-git checkout v19.2.0
+git checkout v19.3.0
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
