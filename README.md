@@ -208,82 +208,269 @@ operations, and the governed runtime.
   <img src="docs/images/architecture-v19.png" width="100%" alt="RedPA AI Architecture">
 </p>
 
-``` mermaid
+```mermaid
 flowchart TB
-    Client[Control Plane / API / SDK / CLI]
 
-    subgraph Core[RedPA Core Platform]
-        API[FastAPI API]
-        GOV[V10 Governed Runtime]
-        Planner[Planner / Router]
-        HITL[Human Review]
-        Policy[Spring Boot Policy Service]
-        Ops[V9 Ops Agent]
+    %% =========================================================
+    %% CLIENTS & EXPERIENCE
+    %% =========================================================
+    subgraph Clients["Clients & Experience"]
+        CP["Next.js Control Plane"]
+        REST["REST API Clients"]
+        SDK["Python SDK"]
+        CLI["CLI / External Systems"]
     end
 
-    subgraph AgentPlane[Agent & Tool Plane]
-        Research[Research Agent]
-        Specialists[Specialist A2A Agents]
-        A2A[A2A Coordinator]
-        MCP[MCP Services]
-        RAG[RAG / Semantic Memory]
+    %% =========================================================
+    %% PLATFORM API & SECURITY
+    %% =========================================================
+    subgraph Platform["Platform API & Security"]
+        API["FastAPI Platform API"]
+        AUTH["Authentication / RBAC"]
+        AUDIT["Audit & Evidence"]
+        GOVAPI["Governance / Control Plane APIs"]
     end
 
-    subgraph Evolution[V12–V19 Platform Evolution]
-        SH[V12 Self-Healing]
-        AG[V13 Adaptive Governance]
-        SC[V14 Security & Compliance]
-        CR[V15 Cloud Readiness]
-        CE[V16 Continuous Evaluation]
-        EI[V17 Integration Governance]
-        TA[V18 Trusted Agents]
-        PH[V18.1 Production Hardening]
-        DEMO[V18.2 Production E2E]
-        RH[V18.3 Run History]
-        MS[V18.4 Microsoft Contracts]
-        BI[V18.5 Enterprise Analytics]
-        AWS[V19 AWS Foundation]
+    %% =========================================================
+    %% GOVERNED AGENT RUNTIME
+    %% =========================================================
+    subgraph Runtime["Governed Agent Runtime"]
+        GOV["V10 Governed Runtime"]
+        Planner["Planner / Router"]
+        Workflow["LangGraph Workflows"]
+        HITL["Human-in-the-Loop"]
+        Trusted["Trusted-Agent Routing"]
+        Durable["Durable Execution"]
+        Recovery["Recovery / Self-Healing"]
     end
 
-    subgraph State[State & Coordination]
-        PG[(PostgreSQL)]
-        Q[(Qdrant)]
-        Redis[(Redis / Streams)]
+    %% =========================================================
+    %% AGENT & TOOL PLANE
+    %% =========================================================
+    subgraph AgentPlane["Agent & Tool Plane"]
+        Research["Research Agent"]
+        SQL["SQL Agent"]
+        Report["Report Agent"]
+        Docker["Docker Agent"]
+        Specialists["Specialist A2A Agents"]
+        A2A["A2A Coordinator"]
+        MCP["MCP Services"]
+        Ops["V9 Ops Agent"]
+        Policy["Spring Boot Policy Service"]
     end
 
-    subgraph Obs[Observability]
-        Prom[Prometheus]
-        Grafana[Grafana]
-        OTEL[OpenTelemetry Collector]
-        Tempo[Tempo]
+    %% =========================================================
+    %% MODEL & KNOWLEDGE
+    %% =========================================================
+    subgraph Intelligence["Model & Knowledge Layer"]
+        Gateway["Model Gateway"]
+        Providers["LLM Providers"]
+        RAG["RAG"]
+        Memory["Agent / Semantic Memory"]
+        Q["Qdrant"]
     end
 
-    Client --> API
+    %% =========================================================
+    %% STATE & EVENT PROCESSING
+    %% =========================================================
+    subgraph State["State, Events & Processing"]
+        PG[("PostgreSQL")]
+        Redis[("Redis / Streams")]
+        Outbox["Transactional Outbox"]
+        Workers["Background Workers"]
+        RunHistory["V18.3 Persistent Run History"]
+    end
+
+    %% =========================================================
+    %% PLATFORM EVOLUTION CAPABILITIES
+    %% =========================================================
+    subgraph Evolution["Platform Evolution Capabilities"]
+        SH["V12<br/>Self-Healing"]
+        AG["V13<br/>Adaptive Governance"]
+        SC["V14<br/>Security & Compliance"]
+        CR["V15<br/>Cloud Readiness"]
+        CE["V16<br/>Continuous Evaluation"]
+        EI["V17<br/>Integration Governance"]
+        TA["V18<br/>Trusted Agents"]
+        PH["V18.1<br/>Production Hardening"]
+        DEMO["V18.2<br/>Production E2E"]
+    end
+
+    %% =========================================================
+    %% ENTERPRISE EXTENSIONS
+    %% =========================================================
+    subgraph Enterprise["Enterprise Extensions"]
+        RH["V18.3<br/>Persistent Run History"]
+
+        MS["V18.4<br/>Microsoft Integration Contracts<br/>Readiness Only"]
+
+        BI["V18.5<br/>Enterprise Analytics"]
+
+        KPI["Operational KPIs"]
+        PowerBI["Power BI-ready Dataset"]
+        CSV["Excel / CSV Export"]
+    end
+
+    %% =========================================================
+    %% OBSERVABILITY
+    %% =========================================================
+    subgraph Obs["Observability"]
+        OTEL["OpenTelemetry Collector"]
+        Prom["Prometheus"]
+        Grafana["Grafana"]
+        Tempo["Tempo"]
+    end
+
+    %% =========================================================
+    %% DEPLOYMENT & INFRASTRUCTURE
+    %% =========================================================
+    subgraph Deploy["Deployment & Infrastructure"]
+        Compose["Docker Compose<br/>Validated Integration Target"]
+
+        K8s["Kubernetes / Helm<br/>Deployment Path"]
+
+        Azure["Azure / Pulumi<br/>Infrastructure Foundation"]
+
+        AWS["V19 AWS / Pulumi<br/>Deployment Foundation"]
+
+        VPC["VPC"]
+        ECS["ECS Cluster"]
+        ECR["ECR Repository"]
+        CW["CloudWatch Log Group"]
+
+        Preview["Pulumi Preview: PASS<br/>pulumi up: NOT RUN"]
+    end
+
+    %% =========================================================
+    %% CLIENT CONNECTIONS
+    %% =========================================================
+    CP --> API
+    REST --> API
+    SDK --> API
+    CLI --> API
+
+    %% =========================================================
+    %% PLATFORM CONNECTIONS
+    %% =========================================================
+    API --> AUTH
+    API --> GOVAPI
     API --> GOV
+
     GOV --> Planner
+    GOV --> Workflow
     GOV --> HITL
+    GOV --> Trusted
+    GOV --> Durable
     GOV --> Policy
     GOV --> Ops
 
+    Durable --> Recovery
+
+    %% =========================================================
+    %% AGENT CONNECTIONS
+    %% =========================================================
     Planner --> Research
+    Planner --> SQL
+    Planner --> Report
+    Planner --> Docker
     Planner --> A2A
-    A2A --> Specialists
     Planner --> MCP
+
+    A2A --> Specialists
+
+    %% =========================================================
+    %% MODEL / KNOWLEDGE CONNECTIONS
+    %% =========================================================
     Research --> RAG
+    SQL --> Gateway
+    Report --> Gateway
+    Research --> Gateway
 
-    GOV --> SH
-    SH --> AG --> SC --> CR --> CE --> EI --> TA --> PH --> DEMO --> RH --> MS --> BI --> AWS
+    Gateway --> Providers
 
+    RAG --> Q
+    RAG --> Memory
+
+    %% =========================================================
+    %% STATE / EVENTS
+    %% =========================================================
     API --> PG
     GOV --> PG
-    RH --> PG
-    RAG --> Q
-    API --> Redis
+    GOV --> Redis
+
+    GOV --> Outbox
+    Outbox --> Workers
+    Workers --> Redis
+
+    GOV --> RunHistory
+    RunHistory --> PG
+
+    GOV --> AUDIT
+
+    %% =========================================================
+    %% EVOLUTION CAPABILITY RELATIONSHIPS
+    %% These are capabilities, NOT a request execution pipeline.
+    %% =========================================================
+    GOV -. reliability .-> SH
+    GOV -. governance .-> AG
+    GOV -. compliance .-> SC
+    GOV -. readiness .-> CR
+    GOV -. evaluation .-> CE
+    GOV -. integration governance .-> EI
+    GOV -. trust .-> TA
+
+    PH -. validates .-> GOV
+    DEMO -. validates E2E .-> GOV
+
+    %% =========================================================
+    %% ENTERPRISE EXTENSIONS
+    %% =========================================================
+    RunHistory --> RH
+
+    GOV --> MS
+
+    RH --> BI
+    BI --> KPI
+    BI --> PowerBI
+    BI --> CSV
+
+    %% =========================================================
+    %% OBSERVABILITY
+    %% =========================================================
+    API --> OTEL
+    GOV --> OTEL
+    Workers --> OTEL
+    Ops --> OTEL
 
     API --> Prom
-    API --> OTEL
+    GOV --> Prom
+
     OTEL --> Tempo
     Prom --> Grafana
+
+    %% =========================================================
+    %% DEPLOYMENT
+    %% =========================================================
+    Compose -. runs .-> API
+    Compose -. runs .-> Policy
+    Compose -. runs .-> PG
+    Compose -. runs .-> Redis
+    Compose -. runs .-> Q
+
+    K8s -. deployment path .-> API
+    Azure -. infrastructure path .-> API
+
+    AWS --> VPC
+    AWS --> ECS
+    AWS --> ECR
+    AWS --> CW
+    AWS --> Preview
+
+    %% =========================================================
+    %% IMPORTANT BOUNDARIES
+    %% =========================================================
+    MS -. "No live Microsoft tenant claimed" .-> GOV
+    Preview -. "AWS resources not deployed" .-> AWS
 ```
 
 For the complete V19 component, runtime, data, governance, reliability,
