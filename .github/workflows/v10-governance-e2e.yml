@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 25
     env:
       JWT_SECRET_KEY: github-actions-v10-e2e-secret-key-long-enough
-      APP_VERSION: "18.2.0"
+      APP_VERSION: "19.0.0"
       OTEL_ENABLED: "false"
 
     steps:

@@ -1,3 +1,28 @@
+## [19.0.0] - 2026-08-20
+
+### Added
+- V18.3 PostgreSQL-backed Control Plane agent run history and summary aggregation.
+- V18.3 persisted trace, fallback, latency, and evaluation evidence.
+- V18.4 credential-free Power Automate approval integration contract with an explicit human-approval boundary.
+- V18.4 Copilot Studio REST action contracts for platform, agent, and incident summaries.
+- V18.5 enterprise analytics APIs for operational KPIs, Power BI-friendly JSON, and Excel-compatible CSV export.
+- V18.5 analytics backed by persisted V18.3 execution history.
+- V19 AWS Pulumi deployment foundation for VPC, ECS, ECR, and CloudWatch.
+- Control Plane views for Run History, Microsoft integration readiness, and Enterprise BI.
+
+### Changed
+- Release identity synchronized across backend, Ops Agent, frontend, Python SDK, Helm, Compose, and CI to `19.0.0`.
+- Alembic head advanced to `v280a1b2c3d4e`.
+
+### Validation
+- 425 automated tests passing.
+- V18.3 runtime persistence validation: PASS.
+- V18.4 Microsoft integration contract validation: PASS.
+- V18.5 enterprise analytics E2E validation: PASS.
+- V19 AWS `pulumi preview`: PASS.
+- Microsoft integration remains contract/readiness based; no live tenant integration is claimed.
+- AWS resources have not been deployed; `pulumi up` has not been run.
+
 ## [18.2.0] - 2026-08-19
 
 ### Added
@@ -87,7 +112,7 @@
 
 # Changelog
 
-## V9.0.0 â€” Production Cloud & Autonomous Operations
+## V9.0.0 Ã¢â‚¬â€ Production Cloud & Autonomous Operations
 
 - added persisted incident and remediation action records;
 - added Docker-backed V9 Ops Agent with explicit approval and stateful-service denylist;
@@ -99,7 +124,7 @@
 - added V9 Alembic migration and contract tests;
 - aligned application, frontend, SDK, Helm and CI release metadata to `9.0.0`.
 
-## V8.0.0 â€” Enterprise AI Operations & Automation
+## V8.0.0 Ã¢â‚¬â€ Enterprise AI Operations & Automation
 
 - added generic analytics fact ingestion and KPI query engine with weighted aggregation;
 - added JSONB dimensional slicing and metric/dimension catalog discovery;
@@ -115,7 +140,7 @@
 - expanded sync/async SDK and CLI operations;
 - aligned current release metadata to `8.0.0`.
 
-## V7.0.0 â€” Enterprise Research
+## V7.0.0 Ã¢â‚¬â€ Enterprise Research
 
 - added persisted enterprise research runs and timeline events;
 - added background evidence-first execution using the existing Research Agent;
@@ -127,7 +152,7 @@
 - added V7 Alembic persistence and regression/contract tests;
 - aligned backend, Docker, frontend, SDK and Helm application metadata to `7.0.0`.
 
-## V6.0.0 â€” Developer Platform
+## V6.0.0 Ã¢â‚¬â€ Developer Platform
 
 ### Completed V6 surface
 
@@ -150,7 +175,7 @@
 - added SDK contract and HTTP mock tests.
 
 
-## V5.5.0 â€” Evaluation & Reliability
+## V5.5.0 Ã¢â‚¬â€ Evaluation & Reliability
 
 ### Batch 4
 
@@ -187,7 +212,7 @@
 - added `/control-plane/reliability` for baseline/candidate inspection.
 
 
-## V5.0.0 â€” Control Plane
+## V5.0.0 Ã¢â‚¬â€ Control Plane
 
 ### Added
 

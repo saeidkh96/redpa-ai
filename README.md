@@ -31,13 +31,13 @@ integration controls, and trusted agent operations.
 ```{=html}
 <p align="center">
 ```
-`<img src="https://img.shields.io/badge/Release-v18.2.0-success" alt="Release">`{=html}
+`<img src="https://img.shields.io/badge/Release-v19.0.0-success" alt="Release">`{=html}
 `<img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">`{=html}
 `<img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">`{=html}
 `<img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">`{=html}
 `<img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">`{=html}
 `<img src="https://img.shields.io/badge/OpenTelemetry-Tracing-425CC7" alt="OpenTelemetry">`{=html}
-`<img src="https://img.shields.io/badge/Tests-420%20passed-success" alt="Tests">`{=html}
+`<img src="https://img.shields.io/badge/Tests-425%20passed-success" alt="Tests">`{=html}
 `<img src="https://img.shields.io/badge/License-MIT-green" alt="License">`{=html}
 ```{=html}
 </p>
@@ -65,48 +65,48 @@ deployment/reference paths; the repository's strongest validated
 integration target is the Docker Compose environment and its automated
 release evidence.
 
-## Current Release --- v18.2.0
+## Current Release --- v19.0.0
 
-**V18.2 Production E2E Demonstration** extends the V18.1
-production-hardening baseline by proving that the major runtime
-boundaries can operate together in a controlled end-to-end execution.
+**V19 Enterprise Extension & AWS Cloud Deployment Foundation** extends
+the V18.2 production E2E baseline with persistent Control Plane run
+history, Microsoft enterprise integration contracts, enterprise
+analytics, and an AWS infrastructure foundation.
 
 Validated release evidence:
 
 ``` text
-420 passed
+425 passed
 0 failed
 
-Alembic head: v270a1b2c3d4e
-Production E2E Demo: PASS
-10/10 E2E stages: PASS
+Alembic head: v280a1b2c3d4e
+V18.3 runtime persistence: PASS
+V18.4 Microsoft integration contracts: PASS
+V18.5 enterprise analytics E2E: PASS
+V19 AWS Pulumi preview: PASS
 ```
 
-The V18.2 production E2E flow covers:
+The V18.3-V19 extension adds:
 
-  Stage   Validation
-  ------- ---------------------------------
-  1       Runtime discovery
-  2       Primary-agent routing
-  3       Trusted-agent boundary
-  4       Governance boundary
-  5       Controlled failure injection
-  6       Self-healing fallback
-  7       Real A2A fallback execution
-  8       Recovery and workflow rejoin
-  9       V16 continuous evaluation
-  10      Machine-readable audit evidence
+- **V18.3 - Control Plane & Persistent Run History:** PostgreSQL-backed
+  agent execution history, trace IDs, fallback counts, evaluation
+  scores, summaries, and a Run History Control Plane view.
+- **V18.4 - Microsoft Enterprise Integration Readiness:** credential-free
+  Power Automate approval contracts and Copilot Studio REST action
+  contracts with an explicit human-approval boundary.
+- **V18.5 - Enterprise Analytics:** operational KPIs, Power BI-friendly
+  JSON datasets, and Excel-compatible CSV exports backed by persisted
+  execution history.
+- **V19 - AWS Cloud Deployment Foundation:** Pulumi infrastructure for
+  an AWS VPC, ECS cluster, ECR repository, and CloudWatch log group in
+  `eu-central-1`.
 
-The demonstrated failure path resolves the `research-agent` as the
-primary runtime agent, injects a controlled failure before delegation,
-resolves the connected `docker-agent` as the fallback, executes through
-the shipped A2A runtime, rejoins the workflow, evaluates the recovered
-result, and persists E2E evidence.
+Microsoft support in this release represents **integration contracts and
+readiness only**; no live Microsoft tenant connection is claimed.
 
-V18.2 builds directly on the V18.1 hardening gate, which validated
-migration continuity, authenticated API flows, restart persistence,
-failure behavior, security/governance boundaries, Docker health,
-observability, release evidence, and regression gating.
+The AWS infrastructure has been successfully validated with
+`pulumi preview`. **No AWS resources have been deployed with
+`pulumi up`**, so V19 should be understood as a deployment foundation,
+not a claim of a live AWS environment.
 
 ## Platform Evolution
 
@@ -196,7 +196,7 @@ flowchart TB
         RAG[RAG / Semantic Memory]
     end
 
-    subgraph Evolution[V12–V18.2 Platform Evolution]
+    subgraph Evolution[V12â€“V18.2 Platform Evolution]
         SH[V12 Self-Healing]
         AG[V13 Adaptive Governance]
         SC[V14 Security & Compliance]
@@ -398,7 +398,7 @@ http://localhost:8000/docs
 git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
 
-git checkout v18.2.0
+git checkout v19.0.0
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -528,11 +528,11 @@ Useful entry points:
 ## Release Line
 
 ``` text
-V1–V4.2   Agentic foundation -> distributed runtime -> enterprise governance -> production-oriented agentic systems
-V5–V8     Control Plane -> developer platform -> enterprise research -> enterprise operations
-V9–V10    Production operations -> governed agent runtime
+V1â€“V4.2   Agentic foundation -> distributed runtime -> enterprise governance -> production-oriented agentic systems
+V5â€“V8     Control Plane -> developer platform -> enterprise research -> enterprise operations
+V9â€“V10    Production operations -> governed agent runtime
 V11       Platform evolution foundation
-V12–V18   Self-healing -> adaptive governance -> compliance -> cloud -> evaluation -> integrations -> trust
+V12â€“V18   Self-healing -> adaptive governance -> compliance -> cloud -> evaluation -> integrations -> trust
 V18.1     Production hardening & release validation
 V18.2     Production E2E demonstration -> controlled failure -> real A2A fallback -> recovery -> evaluation -> audit evidence
 ```
