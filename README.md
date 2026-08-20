@@ -1,29 +1,47 @@
+```{=html}
 <p align="center">
-  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
+```
+`<img src="docs/images/logo.png" width="220" alt="RedPA AI">`{=html}
+```{=html}
 </p>
-
-<h1 align="center">RedPA AI</h1>
-
+```
+```{=html}
+<h1 align="center">
+```
+RedPA AI
+```{=html}
+</h1>
+```
+```{=html}
 <p align="center">
-  <strong>Enterprise Agentic AI Platform</strong>
+```
+`<strong>`{=html}Enterprise Agentic AI Platform`</strong>`{=html}
+```{=html}
 </p>
-
+```
+```{=html}
 <p align="center">
-  Governed multi-agent execution, self-healing failover, adaptive governance,
-  compliance evidence, continuous evaluation, enterprise integration controls,
-  and trusted agent operations.
+```
+Governed multi-agent execution, self-healing failover, adaptive
+governance, compliance evidence, continuous evaluation, enterprise
+integration controls, and trusted agent operations.
+```{=html}
 </p>
-
+```
+```{=html}
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v19.0.0-success" alt="Release">
-  <img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">
-  <img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">
-  <img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/OpenTelemetry-Tracing-425CC7" alt="OpenTelemetry">
-  <img src="https://img.shields.io/badge/Tests-425%20passed-success" alt="Tests">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+```
+`<img src="https://img.shields.io/badge/Release-v19.0.0-success" alt="Release">`{=html}
+`<img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">`{=html}
+`<img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">`{=html}
+`<img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">`{=html}
+`<img src="https://img.shields.io/badge/PostgreSQL-17-336791" alt="PostgreSQL">`{=html}
+`<img src="https://img.shields.io/badge/OpenTelemetry-Tracing-425CC7" alt="OpenTelemetry">`{=html}
+`<img src="https://img.shields.io/badge/Tests-425%20passed-success" alt="Tests">`{=html}
+`<img src="https://img.shields.io/badge/License-MIT-green" alt="License">`{=html}
+```{=html}
 </p>
+```
 
 ------------------------------------------------------------------------
 
@@ -32,8 +50,8 @@
 > audit, and observability boundaries.**
 
 RedPA AI explores a central production question: **what should happen
-when autonomous agents are allowed to reason about—and potentially act
-on—real systems?**
+when autonomous agents are allowed to reason about---and potentially act
+on---real systems?**
 
 The platform combines multi-agent orchestration, RAG, MCP tools, A2A
 delegation, durable workflows, Human-in-the-Loop controls, policy
@@ -48,7 +66,7 @@ integration target. Kubernetes/Helm, Azure/Pulumi, and AWS/Pulumi are
 deployment or infrastructure foundations unless explicitly validated
 otherwise.
 
-## Current Release — v19.0.0
+## Current Release --- v19.0.0
 
 **V19 Enterprise Extension & AWS Cloud Deployment Foundation** extends
 the V18.2 production E2E baseline with persistent Control Plane run
@@ -68,39 +86,39 @@ V18.5 enterprise analytics E2E: PASS
 V19 AWS Pulumi preview: PASS
 ```
 
-### V18.3 — Control Plane & Persistent Run History
+### V18.3 --- Control Plane & Persistent Run History
 
-- PostgreSQL-backed agent execution history
-- Persistent run records and summary aggregation
-- Trace IDs and execution evidence
-- Primary and fallback agent tracking
-- Fallback/recovery run persistence
-- Execution latency and evaluation scores
-- Control Plane Run History view
+-   PostgreSQL-backed agent execution history
+-   Persistent run records and summary aggregation
+-   Trace IDs and execution evidence
+-   Primary and fallback agent tracking
+-   Fallback/recovery run persistence
+-   Execution latency and evaluation scores
+-   Control Plane Run History view
 
-### V18.4 — Microsoft Enterprise Integration Readiness
+### V18.4 --- Microsoft Enterprise Integration Readiness
 
-- Power Automate approval contract
-- Explicit `requires_approval=true` human approval boundary
-- Copilot Studio REST action contracts
-- Platform summary action
-- Agent status action
-- Incident summary action
-- Credential-free integration contracts
+-   Power Automate approval contract
+-   Explicit `requires_approval=true` human approval boundary
+-   Copilot Studio REST action contracts
+-   Platform summary action
+-   Agent status action
+-   Incident summary action
+-   Credential-free integration contracts
 
 > **Important:** V18.4 provides Microsoft integration contracts and
 > readiness. It does **not** claim a live Power Automate, Copilot
 > Studio, Microsoft 365, Teams, Outlook, or Microsoft tenant
 > integration.
 
-### V18.5 — Enterprise Analytics
+### V18.5 --- Enterprise Analytics
 
-- Operational KPI endpoint
-- Power BI-friendly JSON dataset
-- Excel-compatible CSV export
-- Analytics backed by persisted V18.3 execution history
-- Recovery-rate and fallback visibility
-- Average latency and evaluation evidence
+-   Operational KPI endpoint
+-   Power BI-friendly JSON dataset
+-   Excel-compatible CSV export
+-   Analytics backed by persisted V18.3 execution history
+-   Recovery-rate and fallback visibility
+-   Average latency and evaluation evidence
 
 Validated analytics example:
 
@@ -113,16 +131,16 @@ average_latency_ms=842.5
 evaluation_score=0.94
 ```
 
-### V19 — AWS Cloud Deployment Foundation
+### V19 --- AWS Cloud Deployment Foundation
 
-- Pulumi-based AWS infrastructure definition
-- Region: `eu-central-1`
-- VPC
-- ECS cluster
-- ECR repository
-- CloudWatch log group
-- Pulumi stack configuration
-- `pulumi preview` successfully validated
+-   Pulumi-based AWS infrastructure definition
+-   Region: `eu-central-1`
+-   VPC
+-   ECS cluster
+-   ECR repository
+-   CloudWatch log group
+-   Pulumi stack configuration
+-   `pulumi preview` successfully validated
 
 > **Important:** `pulumi preview` has passed, but **`pulumi up` has not
 > been run and no AWS resources have been deployed**. V19 is an AWS
@@ -130,21 +148,54 @@ evaluation_score=0.94
 
 ## Platform Evolution
 
-| Release   | Capability                                | Core boundary                                                                                        |
-|-----------|-------------------------------------------|------------------------------------------------------------------------------------------------------|
-| **V12**   | Self-Healing Multi-Agent Runtime          | Health-aware failover, checkpoint persistence, idempotent recovery, controlled rejoin                |
-| **V13**   | Adaptive Governance                       | Evidence-driven policy recommendations without silent auto-application                               |
-| **V14**   | Security & Compliance Evidence            | Versioned controls, evidence integrity/freshness, risk, approval, audit export                       |
-| **V15**   | Production Cloud Readiness                | Dependency, backup, secrets/IAM, capacity, observability and deployment gates                        |
-| **V16**   | Agent Evaluation & Continuous Improvement | Baseline/candidate evaluation, safety/regression checks, shadow rollout and rollback                 |
-| **V17**   | Enterprise Integration Hub                | Connector registry, scopes, secret/network/write boundaries, risk and approval                       |
-| **V18**   | Trusted Agent Registry                    | Identity, provenance, capabilities, health, governance and trust-aware routing                       |
-| **V18.1** | Production Hardening                      | Cross-version integration, restart/failure validation, observability and release evidence            |
-| **V18.2** | Production E2E Demonstration              | Real A2A fallback, self-healing recovery, governance/trust boundaries, evaluation and audit evidence |
-| **V18.3** | Persistent Run History                    | PostgreSQL execution history, fallback/recovery evidence and Control Plane visibility                |
-| **V18.4** | Microsoft Integration Readiness           | Power Automate approval and Copilot Studio REST contracts                                            |
-| **V18.5** | Enterprise Analytics                      | Operational KPIs, Power BI dataset and Excel/CSV export                                              |
-| **V19**   | AWS Deployment Foundation                 | Pulumi-defined VPC, ECS, ECR and CloudWatch with preview validation                                  |
+  ------------------------------------------------------------------------------
+  Release     Capability          Core boundary
+  ----------- ------------------- ----------------------------------------------
+  **V12**     Self-Healing        Health-aware failover, checkpoint persistence,
+              Multi-Agent Runtime idempotent recovery, controlled rejoin
+
+  **V13**     Adaptive Governance Evidence-driven policy recommendations without
+                                  silent auto-application
+
+  **V14**     Security &          Versioned controls, evidence
+              Compliance Evidence integrity/freshness, risk, approval, audit
+                                  export
+
+  **V15**     Production Cloud    Dependency, backup, secrets/IAM, capacity,
+              Readiness           observability and deployment gates
+
+  **V16**     Agent Evaluation &  Baseline/candidate evaluation,
+              Continuous          safety/regression checks, shadow rollout and
+              Improvement         rollback
+
+  **V17**     Enterprise          Connector registry, scopes,
+              Integration Hub     secret/network/write boundaries, risk and
+                                  approval
+
+  **V18**     Trusted Agent       Identity, provenance, capabilities, health,
+              Registry            governance and trust-aware routing
+
+  **V18.1**   Production          Cross-version integration, restart/failure
+              Hardening           validation, observability and release evidence
+
+  **V18.2**   Production E2E      Real A2A fallback, self-healing recovery,
+              Demonstration       governance/trust boundaries, evaluation and
+                                  audit evidence
+
+  **V18.3**   Persistent Run      PostgreSQL execution history,
+              History             fallback/recovery evidence and Control Plane
+                                  visibility
+
+  **V18.4**   Microsoft           Power Automate approval and Copilot Studio
+              Integration         REST contracts
+              Readiness           
+
+  **V18.5**   Enterprise          Operational KPIs, Power BI dataset and
+              Analytics           Excel/CSV export
+
+  **V19**     AWS Deployment      Pulumi-defined VPC, ECS, ECR and CloudWatch
+              Foundation          with preview validation
+  ------------------------------------------------------------------------------
 
 Earlier releases established the underlying platform primitives: Agentic
 foundation, distributed execution, enterprise governance, Control Plane,
@@ -153,10 +204,13 @@ operations, and the governed runtime.
 
 ## Architecture
 
+```{=html}
 <p align="center">
-  <img src="docs/images/architecture-v18.png" width="100%" alt="RedPA AI Architecture">
+```
+`<img src="docs/images/architecture-v19.png" width="100%" alt="RedPA AI Architecture">`{=html}
+```{=html}
 </p>
-
+```
 ``` mermaid
 flowchart TB
     Client[Control Plane / API / SDK / CLI]
@@ -235,32 +289,65 @@ flowchart TB
     Prom --> Grafana
 ```
 
-For detailed component, data, governance, reliability, observability,
-and deployment views, see
-[`docs/architecture.md`](docs/architecture.md).
+For the complete V19 component, runtime, data, governance, reliability,
+observability, enterprise-integration, analytics, and deployment views,
+see [`docs/architecture.md`](docs/architecture.md).
 
 ## Core Capabilities
 
-| Area                     | Capabilities                                                                                        |
-|--------------------------|-----------------------------------------------------------------------------------------------------|
-| **Agentic Runtime**      | Planner/router, research workflows, RAG, multi-agent orchestration                                  |
-| **Governed Execution**   | Persisted run lifecycle, policy decisions, audit events, approval-aware continuation                |
-| **Human-in-the-Loop**    | Explicit approval/rejection and blocked-run resume                                                  |
-| **Operations**           | Incident persistence, diagnosis, remediation proposals, controlled execution, recovery verification |
-| **Self-Healing**         | Health-aware replacement, context handoff, idempotency, restart checkpoints, controlled rejoin      |
-| **MCP**                  | Filesystem, GitHub, PostgreSQL and Docker tool services                                             |
-| **A2A**                  | Coordinator plus research, PostgreSQL, Docker, filesystem and GitHub specialist agents              |
-| **Memory**               | PostgreSQL-backed state and Qdrant semantic retrieval                                               |
-| **Governance**           | Adaptive recommendations, versioned proposals, shadow evaluation, explicit apply/rollback           |
-| **Compliance**           | Control registry, evidence collection, SHA-256 integrity, freshness, risk and audit records         |
-| **Evaluation**           | Quality/safety/regression evaluation and rollout/rollback gates                                     |
-| **Integration**          | Connector scope, secrets, network and write-access boundaries                                       |
-| **Trust**                | Agent identity, provenance, capabilities, health and trust-aware routing                            |
-| **Run History**          | Persisted execution history, traces, fallback/recovery evidence and summaries                       |
-| **Enterprise Analytics** | KPIs, Power BI-friendly JSON and Excel-compatible CSV                                               |
-| **Observability**        | Prometheus, Grafana, OpenTelemetry, Tempo and structured logging                                    |
-| **Developer Platform**   | Python SDK, CLI, examples and API-first integration                                                 |
-| **Deployment Assets**    | Docker Compose; Kubernetes/Helm, Azure/Pulumi and AWS/Pulumi foundations                            |
+  --------------------------------------------------------------------------------
+  Area                    Capabilities
+  ----------------------- --------------------------------------------------------
+  **Agentic Runtime**     Planner/router, research workflows, RAG, multi-agent
+                          orchestration
+
+  **Governed Execution**  Persisted run lifecycle, policy decisions, audit events,
+                          approval-aware continuation
+
+  **Human-in-the-Loop**   Explicit approval/rejection and blocked-run resume
+
+  **Operations**          Incident persistence, diagnosis, remediation proposals,
+                          controlled execution, recovery verification
+
+  **Self-Healing**        Health-aware replacement, context handoff, idempotency,
+                          restart checkpoints, controlled rejoin
+
+  **MCP**                 Filesystem, GitHub, PostgreSQL and Docker tool services
+
+  **A2A**                 Coordinator plus research, PostgreSQL, Docker,
+                          filesystem and GitHub specialist agents
+
+  **Memory**              PostgreSQL-backed state and Qdrant semantic retrieval
+
+  **Governance**          Adaptive recommendations, versioned proposals, shadow
+                          evaluation, explicit apply/rollback
+
+  **Compliance**          Control registry, evidence collection, SHA-256
+                          integrity, freshness, risk and audit records
+
+  **Evaluation**          Quality/safety/regression evaluation and
+                          rollout/rollback gates
+
+  **Integration**         Connector scope, secrets, network and write-access
+                          boundaries
+
+  **Trust**               Agent identity, provenance, capabilities, health and
+                          trust-aware routing
+
+  **Run History**         Persisted execution history, traces, fallback/recovery
+                          evidence and summaries
+
+  **Enterprise            KPIs, Power BI-friendly JSON and Excel-compatible CSV
+  Analytics**             
+
+  **Observability**       Prometheus, Grafana, OpenTelemetry, Tempo and structured
+                          logging
+
+  **Developer Platform**  Python SDK, CLI, examples and API-first integration
+
+  **Deployment Assets**   Docker Compose; Kubernetes/Helm, Azure/Pulumi and
+                          AWS/Pulumi foundations
+  --------------------------------------------------------------------------------
 
 ## Runtime Topology
 
@@ -270,42 +357,59 @@ Ops Agent, background workers, event publisher, and observability stack.
 
 Primary local endpoints:
 
-| Service                    |   Port |
-|----------------------------|-------:|
-| FastAPI backend / Swagger  | `8000` |
-| Next.js Control Plane      | `3001` |
-| Spring Boot Policy Service | `8090` |
-| Filesystem MCP             | `8010` |
-| GitHub MCP                 | `8020` |
-| PostgreSQL MCP             | `8030` |
-| Docker MCP                 | `8040` |
-| A2A Coordinator            | `8050` |
-| Research Agent             | `8061` |
-| PostgreSQL Agent           | `8062` |
-| Docker Agent               | `8063` |
-| Filesystem Agent           | `8064` |
-| GitHub Agent               | `8065` |
+  Service                          Port
+  ---------------------------- --------
+  FastAPI backend / Swagger      `8000`
+  Next.js Control Plane          `3001`
+  Spring Boot Policy Service     `8090`
+  Filesystem MCP                 `8010`
+  GitHub MCP                     `8020`
+  PostgreSQL MCP                 `8030`
+  Docker MCP                     `8040`
+  A2A Coordinator                `8050`
+  Research Agent                 `8061`
+  PostgreSQL Agent               `8062`
+  Docker Agent                   `8063`
+  Filesystem Agent               `8064`
+  GitHub Agent                   `8065`
 
 ## API Surface
 
 Selected versioned APIs:
 
-| API                                  | Purpose                                         |
-|--------------------------------------|-------------------------------------------------|
-| `/api/v1/governance/v10`             | Governed execution lifecycle                    |
-| `/api/v1/operations/v9`              | Production operations and remediation flow      |
-| `/api/v1/platform/evolution`         | Persisted platform-evolution records            |
-| `/api/v1/adaptive-governance/v13`    | Governance signals and policy proposals         |
-| `/api/v1/security-compliance/v14`    | Compliance controls/evidence                    |
-| `/api/v1/cloud-readiness/v15`        | Cloud-readiness assessment                      |
-| `/api/v1/continuous-evaluation/v16`  | Evaluation and rollout decisions                |
-| `/api/v1/enterprise-integration/v17` | Connector governance                            |
-| `/api/v1/trusted-agents/v18`         | Trusted-agent assessment                        |
-| `/api/v1/production-hardening/v18.1` | Release-hardening evidence                      |
-| `/api/v1/production-demo/v18.2`      | Production E2E demonstration and audit evidence |
-| `/api/v1/control-plane/v18.3/runs`   | Persistent execution run history                |
-| `/api/v1/analytics/v18.5/power-bi`   | Power BI-friendly analytics dataset             |
-| `/api/v1/analytics/v18.5/excel.csv`  | Excel-compatible analytics export               |
+  ------------------------------------------------------------------------------
+  API                                    Purpose
+  -------------------------------------- ---------------------------------------
+  `/api/v1/governance/v10`               Governed execution lifecycle
+
+  `/api/v1/operations/v9`                Production operations and remediation
+                                         flow
+
+  `/api/v1/platform/evolution`           Persisted platform-evolution records
+
+  `/api/v1/adaptive-governance/v13`      Governance signals and policy proposals
+
+  `/api/v1/security-compliance/v14`      Compliance controls/evidence
+
+  `/api/v1/cloud-readiness/v15`          Cloud-readiness assessment
+
+  `/api/v1/continuous-evaluation/v16`    Evaluation and rollout decisions
+
+  `/api/v1/enterprise-integration/v17`   Connector governance
+
+  `/api/v1/trusted-agents/v18`           Trusted-agent assessment
+
+  `/api/v1/production-hardening/v18.1`   Release-hardening evidence
+
+  `/api/v1/production-demo/v18.2`        Production E2E demonstration and audit
+                                         evidence
+
+  `/api/v1/control-plane/v18.3/runs`     Persistent execution run history
+
+  `/api/v1/analytics/v18.5/power-bi`     Power BI-friendly analytics dataset
+
+  `/api/v1/analytics/v18.5/excel.csv`    Excel-compatible analytics export
+  ------------------------------------------------------------------------------
 
 The platform also exposes APIs for authentication,
 conversations/messages, RAG/documents, Human Review, MCP, agents,
@@ -411,57 +515,59 @@ environment and operational checks.
 
 ## Engineering Principles
 
-- **Autonomous reasoning does not imply autonomous permission.**
-- High-risk or destructive operations remain policy- and approval-aware.
-- Governance, operational state, and release evidence should be
-  persisted and auditable.
-- Recovery is not complete until post-action verification succeeds.
-- Failover must preserve workflow context and remain idempotent across
-  retries/restarts.
-- Adaptive governance can recommend changes but must not silently apply
-  them.
-- Connector write access and agent trust are explicit runtime
-  boundaries.
-- Production readiness should be demonstrated with evidence, not
-  inferred from architecture alone.
-- Integration readiness must not be represented as a live external
-  integration.
-- Infrastructure preview must not be represented as deployed
-  infrastructure.
+-   **Autonomous reasoning does not imply autonomous permission.**
+-   High-risk or destructive operations remain policy- and
+    approval-aware.
+-   Governance, operational state, and release evidence should be
+    persisted and auditable.
+-   Recovery is not complete until post-action verification succeeds.
+-   Failover must preserve workflow context and remain idempotent across
+    retries/restarts.
+-   Adaptive governance can recommend changes but must not silently
+    apply them.
+-   Connector write access and agent trust are explicit runtime
+    boundaries.
+-   Production readiness should be demonstrated with evidence, not
+    inferred from architecture alone.
+-   Integration readiness must not be represented as a live external
+    integration.
+-   Infrastructure preview must not be represented as deployed
+    infrastructure.
 
 ## Documentation
 
 Useful entry points:
 
-- [`docs/architecture.md`](docs/architecture.md) — detailed architecture
-- [`docs/V12_SELF_HEALING_STAGE1_10.md`](docs/V12_SELF_HEALING_STAGE1_10.md)
-  — self-healing lifecycle
-- [`docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md`](docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md)
-  — adaptive governance
-- [`docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md`](docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md)
-  — compliance evidence
-- [`docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md`](docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md)
-  — cloud readiness
-- [`docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md`](docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md)
-  — evaluation and rollout
-- [`docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md`](docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md)
-  — connector governance
-- [`docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md`](docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md)
-  — trusted agents
-- [`docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md`](docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md)
-  — release hardening
-- [`docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md`](docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md)
-  — production E2E demonstration
-- [`docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md`](docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md)
-  — persistent run history
-- [`docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md`](docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md)
-  — Microsoft integration contracts
-- [`docs/V18_5_ENTERPRISE_ANALYTICS.md`](docs/V18_5_ENTERPRISE_ANALYTICS.md)
-  — enterprise analytics
-- [`docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md`](docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md)
-  — AWS deployment foundation
-- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) — API reference
-- [`docs/TESTING.md`](docs/TESTING.md) — testing guidance
+-   [`docs/architecture.md`](docs/architecture.md) --- detailed
+    architecture
+-   [`docs/V12_SELF_HEALING_STAGE1_10.md`](docs/V12_SELF_HEALING_STAGE1_10.md)
+    --- self-healing lifecycle
+-   [`docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md`](docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md)
+    --- adaptive governance
+-   [`docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md`](docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md)
+    --- compliance evidence
+-   [`docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md`](docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md)
+    --- cloud readiness
+-   [`docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md`](docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md)
+    --- evaluation and rollout
+-   [`docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md`](docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md)
+    --- connector governance
+-   [`docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md`](docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md)
+    --- trusted agents
+-   [`docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md`](docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md)
+    --- release hardening
+-   [`docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md`](docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md)
+    --- production E2E demonstration
+-   [`docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md`](docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md)
+    --- persistent run history
+-   [`docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md`](docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md)
+    --- Microsoft integration contracts
+-   [`docs/V18_5_ENTERPRISE_ANALYTICS.md`](docs/V18_5_ENTERPRISE_ANALYTICS.md)
+    --- enterprise analytics
+-   [`docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md`](docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md)
+    --- AWS deployment foundation
+-   [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) --- API reference
+-   [`docs/TESTING.md`](docs/TESTING.md) --- testing guidance
 
 ## Release Line
 
