@@ -30,7 +30,7 @@ jobs:
       PYTHONDONTWRITEBYTECODE: "1"
 
       APP_NAME: "RedPA AI"
-      APP_VERSION: "19.0.0"
+      APP_VERSION: "19.1.0"
       APP_ENV: "test"
       ENVIRONMENT: "development"
       DEBUG: "false"
@@ -183,7 +183,7 @@ jobs:
         run: |
             cat > .env << EOF
             APP_NAME=RedPA AI
-            APP_VERSION=19.0.0
+            APP_VERSION=19.1.0
             ENVIRONMENT=development
             DEBUG=false
             API_V1_PREFIX=/api/v1

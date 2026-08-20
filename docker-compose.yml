@@ -554,7 +554,7 @@ services:
     restart: unless-stopped
     environment:
       APP_NAME: ${APP_NAME:-RedPA AI}
-      APP_VERSION: "19.0.0"
+      APP_VERSION: "19.1.0"
       ENVIRONMENT: development
       DEBUG: ${DEBUG:-true}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
@@ -644,7 +644,7 @@ services:
         condition: service_started
     networks:
       - redpa-network
-  
+
   prometheus:
     image: prom/prometheus:latest
     container_name: redpa-prometheus

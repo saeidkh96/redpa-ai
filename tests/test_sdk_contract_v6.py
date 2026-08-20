@@ -62,8 +62,8 @@ def test_v6_async_client_and_release_version_contract():
     project = Path("sdk/python/pyproject.toml").read_text(encoding="utf-8")
     workflow = Path(".github/workflows/sdk-ci.yml").read_text(encoding="utf-8")
     assert "AsyncRedPA" in init_source
-    assert '__version__ = "19.0.0"' in init_source
-    assert 'version = "19.0.0"' in project
+    assert '__version__ = "19.1.0"' in init_source
+    assert 'version = "19.1.0"' in project
     assert 'python-version: ["3.11", "3.12", "3.13"]' in workflow
     assert "python -m build sdk/python" in workflow
 

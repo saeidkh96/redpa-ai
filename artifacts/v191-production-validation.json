@@ -1,0 +1,43 @@
+{
+    "release":  "19.1.0",
+    "validation_date":  "2026-08-20",
+    "aws":  {
+                "region":  "eu-central-1",
+                "pulumi_stack":  "dev",
+                "foundation_deployed":  true,
+                "post_deployment_preview_clean":  true,
+                "resources":  {
+                                  "vpc":  "vpc-0a9c18d53097caa21",
+                                  "ecs_cluster":  "redpa-cluster-92b2bc3",
+                                  "ecr_repository":  "redpa-backend-6ed7a5d",
+                                  "cloudwatch_log_group":  "redpa-logs-8520e6a"
+                              },
+                "application_workload_deployed":  false
+            },
+    "microsoft_governance":  {
+                                 "governed_approval_api":  true,
+                                 "authenticated_callback":  true,
+                                 "persistent_human_review":  true,
+                                 "postgres_persistence":  true,
+                                 "restart_persistence":  true,
+                                 "live_tenant_connection":  false,
+                                 "credentials_embedded":  false
+                             },
+    "governance_analytics":  {
+                                 "service_implemented":  true,
+                                 "api_registered":  true
+                             },
+    "database":  {
+                     "alembic_head":  "v280a1b2c3d4e"
+                 },
+    "validation":  {
+                       "baseline_regression_tests":  437,
+                       "baseline_regression_status":  "PASS",
+                       "secret_scan":  "PASS"
+                   },
+    "claims":  {
+                   "aws_foundation_real_deployment":  true,
+                   "full_public_aws_application_deployment":  false,
+                   "live_microsoft_tenant_connection":  false
+               }
+}

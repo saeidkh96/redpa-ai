@@ -1,3 +1,34 @@
+## [19.1.0] - 2026-08-20
+
+### Added
+
+- Real AWS development foundation deployment using Pulumi in `eu-central-1`.
+- AWS VPC, ECS cluster, ECR repository, and CloudWatch log group deployment validation.
+- Least-privilege AWS deployment policy for the V19.1 infrastructure foundation.
+- Microsoft governed approval integration boundary with persistent human-review state.
+- Authenticated approval decision callback with pending-to-approved lifecycle validation.
+- PostgreSQL-backed approval persistence validated across backend restart.
+- V19.1 enterprise governance analytics API and service.
+- V19.1 release finalization and production-validation tests.
+
+### Validated
+
+- AWS Pulumi foundation deployment: PASS.
+- Pulumi post-deployment preview: no infrastructure changes.
+- Microsoft governed approval persistence: PASS.
+- Authenticated approval callback: PASS.
+- Backend restart persistence: PASS.
+- Governance analytics targeted validation: PASS.
+- Full regression baseline prior to release finalization: 437 tests passed.
+- Secret scan: PASS.
+- Alembic database migration state: `v280a1b2c3d4e (head)`.
+
+### Boundaries
+
+- AWS foundation deployment does not claim that the complete RedPA application workload is publicly running on ECS.
+- Microsoft integration provides a Power-Automate-compatible governed approval boundary; no live Microsoft tenant connection is claimed.
+- No Microsoft credentials are embedded in the repository.
+
 ## [19.0.0] - 2026-08-20
 
 ### Added
