@@ -1,3 +1,4 @@
+from app.models.control_plane_v183 import AgentExecutionRun
 from app.models.platform_evolution import PlatformEvolutionRecord
 from app.models.policy_override_v10 import PolicyOverrideV10
 from app.models.governance_v10 import AgentRun, AgentRunEvent, AgentRunStatus

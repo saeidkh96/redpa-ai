@@ -1,0 +1,3 @@
+name: redpa-ai-aws
+runtime: python
+description: RedPA AI V19 AWS deployment foundation

@@ -7,6 +7,9 @@ import type { ReactNode } from "react";
 const nav = [
   ["Overview", "/control-plane"],
   ["E2E Demo", "/control-plane/demo"],
+  ["Run History", "/control-plane/run-history"],
+  ["Microsoft", "/control-plane/microsoft"],
+  ["Enterprise BI", "/control-plane/bi"],
   ["Agents", "/control-plane/agents"],
   ["Research", "/control-plane/research"],
   ["Analytics", "/control-plane/analytics"],
