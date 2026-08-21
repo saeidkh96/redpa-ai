@@ -135,13 +135,37 @@ backend_security_group = aws.ec2.SecurityGroup(
     "redpa-backend-sg",
     vpc_id=vpc.id,
     description="RedPA AI V19.2 backend runtime validation",
+    ingress=[],
+    egress=[
+        {
+            "protocol": "-1",
+            "from_port": 0,
+            "to_port": 0,
+            "cidr_blocks": ["0.0.0.0/0"],
+        }
+    ],
+    tags=project_tags,
+)
+
+
+# ------------------------------------------------------------
+# V19.4 controlled application ingress
+#
+# Phase A keeps the temporary direct :8000 ingress available
+# while ALB routing is validated.
+# ------------------------------------------------------------
+
+alb_security_group = aws.ec2.SecurityGroup(
+    "redpa-alb-sg",
+    vpc_id=vpc.id,
+    description="RedPA AI V19.4 public ALB ingress",
     ingress=[
         {
             "protocol": "tcp",
-            "from_port": 8000,
-            "to_port": 8000,
+            "from_port": 80,
+            "to_port": 80,
             "cidr_blocks": ["0.0.0.0/0"],
-            "description": "Temporary V19.2 public runtime validation",
+            "description": "HTTP ingress to RedPA ALB",
         }
     ],
     egress=[
@@ -152,7 +176,85 @@ backend_security_group = aws.ec2.SecurityGroup(
             "cidr_blocks": ["0.0.0.0/0"],
         }
     ],
-    tags=project_tags,
+    tags={
+        **project_tags,
+        "Name": "redpa-alb-sg",
+        "Tier": "ingress",
+    },
+)
+
+alb_to_backend_ingress = aws.ec2.SecurityGroupRule(
+    "redpa-alb-to-backend-8000",
+    type="ingress",
+    security_group_id=backend_security_group.id,
+    source_security_group_id=alb_security_group.id,
+    protocol="tcp",
+    from_port=8000,
+    to_port=8000,
+    description="RedPA ALB to ECS backend",
+)
+
+application_load_balancer = aws.lb.LoadBalancer(
+    "redpa-alb",
+    name="redpa-v194-alb",
+    load_balancer_type="application",
+    internal=False,
+    security_groups=[
+        alb_security_group.id,
+    ],
+    subnets=[
+        subnet_a.id,
+        subnet_b.id,
+    ],
+    enable_deletion_protection=False,
+    tags={
+        **project_tags,
+        "Name": "redpa-v194-alb",
+        "Tier": "ingress",
+    },
+)
+
+backend_target_group = aws.lb.TargetGroup(
+    "redpa-backend-tg",
+    name="redpa-v194-backend",
+    port=8000,
+    protocol="HTTP",
+    target_type="ip",
+    vpc_id=vpc.id,
+    deregistration_delay=30,
+    health_check={
+        "enabled": True,
+        "protocol": "HTTP",
+        "path": "/api/v1/platform/live",
+        "port": "traffic-port",
+        "healthy_threshold": 2,
+        "unhealthy_threshold": 3,
+        "interval": 30,
+        "timeout": 5,
+        "matcher": "200",
+    },
+    tags={
+        **project_tags,
+        "Name": "redpa-v194-backend",
+        "Tier": "ingress",
+    },
+)
+
+http_listener = aws.lb.Listener(
+    "redpa-http-listener",
+    load_balancer_arn=application_load_balancer.arn,
+    port=80,
+    protocol="HTTP",
+    default_actions=[
+        {
+            "type": "forward",
+            "target_group_arn": backend_target_group.arn,
+        }
+    ],
+    tags={
+        **project_tags,
+        "Name": "redpa-v194-http",
+    },
 )
 
 
@@ -253,7 +355,8 @@ database = aws.rds.Instance(
     publicly_accessible=False,
     multi_az=False,
     backup_retention_period=1,
-    deletion_protection=False,
+    deletion_protection=True,
+    copy_tags_to_snapshot=True,
     skip_final_snapshot=True,
     auto_minor_version_upgrade=True,
     apply_immediately=True,
@@ -495,6 +598,13 @@ service = aws.ecs.Service(
     name="redpa-backend-v192",
     cluster=cluster.arn,
     task_definition=task_definition.arn,
+    load_balancers=[
+        {
+            "target_group_arn": backend_target_group.arn,
+            "container_name": "redpa-backend",
+            "container_port": 8000,
+        }
+    ],
     desired_count=1,
     launch_type="FARGATE",
     network_configuration={
@@ -507,15 +617,214 @@ service = aws.ecs.Service(
         ],
         "assign_public_ip": True,
     },
-    deployment_minimum_healthy_percent=0,
-    deployment_maximum_percent=100,
+    deployment_circuit_breaker={
+        "enable": True,
+        "rollback": True,
+    },
+    health_check_grace_period_seconds=60,
+    availability_zone_rebalancing="ENABLED",
+    deployment_minimum_healthy_percent=100,
+    deployment_maximum_percent=200,
     tags=project_tags,
     opts=pulumi.ResourceOptions(
         depends_on=[
             route_a,
             route_b,
+            http_listener,
         ]
     ),
+)
+
+
+# ------------------------------------------------------------
+# V19.6 AWS observability
+#
+# CloudWatch alarms provide infrastructure-level visibility
+# across ECS, ALB, and RDS. Alarm actions are intentionally
+# omitted in this development validation environment; alarms
+# remain visible in CloudWatch without requiring SNS/email
+# notification infrastructure.
+# ------------------------------------------------------------
+
+ecs_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-ecs-cpu-high",
+    name="redpa-v196-ecs-cpu-high",
+    alarm_description=(
+        "RedPA ECS backend CPU utilization is above 80 percent."
+    ),
+    namespace="AWS/ECS",
+    metric_name="CPUUtilization",
+    statistic="Average",
+    period=300,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=80,
+    comparison_operator="GreaterThanThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "ClusterName": cluster.name,
+        "ServiceName": service.name,
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "ecs-cpu",
+    },
+)
+
+ecs_memory_high_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-ecs-memory-high",
+    name="redpa-v196-ecs-memory-high",
+    alarm_description=(
+        "RedPA ECS backend memory utilization is above 80 percent."
+    ),
+    namespace="AWS/ECS",
+    metric_name="MemoryUtilization",
+    statistic="Average",
+    period=300,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=80,
+    comparison_operator="GreaterThanThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "ClusterName": cluster.name,
+        "ServiceName": service.name,
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "ecs-memory",
+    },
+)
+
+alb_unhealthy_host_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-alb-unhealthy-host",
+    name="redpa-v196-alb-unhealthy-host",
+    alarm_description=(
+        "RedPA ALB has one or more unhealthy backend targets."
+    ),
+    namespace="AWS/ApplicationELB",
+    metric_name="UnHealthyHostCount",
+    statistic="Maximum",
+    period=60,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=1,
+    comparison_operator="GreaterThanOrEqualToThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "LoadBalancer": application_load_balancer.arn_suffix,
+        "TargetGroup": backend_target_group.arn_suffix,
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "alb-health",
+    },
+)
+
+alb_target_5xx_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-alb-target-5xx",
+    name="redpa-v196-alb-target-5xx",
+    alarm_description=(
+        "RedPA backend returned at least five HTTP 5xx responses "
+        "within a five-minute period."
+    ),
+    namespace="AWS/ApplicationELB",
+    metric_name="HTTPCode_Target_5XX_Count",
+    statistic="Sum",
+    period=300,
+    evaluation_periods=1,
+    datapoints_to_alarm=1,
+    threshold=5,
+    comparison_operator="GreaterThanOrEqualToThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "LoadBalancer": application_load_balancer.arn_suffix,
+        "TargetGroup": backend_target_group.arn_suffix,
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "alb-5xx",
+    },
+)
+
+alb_response_time_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-alb-response-time",
+    name="redpa-v196-alb-response-time",
+    alarm_description=(
+        "RedPA ALB target response time is above two seconds."
+    ),
+    namespace="AWS/ApplicationELB",
+    metric_name="TargetResponseTime",
+    statistic="Average",
+    period=300,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=2,
+    comparison_operator="GreaterThanThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "LoadBalancer": application_load_balancer.arn_suffix,
+        "TargetGroup": backend_target_group.arn_suffix,
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "alb-latency",
+    },
+)
+
+rds_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-rds-cpu-high",
+    name="redpa-v196-rds-cpu-high",
+    alarm_description=(
+        "RedPA PostgreSQL CPU utilization is above 80 percent."
+    ),
+    namespace="AWS/RDS",
+    metric_name="CPUUtilization",
+    statistic="Average",
+    period=300,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=80,
+    comparison_operator="GreaterThanThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "DBInstanceIdentifier": "redpa-v193-postgres",
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "rds-cpu",
+    },
+)
+
+rds_low_storage_alarm = aws.cloudwatch.MetricAlarm(
+    "redpa-rds-low-storage",
+    name="redpa-v196-rds-low-storage",
+    alarm_description=(
+        "RedPA PostgreSQL free storage is below two GiB."
+    ),
+    namespace="AWS/RDS",
+    metric_name="FreeStorageSpace",
+    statistic="Average",
+    period=300,
+    evaluation_periods=2,
+    datapoints_to_alarm=2,
+    threshold=2147483648,
+    comparison_operator="LessThanThreshold",
+    treat_missing_data="notBreaching",
+    dimensions={
+        "DBInstanceIdentifier": "redpa-v193-postgres",
+    },
+    tags={
+        **project_tags,
+        "Tier": "observability",
+        "Signal": "rds-storage",
+    },
 )
 
 
@@ -566,6 +875,26 @@ pulumi.export(
 pulumi.export(
     "backend_service_name",
     service.name,
+)
+
+pulumi.export(
+    "alb_dns_name",
+    application_load_balancer.dns_name,
+)
+
+pulumi.export(
+    "alb_arn",
+    application_load_balancer.arn,
+)
+
+pulumi.export(
+    "backend_target_group_arn",
+    backend_target_group.arn,
+)
+
+pulumi.export(
+    "alb_security_group",
+    alb_security_group.id,
 )
 
 pulumi.export(
