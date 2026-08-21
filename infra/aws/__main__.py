@@ -15,7 +15,7 @@ rds_password = config.require_secret("rds_password")
 project_tags = {
     "Project": "RedPA-AI",
     "Stack": stack,
-    "Release": "19.3.0",
+    "Release": "19.7.0",
 }
 
 
@@ -436,7 +436,7 @@ execution_role_attachment = aws.iam.RolePolicyAttachment(
 
 image_uri = ecr.repository_url.apply(
     lambda repository_url:
-        f"{repository_url}:v19.3.0"
+        f"{repository_url}:v19.7.0"
 )
 
 task_definition = aws.ecs.TaskDefinition(
@@ -475,7 +475,7 @@ task_definition = aws.ecs.TaskDefinition(
                         },
                         {
                             "name": "APP_VERSION",
-                            "value": "19.3.0",
+                            "value": "19.7.0",
                         },
                         {
                             "name": "ENVIRONMENT",

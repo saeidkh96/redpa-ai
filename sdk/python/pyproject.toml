@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "redpa-ai-sdk"
-version = "19.3.0"
+version = "19.7.0"
 description = "Python SDK and CLI for the RedPA AI agentic platform"
 readme = "README.md"
 requires-python = ">=3.11"

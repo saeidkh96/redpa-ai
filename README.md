@@ -31,7 +31,7 @@ integration controls, and trusted agent operations.
 ```{=html}
 <p align="center">
 ```
-`<img src="https://img.shields.io/badge/Release-v19.3.0-success" alt="Release">`{=html}
+`<img src="https://img.shields.io/badge/Release-v19.7.0-success" alt="Release">`{=html}
 `<img src="https://img.shields.io/badge/Python-3.13-blue" alt="Python">`{=html}
 `<img src="https://img.shields.io/badge/FastAPI-0.140.0-009688" alt="FastAPI">`{=html}
 `<img src="https://img.shields.io/badge/Next.js-16.3.0-black" alt="Next.js">`{=html}
@@ -66,7 +66,7 @@ integration target. Kubernetes/Helm, Azure/Pulumi, and AWS/Pulumi are
 deployment or infrastructure foundations unless explicitly validated
 otherwise.
 
-## Current Release --- v19.3.0
+## Current Release --- v19.7.0
 
 **V19 Enterprise Extension & AWS Cloud Deployment Foundation** extends
 the V18.2 production E2E baseline with persistent Control Plane run
@@ -623,7 +623,7 @@ http://localhost:8000/docs
 git clone https://github.com/saeidkh96/redpa-ai.git
 cd redpa-ai
 
-git checkout v19.3.0
+git checkout v19.7.0
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -765,17 +765,17 @@ Useful entry points:
 ## Release Line
 
 ``` text
-V1â€“V4.2    Agentic foundation â†’ distributed runtime â†’ enterprise governance â†’ production-oriented agentic systems
-V5â€“V8      Control Plane â†’ developer platform â†’ enterprise research â†’ enterprise operations
-V9â€“V10     Production operations â†’ governed agent runtime
+V1Ã¢â‚¬â€œV4.2    Agentic foundation Ã¢â€ â€™ distributed runtime Ã¢â€ â€™ enterprise governance Ã¢â€ â€™ production-oriented agentic systems
+V5Ã¢â‚¬â€œV8      Control Plane Ã¢â€ â€™ developer platform Ã¢â€ â€™ enterprise research Ã¢â€ â€™ enterprise operations
+V9Ã¢â‚¬â€œV10     Production operations Ã¢â€ â€™ governed agent runtime
 V11        Platform evolution foundation
-V12â€“V18    Self-healing â†’ adaptive governance â†’ compliance â†’ cloud readiness â†’ continuous evaluation â†’ integrations â†’ trusted agents
-V18.1      Production hardening â†’ release validation
-V18.2      Production E2E demonstration â†’ controlled failure â†’ real A2A fallback â†’ recovery â†’ evaluation â†’ audit evidence
-V18.3      Persistent Control Plane â†’ PostgreSQL run history â†’ fallback/recovery evidence
-V18.4      Microsoft enterprise integration contracts â†’ Power Automate approvals â†’ Copilot Studio REST actions
-V18.5      Enterprise analytics â†’ operational KPIs â†’ Power BI dataset â†’ Excel/CSV export
-V19        AWS deployment foundation â†’ Pulumi â†’ VPC â†’ ECS â†’ ECR â†’ CloudWatch â†’ preview validated
+V12Ã¢â‚¬â€œV18    Self-healing Ã¢â€ â€™ adaptive governance Ã¢â€ â€™ compliance Ã¢â€ â€™ cloud readiness Ã¢â€ â€™ continuous evaluation Ã¢â€ â€™ integrations Ã¢â€ â€™ trusted agents
+V18.1      Production hardening Ã¢â€ â€™ release validation
+V18.2      Production E2E demonstration Ã¢â€ â€™ controlled failure Ã¢â€ â€™ real A2A fallback Ã¢â€ â€™ recovery Ã¢â€ â€™ evaluation Ã¢â€ â€™ audit evidence
+V18.3      Persistent Control Plane Ã¢â€ â€™ PostgreSQL run history Ã¢â€ â€™ fallback/recovery evidence
+V18.4      Microsoft enterprise integration contracts Ã¢â€ â€™ Power Automate approvals Ã¢â€ â€™ Copilot Studio REST actions
+V18.5      Enterprise analytics Ã¢â€ â€™ operational KPIs Ã¢â€ â€™ Power BI dataset Ã¢â€ â€™ Excel/CSV export
+V19        AWS deployment foundation Ã¢â€ â€™ Pulumi Ã¢â€ â€™ VPC Ã¢â€ â€™ ECS Ã¢â€ â€™ ECR Ã¢â€ â€™ CloudWatch Ã¢â€ â€™ preview validated
 ```
 
 ## License

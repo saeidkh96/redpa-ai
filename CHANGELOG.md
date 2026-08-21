@@ -1,3 +1,37 @@
+## [19.7.0] - 2026-08-21
+
+### Added
+
+- AWS Application Load Balancer ingress for the ECS/Fargate backend.
+- ALB target group health routing with controlled backend security-group access.
+- CloudWatch alarms for ECS, ALB, and RDS operational signals.
+- Production-readiness evidence for ECS task self-recovery.
+- RDS automated-backup, encrypted-snapshot, and restore-window validation.
+
+### Changed
+
+- Closed direct public backend access on port 8000.
+- Enabled ECS deployment circuit breaker and automatic rollback.
+- Enabled ECS Availability Zone rebalancing.
+- Added a 60-second ECS health-check grace period.
+- Enabled RDS deletion protection and snapshot tag propagation.
+
+### Validation
+
+- ECS replacement after controlled task termination: PASS.
+- ALB replacement-target registration and health recovery: PASS.
+- Application liveness after task recovery: PASS.
+- RDS automated backup readiness: PASS.
+- RDS encrypted automated snapshot readiness: PASS.
+- CloudWatch alarm readiness: PASS.
+- Pulumi infrastructure drift: CLEAN.
+
+### Deployment boundary
+
+- The AWS deployment remains a development validation environment.
+- Amazon RDS remains single-AZ.
+- Automated RDS backup retention remains one day due to the current AWS account-tier limit.
+- HTTPS/custom-domain production ingress is not claimed.
 ## [19.3.0] - 2026-08-20
 
 ### Added
@@ -200,7 +234,7 @@
 
 # Changelog
 
-## V9.0.0 Ã¢â‚¬â€ Production Cloud & Autonomous Operations
+## V9.0.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Production Cloud & Autonomous Operations
 
 - added persisted incident and remediation action records;
 - added Docker-backed V9 Ops Agent with explicit approval and stateful-service denylist;
@@ -212,7 +246,7 @@
 - added V9 Alembic migration and contract tests;
 - aligned application, frontend, SDK, Helm and CI release metadata to `9.0.0`.
 
-## V8.0.0 Ã¢â‚¬â€ Enterprise AI Operations & Automation
+## V8.0.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Enterprise AI Operations & Automation
 
 - added generic analytics fact ingestion and KPI query engine with weighted aggregation;
 - added JSONB dimensional slicing and metric/dimension catalog discovery;
@@ -228,7 +262,7 @@
 - expanded sync/async SDK and CLI operations;
 - aligned current release metadata to `8.0.0`.
 
-## V7.0.0 Ã¢â‚¬â€ Enterprise Research
+## V7.0.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Enterprise Research
 
 - added persisted enterprise research runs and timeline events;
 - added background evidence-first execution using the existing Research Agent;
@@ -240,7 +274,7 @@
 - added V7 Alembic persistence and regression/contract tests;
 - aligned backend, Docker, frontend, SDK and Helm application metadata to `7.0.0`.
 
-## V6.0.0 Ã¢â‚¬â€ Developer Platform
+## V6.0.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Developer Platform
 
 ### Completed V6 surface
 
@@ -263,7 +297,7 @@
 - added SDK contract and HTTP mock tests.
 
 
-## V5.5.0 Ã¢â‚¬â€ Evaluation & Reliability
+## V5.5.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Evaluation & Reliability
 
 ### Batch 4
 
@@ -300,7 +334,7 @@
 - added `/control-plane/reliability` for baseline/candidate inspection.
 
 
-## V5.0.0 Ã¢â‚¬â€ Control Plane
+## V5.0.0 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Control Plane
 
 ### Added
 
