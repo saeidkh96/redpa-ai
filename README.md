@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.png" width="220" alt="RedPA AI">
+  <img src="docs/images/logo.png" width="210" alt="RedPA AI">
 </p>
 
 <h1 align="center">RedPA AI</h1>
@@ -10,8 +10,8 @@
 
 <p align="center">
   Governed multi-agent execution, RAG, MCP, A2A, Human-in-the-Loop,
-  policy enforcement, self-healing recovery, continuous evaluation,
-  enterprise analytics, and production-validated AWS infrastructure.
+  durable workflows, self-healing operations, continuous evaluation,
+  enterprise analytics, and validated AWS production infrastructure.
 </p>
 
 <p align="center">
@@ -30,184 +30,149 @@
 
 > **A production-oriented platform for building and validating governed Agentic AI systems with explicit policy, approval, reliability, recovery, audit, and observability boundaries.**
 
-RedPA AI explores a central production question:
+RedPA AI explores a practical production question:
 
 > **What should happen when autonomous agents are allowed to reason about — and potentially act on — real systems?**
 
-The platform separates **reasoning from permission**. Agents may plan, retrieve, delegate, evaluate, diagnose, and recommend actions, while high-risk or destructive operations remain behind explicit governance, policy, Human-in-the-Loop approval, verification, and audit boundaries.
+The platform separates **reasoning from permission**. Agents can plan, retrieve, delegate, evaluate, diagnose, and recommend actions, while high-risk operations remain behind explicit policy, Human-in-the-Loop approval, verification, and audit boundaries.
 
-RedPA AI is not only an LLM/RAG demo. It combines a governed Agentic AI runtime, durable state, multi-agent interoperability, operational recovery, enterprise integration contracts, analytics, observability, cloud infrastructure, and release validation.
+RedPA AI is more than an LLM or RAG demo. It combines an agent runtime, interoperability, durable state, governance, operational recovery, enterprise integration contracts, analytics, observability, and a validated AWS production deployment.
 
-## Current Release — v20.0.0
+## Architecture
 
-RedPA AI v20.0.0 promotes the validated AWS foundation into a dedicated **production Pulumi stack** while preserving the existing development stack without drift.
+<p align="center">
+  <img src="docs/images/architecture-v20.png" width="100%" alt="RedPA AI v20.0.0 Production Architecture">
+</p>
 
-V20 adds production-specific resource identities, runtime configuration, a validated release image, two-task steady-state ECS capacity, target-tracking autoscaling, SNS-backed CloudWatch alarm routing, and production startup hardening.
+The diagram above is the high-level V20 architecture. See [`docs/architecture.md`](docs/architecture.md) for the detailed system architecture and [`docs/V20_ENTERPRISE_PRODUCTION.md`](docs/V20_ENTERPRISE_PRODUCTION.md) for the production deployment boundary.
+
+## Why RedPA AI?
+
+Most agent demos stop after a model chooses a tool or generates an answer. RedPA AI focuses on what comes next when agentic behavior is introduced into systems where actions have operational consequences.
+
+The platform is designed around five ideas:
+
+- **Governed autonomy** — reasoning and permission are separate concerns.
+- **Durable execution** — workflow state, approvals, recovery, and execution evidence survive beyond a single request.
+- **Interoperability** — MCP provides a structured tool plane while A2A supports specialist-agent discovery and delegation.
+- **Operational safety** — diagnosis, remediation, failover, and self-healing remain policy-aware and verifiable.
+- **Production evidence** — deployment readiness is demonstrated through tests, health checks, runtime validation, infrastructure state, and auditable boundaries.
+
+## V20.0.0 — Enterprise Production
+
+V20 promotes the validated AWS foundation into a dedicated **production Pulumi stack** while preserving the development stack without drift.
+
+### Production highlights
+
+| Area | V20 capability |
+|---|---|
+| Runtime | Amazon ECS Fargate production service |
+| Capacity | 2-task steady state, autoscaling up to 4 |
+| Ingress | Application Load Balancer with controlled backend access |
+| Data | Private encrypted Amazon RDS PostgreSQL |
+| Images | Amazon ECR production image delivery |
+| Secrets | AWS Secrets Manager |
+| Scaling | CPU and memory target-tracking policies |
+| Observability | CloudWatch, Container Insights, production alarms |
+| Alerting | SNS-backed CloudWatch alarm routing |
+| IaC | Isolated Pulumi `dev` and `prod` stacks |
+| Runtime hardening | Production secrets, host validation, liveness contract |
 
 ### Validated production evidence
 
 ```text
-Full regression suite:          437 passed
-Release tag:                    v20.0.0
-Live AWS runtime version:       20.0.0
-Runtime environment:            production
-ECS desired / running:          2 / 2
-ECS pending:                    0
-ECS rollout:                    COMPLETED
-ECS failed tasks:               0
-ECS autoscaling range:          2–4 tasks
-ALB liveness:                   healthy
-RDS status:                     available
-RDS storage encrypted:          true
-RDS public access:              false
-RDS deletion protection:        true
-RDS Multi-AZ:                   false
-RDS backup retention:           1 day
-SNS production alert topic:     deployed
-CloudWatch alarm routing:       SNS-backed
-Pulumi production preview:      39 unchanged
-Development stack drift:        preserved / clean
+Regression suite:             437 passed
+Release:                      v20.0.0
+Live runtime version:         20.0.0
+Runtime environment:          production
+ECS desired / running:        2 / 2
+ECS pending:                  0
+ECS rollout:                  COMPLETED
+ECS failed tasks:             0
+Autoscaling range:            2–4 tasks
+ALB liveness:                 healthy
+RDS:                          private / encrypted / deletion-protected
+SNS production topic:         deployed
+CloudWatch alarm routing:     SNS-backed
+Pulumi production preview:    39 unchanged
+Development stack drift:      clean
 ```
 
-### Production runtime boundary
+Production traffic follows:
 
 ```text
-Internet
-   |
-   v
-Application Load Balancer :80
-   |
-   | security-group controlled ingress
-   v
-ECS / Fargate service
-   |
-   +-- minimum / desired: 2 tasks
-   +-- target-tracking scale-out: up to 4 tasks
-   +-- RedPA backend :8000
-   +-- Redis sidecar
-   |
-   v
+Client
+  |
+  v
+Application Load Balancer
+  |
+  v
+ECS / Fargate Service
+  |-- RedPA AI backend
+  |-- Redis runtime sidecar
+  |-- 2-task production floor
+  |-- target-tracking scale-out to 4
+  |
+  v
 Private Amazon RDS PostgreSQL
 ```
 
-The ALB remains the public application entry point; direct public access to backend port `8000` is not part of the production boundary.
+V20 does **not** claim infrastructure that has not been validated. Current boundaries include no custom-domain/HTTPS ingress, WAF, Multi-AZ RDS, regional failover, multi-region HA, or SLA/SLO-backed production traffic.
 
-### Production autoscaling
+## Platform Capabilities
 
-V20 registers the ECS service with AWS Application Auto Scaling:
+### 1. Agentic Runtime & Knowledge
 
-```text
-minimum capacity:        2
-maximum capacity:        4
-CPU target:              60%
-memory target:           70%
-scale-out cooldown:      60 seconds
-scale-in cooldown:       300 seconds
-```
-
-This provides service-level capacity elasticity while preserving a two-task steady-state production floor. It is not a claim of regional or multi-region HA.
-
-### Production alert routing
-
-Seven CloudWatch alarms cover ECS, ALB, and RDS signals and route alarm actions to the V20 production SNS topic. An email subscription is optional and configuration-driven; the committed production configuration does **not** claim an active email subscriber.
-
-### Production startup hardening
-
-V20 also validates the container startup contract for production:
-
-- production-specific `SECRET_KEY` / `JWT_SECRET_KEY`
-- URL-safe construction of the RDS connection string
-- explicit production `ALLOWED_HOSTS` sourced from the ALB DNS name
-- production liveness endpoint bypass for Redis-backed rate limiting
-- validated `20.0.0` container startup and `/api/v1/platform/live`
-- validated ECR release promotion from the tested RC image to `v20.0.0`
-
-### Current database boundary
-
-The production RDS instance is private, encrypted, deletion-protected, and backup-enabled. `Multi-AZ=false` and one-day backup retention remain explicit current boundaries. V20 therefore does not claim multi-AZ database HA, regional failover, or disaster-recovery objectives that have not been validated.
-
----
-
-## What RedPA AI Includes
-
-### Agentic Runtime
-
-- Planner / router
-- LangGraph workflows
-- research workflows
-- retrieval-augmented generation
+- Planner/router and LangGraph workflows
 - specialist-agent orchestration
-- durable execution
-- approval-aware continuation
-- persistent execution state
-- recovery-aware workflow handling
-
-### Retrieval and Memory
-
-- RAG pipelines
+- Retrieval-Augmented Generation
 - Qdrant vector retrieval
-- semantic memory
-- PostgreSQL-backed durable state
-- contextual retrieval for agents and workflows
+- semantic agent memory
+- durable and persistent execution state
+- approval-aware continuation
+- Model Gateway abstraction and routing
 
-### MCP Tool Plane
+### 2. MCP & A2A Interoperability
 
-RedPA uses MCP as a structured tool-execution boundary.
-
-Implemented MCP services include:
+**MCP tool plane**
 
 - filesystem
 - GitHub
 - PostgreSQL
 - Docker
+- typed capability discovery and controlled invocation
 
-The MCP plane focuses on capability discovery, typed arguments, controlled invocation, and tool execution.
-
-### A2A Agent Plane
-
-A2A is treated separately from MCP.
-
-The A2A layer supports:
+**A2A agent plane**
 
 - agent discovery
 - capability-based specialist selection
-- delegation
-- distributed / parallel work
+- delegation and parallel work
 - fallback execution
 - result aggregation
-- governed agent routing
+- governed routing
 
 Specialist services include research, PostgreSQL, Docker, filesystem, and GitHub agents.
 
-### Human-in-the-Loop
+### 3. Governance, Trust & Human Approval
 
-The Human Review flow supports:
-
-- approval
-- rejection
-- persisted review state
-- blocked execution
-- explicit resume
-- audit evidence
-- safe continuation after approval
-
-### Governed Runtime
-
-Governance is part of runtime state rather than a detached pre-request check.
-
-Core boundaries include:
-
-- policy evaluation
-- ALLOW / REVIEW / DENY outcomes
-- explicit approval gates
+- ALLOW / REVIEW / DENY policy outcomes
+- explicit Human-in-the-Loop approval
 - fail-closed execution
-- persisted audit evidence
+- persisted review and audit evidence
 - approval-aware resume
-- post-action verification
+- adaptive governance recommendations
+- shadow evaluation before policy changes
+- signed/trusted agent manifests and provenance
+- governance-compatible agent routing
+- security and compliance evidence lifecycle
 
-### Production Operations
+A core design principle is:
 
-The operations path covers:
+> **Autonomous reasoning does not imply autonomous permission.**
+
+### 4. Operations, Recovery & Self-Healing
+
+The governed operations path is:
 
 ```text
 Incident
@@ -221,318 +186,110 @@ Incident
   -> close / fail closed
 ```
 
-A dedicated Ops Agent supports incident diagnosis and remediation planning while potentially destructive side effects remain governed.
+The runtime also supports failure recording, health-aware replacement, approval-aware failover, context handoff, persisted recovery checkpoints, verification, controlled rejoin, and idempotent failover behavior.
 
-### Self-Healing Runtime
-
-RedPA includes self-healing behavior for agent/runtime failures:
-
-- failure recording
-- capability discovery
-- health-aware replacement
-- approval-aware failover
-- context handoff
-- replacement execution
-- verification
-- persisted checkpoints
-- controlled rejoin
-- idempotent failover behavior
-
-### Adaptive Governance
-
-Adaptive governance converts runtime signals into auditable recommendations.
-
-It can:
-
-- aggregate historical signals
-- generate policy recommendations
-- calculate risk/confidence
-- create versioned proposals
-- perform shadow evaluation
-- require explicit review/apply
-- support rollback
-
-Recommendations are not silently auto-applied.
-
-### Security and Compliance Evidence
-
-The compliance lifecycle includes:
-
-- versioned controls
-- evidence collection
-- completeness checks
-- SHA-256 integrity
-- freshness / expiry
-- risk assessment
-- approval boundaries
-- persisted audit records
-- export / validation gates
-
-### Continuous Evaluation
-
-The evaluation layer supports:
+### 5. Evaluation, Analytics & Enterprise Integration
 
 - baseline vs candidate evaluation
-- quality evaluation
-- safety evaluation
-- regression analysis
-- shadow evaluation
-- rollout decisions
-- rollback capability
-- validation gates
-
-### Trusted Agent Registry
-
-Trusted-agent routing considers:
-
-- agent identity
-- signed manifests
-- provenance
-- declared capabilities
-- health
-- governance compatibility
-- policy profile
-- trust score/state
-- routing eligibility
-
-### Enterprise Integration Hub
-
-RedPA treats external integrations as governed capabilities.
-
-Connector controls cover:
-
-- authentication scope
-- secret handling
-- network access
-- write access
-- rate limits
-- audit
-- risk assessment
-- approval requirements
-- validation gates
-
-### Microsoft Enterprise Integration Readiness
-
-The repository includes contract/readiness support for:
-
-- Power Automate approval flows
-- `requires_approval=true` semantics
-- Copilot Studio REST actions
-- platform summary actions
-- agent status actions
-- incident summary actions
-
-This is integration readiness and contract support. It does **not** claim a live Power Automate, Copilot Studio, Microsoft 365, Teams, Outlook, or tenant connection.
-
-### Persistent Run History
-
-RedPA persists execution history in PostgreSQL:
-
-- run records
-- trace IDs
-- primary/fallback agent data
+- quality, safety, and regression evaluation
+- shadow evaluation and rollout decisions
+- persistent run history and trace IDs
 - fallback/recovery evidence
-- latency
-- evaluation scores
-- execution summaries
-- Control Plane run-history visibility
-
-### Enterprise Analytics
-
-Analytics are derived from persisted execution history and expose:
-
-- operational KPI summaries
-- success / fallback / recovery metrics
-- latency
-- evaluation scores
-- policy-denial visibility
+- latency and evaluation KPIs
 - agent reliability signals
 - Power BI-friendly JSON
 - Excel-compatible CSV
+- governed connector contracts
+- Power Automate approval-flow readiness
+- Copilot Studio REST-action readiness
 
-### Model Gateway
+Microsoft integration support represents **contract/readiness support**, not a claim of a live Microsoft 365, Teams, Outlook, Power Automate, or Copilot Studio tenant connection.
 
-The Model Gateway provides an abstraction boundary between platform logic and model providers.
+### 6. Observability & Developer Platform
 
-It supports:
-
-- provider abstraction
-- routing
-- model status
-- provider-specific adapters
-- economics / usage considerations
-- controlled model-facing integration
-
-### Observability
-
-Application-level observability includes:
+**Observability**
 
 - Prometheus
 - Grafana
 - OpenTelemetry
 - Tempo
-- structured logs
-- request metrics
-- operational metrics
-- evaluation metrics
-- governance metrics
+- structured logging
+- request, operational, evaluation, and governance metrics
+- AWS CloudWatch and Container Insights
 
-AWS infrastructure observability is documented separately and uses CloudWatch and Container Insights.
-
-### Developer Platform
+**Developer platform**
 
 - FastAPI REST API
+- Next.js Control Plane
 - Python SDK
-- CLI
-- examples
+- CLI and examples
 - Docker Compose
-- Helm chart
-- Kubernetes deployment path
+- Kubernetes and Helm deployment assets
 - Pulumi AWS infrastructure
 - Pulumi Azure infrastructure path
 
----
+## Technology Stack
 
-## Architecture
+| Layer | Technologies |
+|---|---|
+| Agentic AI | LangGraph, LangChain, RAG, MCP, A2A |
+| Backend | Python, FastAPI, Pydantic |
+| Frontend | Next.js, TypeScript |
+| Data | PostgreSQL, Qdrant, Redis |
+| AI runtime | Model Gateway, provider adapters, embeddings |
+| Observability | Prometheus, Grafana, OpenTelemetry, Tempo, CloudWatch |
+| Cloud | AWS ECS/Fargate, ALB, RDS, ECR, Secrets Manager, SNS |
+| Infrastructure | Pulumi, Docker, Docker Compose, Kubernetes, Helm |
+| Delivery | Git, GitHub Actions, CI/CD |
 
-<p align="center">
-  <img src="docs/images/architecture-v20.png" width="100%" alt="RedPA AI v20.0.0 Architecture">
-</p>
+## Showcase
 
+V20 is designed to demonstrate a governed agent lifecycle rather than only a chatbot interaction.
 
+A representative end-to-end scenario is:
 
-The canonical architecture is documented in [`docs/architecture.md`](docs/architecture.md).
-
-```mermaid
-flowchart TB
-    Client["Control Plane / SDK / CLI / REST Clients"]
-
-    subgraph AWS["AWS Runtime"]
-        ALB["Application Load Balancer"]
-        ECS["ECS / Fargate"]
-        CW["CloudWatch / Container Insights"]
-        SM["Secrets Manager"]
-        RDS[("Private RDS PostgreSQL")]
-    end
-
-    subgraph Platform["Platform API"]
-        API["FastAPI"]
-        Auth["Authentication / RBAC"]
-        Audit["Audit / Evidence"]
-    end
-
-    subgraph Runtime["Governed Agent Runtime"]
-        Router["Planner / Router"]
-        LG["LangGraph Workflows"]
-        HITL["Human-in-the-Loop"]
-        Policy["Policy / Governance"]
-        Ops["Ops Agent"]
-        Eval["Evaluation"]
-    end
-
-    subgraph AgentMesh["Agent & Tool Plane"]
-        MCP["MCP Services"]
-        A2A["A2A Coordinator / Specialists"]
-        RAG["RAG"]
-        Q[("Qdrant")]
-        Gateway["Model Gateway"]
-    end
-
-    subgraph State["State & Coordination"]
-        PG[("PostgreSQL")]
-        Redis[("Redis / Streams")]
-        History["Persistent Run History"]
-    end
-
-    Client --> ALB
-    ALB --> ECS
-    ECS --> API
-
-    API --> Auth
-    API --> Audit
-    API --> Router
-
-    Router --> LG
-    Router --> HITL
-    Router --> Policy
-    Router --> Ops
-    Router --> MCP
-    Router --> A2A
-    Router --> RAG
-    Router --> Gateway
-
-    RAG --> Q
-
-    API --> PG
-    LG --> PG
-    LG --> Redis
-    LG --> History
-    History --> PG
-
-    ECS --> RDS
-    ECS --> CW
-    ECS --> SM
+```text
+User / Operator Request
+        |
+        v
+Planner / Router
+        |
+        +--> RAG / Memory
+        +--> MCP Tools
+        +--> A2A Specialist Agents
+        |
+        v
+Policy / Governance
+        |
+   +----+----+
+   |         |
+ ALLOW     REVIEW
+   |         |
+   |       Human Approval
+   |         |
+   +----+----+
+        |
+        v
+Controlled Execution
+        |
+        v
+Evaluation / Verification
+        |
+        v
+Persistent Evidence + Observability
 ```
 
----
-
-## Platform Evolution
-
-| Release | Capability | Core boundary |
-|---|---|---|
-| V1–V4.2 | Agentic foundation | orchestration, RAG, platform foundations |
-| V5–V8 | Control Plane & developer platform | operator UI, SDK, enterprise workflows |
-| V9 | Production operations | incident diagnosis, remediation, verification |
-| V10 | Governed agent runtime | policy-aware execution and approval |
-| V11 | Platform evolution | cross-version evolution foundation |
-| V12 | Self-healing runtime | failure, replacement, verification, rejoin |
-| V13 | Adaptive governance | recommendation-first policy evolution |
-| V14 | Security & compliance | evidence, risk, approval, audit |
-| V15 | Cloud readiness | explicit production/cloud readiness gates |
-| V16 | Continuous evaluation | baseline/candidate evaluation and rollout |
-| V17 | Enterprise integration hub | governed connector boundaries |
-| V18 | Trusted agents | identity, provenance, health, trust-aware routing |
-| V18.1 | Production hardening | release evidence and production gates |
-| V18.2 | Production E2E | controlled failure, A2A fallback, recovery |
-| V18.3 | Persistent run history | PostgreSQL execution evidence |
-| V18.4 | Microsoft readiness | Power Automate / Copilot Studio contracts |
-| V18.5 | Enterprise analytics | KPIs, Power BI JSON, Excel/CSV |
-| V19.0–V19.3 | AWS runtime/data foundation | VPC, ECS/Fargate, ECR, RDS, Secrets |
-| V19.4 | Controlled ingress | ALB and backend exposure boundary |
-| V19.5 | Resilience | ECS rollback/rebalancing and RDS hardening |
-| V19.6 | AWS observability | CloudWatch alarms and infrastructure telemetry |
-| V19.7 | Production-readiness validation | failure recovery, backup readiness, validated AWS runtime |
-| **V20.0** | **Enterprise production deployment** | **dedicated prod stack, 2–4 ECS autoscaling, SNS alert routing, production runtime hardening** |
-
----
+Demo screenshots and a short end-to-end walkthrough can be added here without changing the architecture or release contract.
 
 ## Runtime Topology
 
-The main Docker Compose integration stack includes:
-
-- FastAPI backend
-- Next.js Control Plane
-- PostgreSQL
-- Qdrant
-- Redis
-- Spring Boot Policy Service
-- MCP services
-- A2A coordinator
-- specialist agents
-- Ops Agent
-- background workers
-- scheduler
-- outbox/event publisher
-- Prometheus
-- Grafana
-- OpenTelemetry Collector
-- Tempo
+The main Docker Compose integration stack includes FastAPI, the Next.js Control Plane, PostgreSQL, Qdrant, Redis, the Spring Boot Policy Service, MCP services, the A2A coordinator and specialist agents, Ops Agent, background workers, scheduler/outbox components, Prometheus, Grafana, OpenTelemetry Collector, and Tempo.
 
 ### Primary local endpoints
 
 | Service | Port |
 |---|---:|
-| FastAPI backend / Swagger | `8000` |
+| FastAPI / Swagger | `8000` |
 | Next.js Control Plane | `3001` |
 | Spring Boot Policy Service | `8090` |
 | Filesystem MCP | `8010` |
@@ -546,38 +303,23 @@ The main Docker Compose integration stack includes:
 | Filesystem Agent | `8064` |
 | GitHub Agent | `8065` |
 
----
-
-## API Surface
-
-Selected APIs include:
+## Selected API Surface
 
 | API | Purpose |
 |---|---|
 | `/api/v1/governance/v10` | Governed execution lifecycle |
 | `/api/v1/operations/v9` | Production operations and remediation |
-| `/api/v1/platform/evolution` | Platform evolution records |
 | `/api/v1/adaptive-governance/v13` | Policy recommendations |
-| `/api/v1/security-compliance/v14` | Compliance controls/evidence |
-| `/api/v1/cloud-readiness/v15` | Cloud readiness |
+| `/api/v1/security-compliance/v14` | Compliance controls and evidence |
 | `/api/v1/continuous-evaluation/v16` | Evaluation and rollout decisions |
 | `/api/v1/enterprise-integration/v17` | Connector governance |
-| `/api/v1/trusted-agents/v18` | Trusted agent assessment |
-| `/api/v1/production-hardening/v18.1` | Release-hardening evidence |
+| `/api/v1/trusted-agents/v18` | Trusted-agent assessment |
 | `/api/v1/production-demo/v18.2` | Production E2E demonstration |
 | `/api/v1/control-plane/v18.3/runs` | Persistent run history |
 | `/api/v1/analytics/v18.5/power-bi` | Power BI-friendly analytics |
 | `/api/v1/analytics/v18.5/excel.csv` | Excel-compatible export |
 
-The platform also exposes authentication, conversations/messages, RAG/documents, Human Review, MCP, agents, memory, evaluations, events, policy, model-gateway, analytics, connector, and health endpoints.
-
-Swagger UI:
-
-```text
-http://localhost:8000/docs
-```
-
----
+The platform additionally exposes authentication, conversations/messages, documents/RAG, Human Review, MCP, agents, memory, model-gateway, events, policy, analytics, connector, and health endpoints.
 
 ## Quick Start
 
@@ -604,20 +346,12 @@ docker exec redpa-backend alembic `
   -c /app/backend/alembic.ini upgrade head
 ```
 
-Current validated Alembic head:
-
-```text
-v280a1b2c3d4e
-```
-
 Open:
 
 ```text
 API docs:      http://localhost:8000/docs
 Control Plane: http://localhost:3001
 ```
-
----
 
 ## Validation
 
@@ -627,13 +361,13 @@ Run the regression suite:
 python -m pytest tests -q
 ```
 
-Validated V20.0 result:
+Validated V20 result:
 
 ```text
 437 passed
 ```
 
-Run the secret scan:
+Run the committed-secret scanner:
 
 ```powershell
 python scripts/security/secret_scan.py
@@ -651,73 +385,71 @@ Validate AWS IaC syntax:
 python -m py_compile infra/aws/__main__.py
 ```
 
-Validate Pulumi state:
-
-```powershell
-cd infra/aws
-pulumi preview
-```
-
-Current validated result:
+For the production Pulumi stack, the final release validation reported:
 
 ```text
 Resources:
     39 unchanged
 ```
 
----
+Infrastructure preview is evidence of IaC state only; it should not be represented as deployment unless the runtime has also been validated. V20 includes both deployed-runtime and drift-validation evidence.
 
 ## Deployment Boundaries
 
 ### Docker Compose
 
-The strongest integrated local runtime target.
+The strongest integrated local runtime target, combining the platform API, Control Plane, state services, agent/tool services, policy service, and observability stack.
 
 ### AWS / Pulumi
 
-V20.0.0 is deployed and validated in AWS using a dedicated `prod` Pulumi stack in `eu-central-1`, alongside the preserved `dev` stack. The production runtime uses ECS/Fargate, ECR, ALB, private encrypted RDS PostgreSQL, Secrets Manager, CloudWatch, SNS, Application Auto Scaling, and Pulumi.
+V20.0.0 is deployed and validated in AWS using a dedicated `prod` Pulumi stack in `eu-central-1`, alongside the preserved `dev` stack.
 
-Validated claims include:
+Validated production characteristics include:
 
-- live ECS/Fargate runtime
-- ALB controlled ingress
-- direct public backend access closed
+- ECS/Fargate runtime and ALB-controlled ingress
 - healthy target routing
-- ECS task self-recovery
-- deployment circuit breaker
-- automatic rollback
-- AZ rebalancing
-- RDS encryption
-- RDS private access
-- deletion protection
-- automated backup metadata
-- restore window
-- encrypted automated snapshots
-- CloudWatch alarms
-- Container Insights
+- direct public backend access closed
+- ECS recovery, deployment circuit breaker, rollback, and AZ rebalancing
+- private encrypted RDS with deletion protection
+- automated backup metadata and restore window
+- CloudWatch alarms and Container Insights
+- SNS-backed alarm actions
+- ECS Application Auto Scaling
 - clean Pulumi drift state
 
-Not currently claimed:
-
-- HTTPS/custom-domain ingress
-- AWS WAF
-- Route53 production DNS
-- ACM certificate integration
-- NAT Gateway private egress architecture
-- Multi-AZ RDS
-- regional failover
-- multi-region HA
-- SLA/SLO-backed production traffic
+The current deployment does not claim HTTPS/custom-domain ingress, WAF, Route 53 production DNS, ACM integration, NAT Gateway private-egress architecture, Multi-AZ RDS, regional failover, multi-region HA, or SLA/SLO-backed traffic.
 
 ### Kubernetes / Helm
 
-The repository contains Kubernetes and Helm deployment assets. They represent a deployment path, not proof of a currently running production cluster.
+The repository contains Kubernetes and Helm deployment assets. They represent a deployment path, not proof of a currently running production Kubernetes cluster.
 
 ### Azure / Pulumi
 
-Azure infrastructure modules remain part of the multi-cloud deployment foundation. They should be treated as infrastructure/reference assets unless separately validated against a live Azure target.
+Azure infrastructure modules remain part of the multi-cloud foundation and should be treated as infrastructure/reference assets unless separately validated against a live Azure target.
 
----
+## Release Evolution
+
+| Release | Main milestone |
+|---|---|
+| V1–V4.2 | Agentic foundation, RAG, orchestration, platform foundations |
+| V5–V8 | Control Plane, developer platform, research and enterprise workflows |
+| V9 | Production operations |
+| V10 | Governed agent runtime |
+| V11 | Platform evolution foundation |
+| V12 | Self-healing runtime |
+| V13 | Adaptive governance |
+| V14 | Security and compliance |
+| V15 | Cloud readiness |
+| V16 | Continuous evaluation |
+| V17 | Enterprise integration hub |
+| V18 | Trusted agents |
+| V18.1–V18.5 | Production hardening, E2E recovery, run history, Microsoft readiness, analytics |
+| V19.0–V19.3 | AWS runtime and managed-data foundation |
+| V19.4 | Controlled ALB ingress |
+| V19.5 | ECS/RDS resilience hardening |
+| V19.6 | AWS observability |
+| V19.7 | Failure recovery and production-readiness validation |
+| **V20.0** | **Enterprise production stack, autoscaling, alert routing, runtime hardening** |
 
 ## Engineering Principles
 
@@ -725,64 +457,53 @@ Azure infrastructure modules remain part of the multi-cloud deployment foundatio
 - High-risk operations remain policy- and approval-aware.
 - Governance state and release evidence should be persisted and auditable.
 - Recovery is incomplete until post-action verification succeeds.
-- Failover must preserve context and remain idempotent.
-- Adaptive governance can recommend changes but must not silently apply them.
+- Failover should preserve context and remain idempotent.
+- Adaptive governance may recommend changes but must not silently apply them.
 - Connector write access and agent trust are explicit runtime boundaries.
 - Evaluation precedes rollout.
 - Deployment readiness must be demonstrated with evidence.
 - Integration readiness must not be represented as a live integration.
 - Infrastructure preview must not be represented as deployment.
-- Cloud deployment must not be represented as HA beyond what is actually validated.
-
----
+- Cloud deployment must not be represented as HA beyond what has actually been validated.
 
 ## Documentation
 
-Key entry points:
+| Document | Purpose |
+|---|---|
+| [`docs/architecture.md`](docs/architecture.md) | Detailed platform architecture |
+| [`docs/V20_ENTERPRISE_PRODUCTION.md`](docs/V20_ENTERPRISE_PRODUCTION.md) | V20 AWS production deployment |
+| [`docs/releases/V20.0.0.md`](docs/releases/V20.0.0.md) | V20 release notes |
+| [`docs/roadmap.md`](docs/roadmap.md) | Platform roadmap |
+| [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) | API reference |
+| [`docs/TESTING.md`](docs/TESTING.md) | Testing and validation |
+| [`infra/aws/README.md`](infra/aws/README.md) | AWS/Pulumi infrastructure |
+| [`docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md`](docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md) | Historical V19 cloud foundation |
 
-- [`docs/architecture.md`](docs/architecture.md) — detailed architecture
-- [`docs/V12_SELF_HEALING_STAGE1_10.md`](docs/V12_SELF_HEALING_STAGE1_10.md)
-- [`docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md`](docs/V13_ADAPTIVE_GOVERNANCE_STAGE1_10.md)
-- [`docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md`](docs/V14_SECURITY_COMPLIANCE_STAGE1_10.md)
-- [`docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md`](docs/V15_PRODUCTION_CLOUD_PLATFORM_STAGE1_10.md)
-- [`docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md`](docs/V16_AGENT_EVALUATION_AND_CONTINUOUS_IMPROVEMENT_STAGE1_10.md)
-- [`docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md`](docs/V17_ENTERPRISE_INTEGRATION_HUB_STAGE1_10.md)
-- [`docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md`](docs/V18_TRUSTED_AGENT_REGISTRY_STAGE1_10.md)
-- [`docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md`](docs/V18_1_PRODUCTION_HARDENING_STAGE1_10.md)
-- [`docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md`](docs/V18_2_PRODUCTION_E2E_DEMO_STAGE1_10.md)
-- [`docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md`](docs/V18_3_CONTROL_PLANE_RUN_HISTORY.md)
-- [`docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md`](docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md)
-- [`docs/V18_5_ENTERPRISE_ANALYTICS.md`](docs/V18_5_ENTERPRISE_ANALYTICS.md)
-- [`docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md`](docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md)
-- [`docs/releases/V19.7.0.md`](docs/releases/V19.7.0.md)
-- [`docs/releases/V20.0.0.md`](docs/releases/V20.0.0.md)
-- [`docs/V20_ENTERPRISE_PRODUCTION.md`](docs/V20_ENTERPRISE_PRODUCTION.md)
-- [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)
-- [`docs/TESTING.md`](docs/TESTING.md)
+Detailed milestone documentation for V12–V18.5 remains under [`docs/`](docs/).
 
----
-
-## Release Line
+## Repository Structure
 
 ```text
-V1–V4.2     Agentic foundation → distributed runtime → governance
-V5–V8       Control Plane → developer platform → research → enterprise operations
-V9–V10      Production operations → governed agent runtime
-V11         Platform evolution foundation
-V12–V18     Self-healing → adaptive governance → compliance → cloud readiness
-            → continuous evaluation → integration governance → trusted agents
-V18.1       Production hardening
-V18.2       Production E2E demonstration
-V18.3       Persistent run history
-V18.4       Microsoft integration readiness
-V18.5       Enterprise analytics
-V19.0–19.3  AWS runtime and managed data foundation
-V19.4       Controlled ALB ingress
-V19.5       ECS/RDS resilience hardening
-V19.6       AWS observability
-V19.7       Failure recovery + production-readiness validation
-V20.0       Enterprise production stack + autoscaling + alert routing + runtime hardening
+redpa-ai/
+├── backend/              FastAPI platform and agent runtime
+├── frontend/             Next.js Control Plane
+├── infra/
+│   ├── aws/              Pulumi AWS infrastructure
+│   └── azure/            Azure infrastructure path
+├── docs/                 Architecture, releases and milestone documentation
+├── tests/                Regression and platform validation
+├── scripts/              Security, operations and validation tooling
+├── sdk/                  Developer SDK
+├── helm/                 Helm deployment assets
+├── .github/              CI/CD workflows
+└── docker-compose.yml    Integrated local runtime
 ```
+
+## Author
+
+**Saeid Khalilian**
+
+RedPA AI is an engineering portfolio project focused on Agentic AI architecture, production-oriented backend systems, governance, reliability, observability, and cloud infrastructure.
 
 ## License
 
