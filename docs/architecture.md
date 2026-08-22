@@ -1,4 +1,4 @@
-# RedPA AI v19.7.0 Architecture
+# RedPA AI v20.0.0 Architecture
 
 RedPA AI is a production-oriented, governed Agentic AI platform built around explicit execution, governance, reliability, recovery, interoperability, audit, evaluation, and infrastructure boundaries.
 
@@ -8,9 +8,9 @@ The central architectural rule is:
 
 An agent may reason, retrieve, delegate, diagnose, evaluate, and recommend an action without automatically being authorized to perform a destructive or high-risk side effect.
 
-## Architecture Scope — v19.7.0
+## Architecture Scope — v20.0.0
 
-RedPA AI v19.7.0 combines:
+RedPA AI v20.0.0 combines:
 
 - FastAPI platform APIs
 - Next.js Control Plane
@@ -37,6 +37,8 @@ RedPA AI v19.7.0 combines:
 - AWS Application Load Balancer
 - Amazon RDS PostgreSQL
 - AWS Secrets Manager
+- Amazon SNS
+- AWS Application Auto Scaling
 - CloudWatch
 - ECS Container Insights
 - Pulumi IaC
@@ -506,126 +508,105 @@ flowchart LR
     Analytics --> CSV
 ```
 
-## 16. AWS Runtime Architecture — v19.7
+## 16. AWS Production Runtime Architecture — v20.0
 
 ```mermaid
 flowchart TB
     Internet["Internet"]
 
-    subgraph AWS["AWS eu-central-1"]
+    subgraph AWS["AWS eu-central-1 / prod stack"]
         ALB["Application Load Balancer :80"]
         ALBSG["ALB Security Group"]
-
-        subgraph ECS["ECS / Fargate"]
-            Backend["redpa-backend :8000"]
-            Redis["Redis sidecar"]
-        end
-
-        BackendSG["Backend Security Group"]
-        RDS[("Private RDS PostgreSQL 18.3")]
+        ECR["Amazon ECR / v20.0.0"]
         Secrets["AWS Secrets Manager"]
-        ECR["Amazon ECR"]
+        RDS[("Private RDS PostgreSQL")]
         Logs["CloudWatch Logs"]
         Alarms["7 CloudWatch Alarms"]
+        SNS["SNS production alert topic"]
+        Scaling["Application Auto Scaling
+min 2 / max 4"]
         Insights["ECS Container Insights"]
-        Pulumi["Pulumi"]
+        Pulumi["Pulumi prod stack"]
+
+        subgraph ECS["ECS / Fargate service"]
+            TaskA["Backend + Redis sidecar"]
+            TaskB["Backend + Redis sidecar"]
+            Extra["Scale-out tasks up to 4"]
+        end
     end
 
-    Internet --> ALB
-    ALB --> ALBSG
-    ALBSG -->|only allowed backend ingress :8000| BackendSG
-    BackendSG --> Backend
-
-    Backend --> RDS
-    Backend --> Redis
-    Backend --> Secrets
-    ECR --> Backend
-
-    Backend --> Logs
-    Backend --> Insights
+    Internet --> ALB --> ALBSG
+    ALBSG -->|backend :8000 only| TaskA
+    ALBSG -->|backend :8000 only| TaskB
+    ECR --> TaskA
+    ECR --> TaskB
+    Secrets --> TaskA
+    Secrets --> TaskB
+    TaskA --> RDS
+    TaskB --> RDS
+    Scaling -. controls desired count .-> ECS
+    Alarms --> SNS
     Alarms -. monitors .-> ECS
     Alarms -. monitors .-> ALB
     Alarms -. monitors .-> RDS
-
-    Pulumi -. manages .-> ALB
-    Pulumi -. manages .-> ECS
-    Pulumi -. manages .-> RDS
-    Pulumi -. manages .-> ECR
-    Pulumi -. manages .-> Secrets
-    Pulumi -. manages .-> Logs
-    Pulumi -. manages .-> Alarms
+    ECS --> Logs
+    ECS --> Insights
+    Pulumi -. manages .-> AWS
 ```
 
-### Validated ingress properties
+### Validated production properties
 
-- ALB is the public application entry point.
-- Backend port `8000` is not directly public.
-- Backend ingress allows ALB security group traffic to port `8000`.
-- ALB target health is validated.
-- HTTP liveness through the ALB is validated.
+- dedicated Pulumi `prod` stack, separate from the preserved `dev` stack
+- production-specific physical resource identities
+- ALB as the public application entry point
+- backend port `8000` restricted to the ALB security group path
+- two-task steady-state ECS service
+- target-tracking ECS autoscaling from 2 to 4 tasks
+- CPU target 60% and memory target 70%
+- deployment circuit breaker and rollback behavior retained
+- private encrypted RDS with deletion protection
+- production secrets supplied through Pulumi/AWS secret boundaries
+- ECR release image `v20.0.0` promoted from the validated RC artifact
+- seven CloudWatch alarms with SNS alarm actions
+- final production Pulumi preview: `39 unchanged`
 
-HTTPS, ACM, Route53 production DNS, WAF, NAT Gateway architecture, and custom-domain ingress are not currently claimed.
+HTTPS/custom-domain ingress, ACM, Route53 production DNS, WAF, Multi-AZ RDS, regional failover, multi-region HA, and an SLA/SLO are not claimed by V20.
 
-## 17. Failure and Recovery Model
+## 17. Production Runtime and Release Validation
 
-A controlled task-level failure was executed against the live V19.7 AWS development environment.
-
-```mermaid
-flowchart TB
-    Healthy["Healthy ECS Task"]
-    Stop["Controlled Task Termination"]
-    Desired["ECS detects desired-count violation"]
-    Replacement["Replacement Fargate Task"]
-    Container["Container HEALTHY"]
-    Register["ALB registers replacement target"]
-    Live["Application liveness restored"]
-    Steady["ECS steady state"]
-
-    Healthy --> Stop --> Desired --> Replacement --> Container --> Register --> Live --> Steady
-```
-
-Observed behavior:
-
-- previous task intentionally stopped
-- replacement task automatically created
-- replacement container became `HEALTHY`
-- ALB target became healthy
-- application liveness returned successfully
-- service returned to `desired=1`, `running=1`, `pending=0`
-- rollout returned to `COMPLETED`
-
-This validates task-level self-recovery, not regional HA.
-
-## 18. Database Recovery Readiness
-
-V19.7 validates the following RDS properties:
+V20 validated the production startup and rollout path before final release publication:
 
 ```text
-Engine:                   PostgreSQL 18.3
-Status:                   available
-Storage encryption:       enabled
-Public access:            false
-Deletion protection:      enabled
-Copy tags to snapshot:    enabled
-Backup retention:         1 day
-Automated backup:         active
-Restore window:           present
-Automated snapshots:      available
-Snapshot encryption:      enabled
-Multi-AZ:                 false
+container startup:          PASS
+/api/v1/platform/live:      healthy
+runtime version:            20.0.0
+environment:                production
+ECS desired/running:        2/2
+ECS pending:                0
+rollout:                    COMPLETED
+failed tasks:               0
+Pulumi final state:         39 unchanged
 ```
 
-Automated backup metadata exposed a valid restore window and encrypted automated snapshots were observed.
+The production startup contract includes explicit `ALLOWED_HOSTS`, production-strength secret configuration, URL-safe database credentials, and a liveness path that does not depend on Redis-backed rate limiting.
 
-`Multi-AZ=false` remains an intentional current cost/account boundary.
+## 18. Database Recovery Boundary
 
-## 19. AWS Observability
+Production RDS is private, storage-encrypted, deletion-protected, and configured with automated backup retention. The committed V20 production configuration keeps:
 
-AWS infrastructure observability is separate from application-level observability.
+```text
+Multi-AZ:             false
+Backup retention:     1 day
+Public access:        false
+Storage encryption:   enabled
+Deletion protection:  enabled
+```
 
-### CloudWatch alarms
+These are explicit deployment boundaries. V20 does not claim multi-AZ database HA or regional disaster recovery.
 
-Seven alarms are deployed:
+## 19. AWS Observability, Alerting, and Scaling
+
+Seven CloudWatch alarms cover:
 
 1. ECS CPU high
 2. ECS memory high
@@ -635,15 +616,9 @@ Seven alarms are deployed:
 6. RDS CPU high
 7. RDS low storage
 
-### CloudWatch Logs
+In production, alarm actions route to the `redpa-prod-v20-alerts` SNS topic. Email subscription is optional and only created when `alert_email` is configured; no active email subscriber is claimed by the committed production config.
 
-RedPA application logs are retained for 30 days.
-
-### ECS Container Insights
-
-Container Insights is enabled for ECS task/container performance visibility.
-
-No SNS notification dependency is currently required or claimed.
+ECS target-tracking scaling uses CPU and memory signals with a production capacity range of 2–4 tasks. CloudWatch Logs and ECS Container Insights remain part of the AWS observability boundary.
 
 ## 20. Application Observability
 
@@ -699,7 +674,7 @@ The strongest integrated local runtime target.
 
 ### AWS / Pulumi
 
-Actually deployed and validated for V19.7 in `eu-central-1`.
+Actually deployed and validated for V20.0.0 in a dedicated `prod` stack in `eu-central-1`; the `dev` stack remains separately managed.
 
 Validated:
 
@@ -714,6 +689,8 @@ Validated:
 - controlled ingress
 - self-recovery
 - backup/restore readiness
+- SNS-backed alarm routing
+- ECS target-tracking autoscaling (2–4 tasks)
 - clean Pulumi state
 
 ### Kubernetes / Helm
@@ -751,58 +728,40 @@ Additional routers cover authentication, users, conversations/messages, chat/LLM
 
 ## 26. Release Validation Boundary
 
-Validated V19.7 evidence:
+Validated V20.0.0 evidence:
 
 ```text
 Full regression:             437 passed
-Live AWS runtime:            19.7.0
-ECS task:                    HEALTHY
-ALB target:                  healthy
-Direct backend :8000:        closed
-RDS backup:                  active
-RDS restore window:          validated
-CloudWatch alarms:           7 / 7 OK
-Pulumi final state:          35 unchanged
+Live AWS runtime:            20.0.0 / production
+ECS service:                 desired 2 / running 2 / pending 0
+ECS rollout:                 COMPLETED
+ECS autoscaling:             min 2 / max 4
+ALB liveness:                healthy
+RDS:                         private + encrypted + deletion-protected
+SNS alert topic:             deployed
+CloudWatch alarm actions:    SNS-backed
+Pulumi final state:          39 unchanged
+Git release tag:             v20.0.0
 ```
 
-This demonstrates the tested development validation environment. It does not imply an SLA, multi-region HA, multiple steady-state tasks, or multi-AZ database HA.
+This demonstrates the tested production deployment boundary. It does not imply HTTPS/custom-domain readiness, WAF protection, Multi-AZ database HA, regional failover, multi-region HA, or an SLA/SLO.
 
-## 27. V19 Evolution
+## 27. V19 → V20 Evolution
 
 ```text
-V19.0–V19.3
-    AWS runtime and managed-data foundation
-        -> ECS/Fargate
-        -> ECR
-        -> RDS PostgreSQL
-        -> Secrets Manager
-
-V19.4
-    controlled ingress
-        -> ALB
-        -> target group
-        -> backend direct public access closed
-
-V19.5
-    resilience hardening
-        -> ECS circuit breaker
-        -> automatic rollback
-        -> AZ rebalancing
-        -> RDS deletion protection
-        -> snapshot tag propagation
-
-V19.6
-    infrastructure observability
-        -> CloudWatch alarms
-        -> ECS / ALB / RDS monitoring
-
-V19.7
-    production-readiness validation
-        -> controlled ECS failure
-        -> automatic replacement
-        -> ALB recovery
-        -> backup/restore evidence
-        -> clean Pulumi state
+V19.0–V19.3  AWS runtime and managed-data foundation
+V19.4        controlled ALB ingress
+V19.5        ECS/RDS resilience hardening
+V19.6        infrastructure observability
+V19.7        failure recovery + backup/readiness validation
+V20.0        dedicated production stack
+             -> production resource identities
+             -> validated v20.0.0 ECR artifact
+             -> 2-task production floor
+             -> ECS target-tracking autoscaling to 4
+             -> SNS-backed CloudWatch alarm routing
+             -> production startup contract hardening
+             -> 39-resource zero-drift final state
 ```
 
 ## 28. Architectural Principles
@@ -843,4 +802,6 @@ V19.7
 - `docs/V18_4_MICROSOFT_ENTERPRISE_INTEGRATION.md`
 - `docs/V18_5_ENTERPRISE_ANALYTICS.md`
 - `docs/V19_CLOUD_DEPLOYMENT_FOUNDATION.md`
+- `docs/V20_ENTERPRISE_PRODUCTION.md`
+- `docs/releases/V20.0.0.md`
 - `docs/releases/V19.7.0.md`

@@ -1,3 +1,33 @@
+## [20.0.0] - 2026-08-22
+
+### Added
+
+- Dedicated AWS production Pulumi stack with production-specific resource identities.
+- ECS/Fargate two-task production floor with Application Auto Scaling from 2 to 4 tasks.
+- CPU and memory target-tracking scaling policies.
+- Production SNS topic and SNS-backed CloudWatch alarm actions.
+- Production runtime configuration for `20.0.0` / `production`.
+- Production startup hardening for secret requirements, URL-safe database credentials, and explicit ALB-based allowed hosts.
+- Liveness endpoint rate-limit bypass for infrastructure health validation.
+
+### Validated
+
+- Full regression suite: 437 tests passed.
+- Local production container startup and liveness: PASS.
+- Validated RC image promotion to final ECR `v20.0.0`: PASS.
+- ECS final state: desired 2, running 2, pending 0, rollout completed, zero failed tasks.
+- Live ALB liveness: healthy, version `20.0.0`, environment `production`.
+- Production Pulumi final preview: 39 resources unchanged.
+- Development stack zero-drift preservation: PASS.
+- Git main/tag/remote synchronization for `v20.0.0`: PASS.
+
+### Boundaries
+
+- Production ALB ingress remains HTTP; HTTPS/custom-domain/ACM and WAF are not claimed.
+- RDS remains single-AZ with one-day backup retention.
+- SNS alarm routing is deployed; an email subscriber is optional and not claimed by the committed config.
+- Regional/multi-region HA and SLA/SLO guarantees are not claimed.
+
 ## [19.7.0] - 2026-08-21
 
 ### Added
