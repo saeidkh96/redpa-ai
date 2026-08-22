@@ -135,7 +135,7 @@ const tone = (status?: string) => {
   return "neutral";
 };
 
-const when = (value?: string) => value ? new Date(value).toLocaleString() : "—";
+const when = (value?: string) => value ? new Date(value).toLocaleString() : "-";
 
 function normalizeArray(payload: unknown): any[] {
   if (Array.isArray(payload)) return payload;
@@ -252,7 +252,7 @@ export default function Dashboard() {
       .map(r => r.status === "rejected" ? r.reason?.message : "")
       .filter(Boolean);
 
-    setMessage(errors.length ? errors.join(" · ") : null);
+    setMessage(errors.length ? errors.join(" | ") : null);
     setLastUpdated(new Date().toLocaleTimeString());
   }, [api, request]);
 
@@ -295,9 +295,9 @@ export default function Dashboard() {
 
   const metricValue = (name: string) => {
     const row = metricsText.split(/\r?\n/).find(line => line.startsWith(`${name} `));
-    if (!row) return "—";
+    if (!row) return "-";
     const value = Number(row.slice(name.length).trim());
-    return Number.isFinite(value) ? String(value) : "—";
+    return Number.isFinite(value) ? value.toFixed(0) : "-";
   };
 
   const login = async (event: FormEvent) => {
@@ -493,7 +493,7 @@ export default function Dashboard() {
       <section className="content">
         <header>
           <div>
-            <p className="eyebrow">REDPA AI · V2 · FINAL</p>
+            <p className="eyebrow">REDPA AI | V20 | PRODUCTION</p>
             <h1>Operations Control Center</h1>
             <p className="subtitle">Agents, workflows, human approval, memory, MCP tools, observability, security and release readiness.</p>
           </div>
@@ -503,10 +503,10 @@ export default function Dashboard() {
         {message && <div className="notice"><strong>Notice</strong><span>{message}</span></div>}
 
         <section id="overview" className="stats">
-          <article><span>Platform</span><strong className={health?.status === "healthy" ? "good" : ""}>{health?.status ?? "—"}</strong><small>v{health?.version ?? "—"}</small></article>
+          <article><span>Platform</span><strong className={health?.status === "healthy" ? "good" : ""}>{health?.status ?? "-"}</strong><small>v{health?.version ?? "-"}</small></article>
           <article><span>Dependencies</span><strong>{healthyDeps}/{totalDeps}</strong><small>healthy</small></article>
           <article><span>Agents</span><strong>{agents?.total ?? 0}</strong><small>{connectedRemotes}/{remotes?.total ?? 0} remote connected</small></article>
-          <article><span>Release</span><strong>v2.0.0</strong><small>candidate</small></article>
+          <article><span>Release</span><strong>V20.0.0</strong><small>production</small></article>
         </section>
 
         <section className="panel" id="agents">
@@ -526,7 +526,7 @@ export default function Dashboard() {
               <article className="miniCard" key={agent.id}>
                 <span className={`status ${tone(agent.status)}`}>{agent.status}</span>
                 <strong>{agent.name}</strong>
-                <small>{agent.capability_names.slice(0, 4).join(" · ")}</small>
+                <small>{agent.capability_names.slice(0, 4).join(" | ")}</small>
               </article>
             ))}
           </div>
@@ -602,7 +602,7 @@ export default function Dashboard() {
               <article className="memoryCard" key={memory.id}>
                 <div className="row"><div className="tags"><span>{memory.kind}</span><span>{memory.scope}</span><span>{memory.agent_id}</span></div>{score !== null && <strong className="score">{Math.round(score * 100)}</strong>}</div>
                 <p>{memory.content}</p>
-                <small>Importance {memory.importance.toFixed(2)} · {memory.embedding_status} · {when(memory.updated_at)}</small>
+                <small>Importance {memory.importance.toFixed(2)} | {memory.embedding_status} | {when(memory.updated_at)}</small>
                 <button className="delete" disabled={busy === memory.id} onClick={() => void deleteMemory(memory.id)}>Delete</button>
               </article>
             ))}
@@ -663,7 +663,7 @@ export default function Dashboard() {
               <Metric label="Slow requests" value={metricValue("redpa_slow_requests_total")} />
             </div>
             <div className="stack">
-              {(health?.dependencies ?? []).map(dep => <div className="depRow" key={dep.name}><span className={`dot ${dep.status === "healthy" ? "dotHealthy" : ""}`} /><strong>{dep.name}</strong><small>{dep.latency_ms?.toFixed(1) ?? "—"} ms</small><span className={`status ${tone(dep.status)}`}>{dep.status}</span></div>)}
+              {(health?.dependencies ?? []).map(dep => <div className="depRow" key={dep.name}><span className={`dot ${dep.status === "healthy" ? "dotHealthy" : ""}`} /><strong>{dep.name}</strong><small>{dep.latency_ms?.toFixed(1) ?? "-"} ms</small><span className={`status ${tone(dep.status)}`}>{dep.status}</span></div>)}
             </div>
             <div className="links">
               <a href="http://localhost:9090" target="_blank" rel="noreferrer">Prometheus <span>:9090</span></a>
@@ -697,7 +697,7 @@ export default function Dashboard() {
                 "Health probes enabled",
                 "Telemetry retention reviewed",
                 "No real credentials committed",
-              ].map(item => <div key={item}><span>✓</span><p>{item}</p></div>)}
+              ].map(item => <div key={item}><span>[OK]</span><p>{item}</p></div>)}
               <small>Checklist items are release requirements, not claims about the current development environment.</small>
             </div>
           </div>
@@ -738,16 +738,16 @@ function WorkflowView({ workflow }: { workflow: Workflow }) {
     <div className="flowSummary"><span className={`status ${tone(workflow.status)}`}>{workflow.status}</span><strong>{workflow.request}</strong></div>
     <div className="flowLine">
       <FlowNode title="Request" detail="Created" state="completed" />
-      <span>→</span>
+      <span>-&gt;</span>
       <FlowNode title="Planner" detail={`${workflow.subtasks.length} subtasks`} state={workflow.status} />
-      <span>→</span>
+      <span>-&gt;</span>
       <div className="subtasks">
         <small>Specialist subtasks</small>
-        {workflow.subtasks.map(task => <div key={task.id}><span className={`status ${tone(task.status)}`}>{task.status}</span><strong>{task.subtask_key}</strong><p>{task.instruction}</p><small>{task.remote_agent || "local"} · {task.execution_time_ms.toFixed(0)} ms · attempt {task.attempt_count}</small></div>)}
+        {workflow.subtasks.map(task => <div key={task.id}><span className={`status ${tone(task.status)}`}>{task.status}</span><strong>{task.subtask_key}</strong><p>{task.instruction}</p><small>{task.remote_agent || "local"} | {task.execution_time_ms.toFixed(0)} ms | attempt {task.attempt_count}</small></div>)}
       </div>
-      {workflow.approval_required && <><span>→</span><FlowNode title="Human Review" detail={workflow.approval_granted ? "Approved" : "Required"} state={workflow.approval_granted ? "approved" : "pending"} /></>}
-      <span>→</span>
-      <FlowNode title="Aggregate" detail={`${workflow.successful_subtasks} success · ${workflow.failed_subtasks} failed`} state={workflow.status} />
+      {workflow.approval_required && <><span>-&gt;</span><FlowNode title="Human Review" detail={workflow.approval_granted ? "Approved" : "Required"} state={workflow.approval_granted ? "approved" : "pending"} /></>}
+      <span>-&gt;</span>
+      <FlowNode title="Aggregate" detail={`${workflow.successful_subtasks} success | ${workflow.failed_subtasks} failed`} state={workflow.status} />
     </div>
     {workflow.aggregated_response && <details><summary>Aggregated response</summary><pre>{workflow.aggregated_response}</pre></details>}
   </div>;

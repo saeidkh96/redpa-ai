@@ -81,6 +81,7 @@ services:
       PYTHONPATH: /app/backend
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/redpa_ai
       REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
