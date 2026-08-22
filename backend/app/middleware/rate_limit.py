@@ -8,7 +8,13 @@ from app.runtime_cache.redis_client import RedisRuntime
 
 class RedisRateLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in {"/health", "/metrics", "/docs", "/openapi.json"}:
+        if request.url.path in {
+            "/health",
+            "/metrics",
+            "/docs",
+            "/openapi.json",
+            "/api/v1/platform/live",
+        }:
             return await call_next(request)
 
         limit = int(os.getenv("RATE_LIMIT_REQUESTS", "120"))

@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 import pulumi
 import pulumi_aws as aws
@@ -12,11 +13,141 @@ region = aws.config.region or "eu-central-1"
 jwt_secret_key = config.require_secret("jwt_secret_key")
 rds_password = config.require_secret("rds_password")
 
+# ------------------------------------------------------------
+# V20 stack-aware deployment identity
+#
+# The existing dev stack MUST preserve all V19 physical resource
+# names to avoid replacements. The prod stack receives isolated
+# V20 production resource names.
+# ------------------------------------------------------------
+
+is_prod = stack == "prod"
+
+release_version = "20.0.0" if is_prod else "19.7.0"
+runtime_environment = "production" if is_prod else "development"
+runtime_image_tag = "v20.0.0" if is_prod else "v19.7.0"
+
+# V20 production capacity / recovery boundaries.
+#
+# RDS remains Single-AZ with one-day backup retention by default
+# because the current AWS account rejected higher retention under
+# its present free-tier/account boundary.
+prod_ecs_min_capacity = 2
+prod_ecs_max_capacity = 4
+
+prod_rds_multi_az = (
+    config.get_bool("rds_multi_az")
+    if is_prod
+    else False
+)
+
+if prod_rds_multi_az is None:
+    prod_rds_multi_az = False
+
+prod_rds_backup_retention = (
+    config.get_int("rds_backup_retention")
+    if is_prod
+    else 1
+)
+
+if prod_rds_backup_retention is None:
+    prod_rds_backup_retention = 1
+
+alert_email = config.get("alert_email") if is_prod else None
+
+alb_name = "redpa-prod-v20-alb" if is_prod else "redpa-v194-alb"
+target_group_name = (
+    "redpa-prod-v20-backend"
+    if is_prod
+    else "redpa-v194-backend"
+)
+
+db_subnet_group_name = (
+    "redpa-prod-v20-db-subnets"
+    if is_prod
+    else "redpa-v193-db-subnets"
+)
+
+database_identifier = (
+    "redpa-prod-v20-postgres"
+    if is_prod
+    else "redpa-v193-postgres"
+)
+
+database_secret_name = (
+    "redpa-prod-v20/database"
+    if is_prod
+    else "redpa-v193/database"
+)
+
+execution_role_name = (
+    "redpa-prod-v20-ecs-execution-role"
+    if is_prod
+    else "redpa-ecs-execution-role"
+)
+
+task_family_name = (
+    "redpa-prod-v20-backend"
+    if is_prod
+    else "redpa-backend-v192"
+)
+
+service_name = (
+    "redpa-prod-v20-backend"
+    if is_prod
+    else "redpa-backend-v192"
+)
+
+ecs_cpu_alarm_name = (
+    "redpa-prod-v20-ecs-cpu-high"
+    if is_prod
+    else "redpa-v196-ecs-cpu-high"
+)
+
+ecs_memory_alarm_name = (
+    "redpa-prod-v20-ecs-memory-high"
+    if is_prod
+    else "redpa-v196-ecs-memory-high"
+)
+
+alb_unhealthy_alarm_name = (
+    "redpa-prod-v20-alb-unhealthy-host"
+    if is_prod
+    else "redpa-v196-alb-unhealthy-host"
+)
+
+alb_5xx_alarm_name = (
+    "redpa-prod-v20-alb-target-5xx"
+    if is_prod
+    else "redpa-v196-alb-target-5xx"
+)
+
+alb_latency_alarm_name = (
+    "redpa-prod-v20-alb-response-time"
+    if is_prod
+    else "redpa-v196-alb-response-time"
+)
+
+rds_cpu_alarm_name = (
+    "redpa-prod-v20-rds-cpu-high"
+    if is_prod
+    else "redpa-v196-rds-cpu-high"
+)
+
+rds_storage_alarm_name = (
+    "redpa-prod-v20-rds-low-storage"
+    if is_prod
+    else "redpa-v196-rds-low-storage"
+)
+
 project_tags = {
     "Project": "RedPA-AI",
     "Stack": stack,
-    "Release": "19.7.0",
+    "Release": release_version,
 }
+
+if is_prod:
+    project_tags["Environment"] = runtime_environment
 
 
 # ------------------------------------------------------------
@@ -135,7 +266,6 @@ backend_security_group = aws.ec2.SecurityGroup(
     "redpa-backend-sg",
     vpc_id=vpc.id,
     description="RedPA AI V19.2 backend runtime validation",
-    ingress=[],
     egress=[
         {
             "protocol": "-1",
@@ -196,7 +326,7 @@ alb_to_backend_ingress = aws.ec2.SecurityGroupRule(
 
 application_load_balancer = aws.lb.LoadBalancer(
     "redpa-alb",
-    name="redpa-v194-alb",
+    name=alb_name,
     load_balancer_type="application",
     internal=False,
     security_groups=[
@@ -206,17 +336,17 @@ application_load_balancer = aws.lb.LoadBalancer(
         subnet_a.id,
         subnet_b.id,
     ],
-    enable_deletion_protection=False,
+    enable_deletion_protection=is_prod,
     tags={
         **project_tags,
-        "Name": "redpa-v194-alb",
+        "Name": alb_name,
         "Tier": "ingress",
     },
 )
 
 backend_target_group = aws.lb.TargetGroup(
     "redpa-backend-tg",
-    name="redpa-v194-backend",
+    name=target_group_name,
     port=8000,
     protocol="HTTP",
     target_type="ip",
@@ -235,7 +365,7 @@ backend_target_group = aws.lb.TargetGroup(
     },
     tags={
         **project_tags,
-        "Name": "redpa-v194-backend",
+        "Name": target_group_name,
         "Tier": "ingress",
     },
 )
@@ -295,14 +425,14 @@ db_subnet_b = aws.ec2.Subnet(
 
 db_subnet_group = aws.rds.SubnetGroup(
     "redpa-db-subnet-group",
-    name="redpa-v193-db-subnets",
+    name=db_subnet_group_name,
     subnet_ids=[
         db_subnet_a.id,
         db_subnet_b.id,
     ],
     tags={
         **project_tags,
-        "Name": "redpa-v193-db-subnets",
+        "Name": db_subnet_group_name,
     },
 )
 
@@ -338,7 +468,7 @@ db_security_group = aws.ec2.SecurityGroup(
 
 database = aws.rds.Instance(
     "redpa-postgres",
-    identifier="redpa-v193-postgres",
+    identifier=database_identifier,
     engine="postgres",
     instance_class="db.t4g.micro",
     allocated_storage=20,
@@ -353,23 +483,28 @@ database = aws.rds.Instance(
         db_security_group.id,
     ],
     publicly_accessible=False,
-    multi_az=False,
-    backup_retention_period=1,
+    multi_az=prod_rds_multi_az,
+    backup_retention_period=prod_rds_backup_retention,
     deletion_protection=True,
     copy_tags_to_snapshot=True,
-    skip_final_snapshot=True,
+    skip_final_snapshot=not is_prod,
+    final_snapshot_identifier=(
+        "redpa-prod-v20-final-snapshot"
+        if is_prod
+        else None
+    ),
     auto_minor_version_upgrade=True,
     apply_immediately=True,
     tags={
         **project_tags,
-        "Name": "redpa-v193-postgres",
+        "Name": database_identifier,
         "Tier": "database",
     },
 )
 
 database_secret = aws.secretsmanager.Secret(
     "redpa-database-secret",
-    name="redpa-v193/database",
+    name=database_secret_name,
     description="RedPA AI V19.3 managed PostgreSQL connection metadata",
     recovery_window_in_days=0,
     tags=project_tags,
@@ -402,7 +537,7 @@ database_secret_value = aws.secretsmanager.SecretVersion(
 
 execution_role = aws.iam.Role(
     "redpa-ecs-execution-role",
-    name="redpa-ecs-execution-role",
+    name=execution_role_name,
     assume_role_policy=json.dumps(
         {
             "Version": "2012-10-17",
@@ -436,12 +571,12 @@ execution_role_attachment = aws.iam.RolePolicyAttachment(
 
 image_uri = ecr.repository_url.apply(
     lambda repository_url:
-        f"{repository_url}:v19.7.0"
+        f"{repository_url}:{runtime_image_tag}"
 )
 
 task_definition = aws.ecs.TaskDefinition(
     "redpa-backend-task",
-    family="redpa-backend-v192",
+    family=task_family_name,
     cpu="256",
     memory="1024",
     network_mode="awsvpc",
@@ -454,6 +589,7 @@ task_definition = aws.ecs.TaskDefinition(
         database.address,
         database.port,
         rds_password,
+        application_load_balancer.dns_name,
     ).apply(
         lambda values: json.dumps(
             [
@@ -475,11 +611,11 @@ task_definition = aws.ecs.TaskDefinition(
                         },
                         {
                             "name": "APP_VERSION",
-                            "value": "19.7.0",
+                            "value": release_version,
                         },
                         {
                             "name": "ENVIRONMENT",
-                            "value": "development",
+                            "value": runtime_environment,
                         },
                         {
                             "name": "DEBUG",
@@ -489,12 +625,16 @@ task_definition = aws.ecs.TaskDefinition(
                             "name": "DATABASE_URL",
                             "value": (
                                 "postgresql+asyncpg://"
-                                f"redpa:{values[5]}@"
+                                f"redpa:{quote(values[5], safe='')}@"
                                 f"{values[3]}:{values[4]}/redpa"
                             ),
                         },
                         {
                             "name": "JWT_SECRET_KEY",
+                            "value": values[2],
+                        },
+                        {
+                            "name": "SECRET_KEY",
                             "value": values[2],
                         },
                         {
@@ -515,7 +655,11 @@ task_definition = aws.ecs.TaskDefinition(
                         },
                         {
                             "name": "ALLOWED_HOSTS",
-                            "value": "*",
+                            "value": (
+                                values[6]
+                                if is_prod
+                                else "*"
+                            ),
                         },
                     ],
                     "healthCheck": {
@@ -595,7 +739,7 @@ task_definition = aws.ecs.TaskDefinition(
 
 service = aws.ecs.Service(
     "redpa-backend-service",
-    name="redpa-backend-v192",
+    name=service_name,
     cluster=cluster.arn,
     task_definition=task_definition.arn,
     load_balancers=[
@@ -605,7 +749,7 @@ service = aws.ecs.Service(
             "container_port": 8000,
         }
     ],
-    desired_count=1,
+    desired_count=prod_ecs_min_capacity if is_prod else 1,
     launch_type="FARGATE",
     network_configuration={
         "subnets": [
@@ -631,9 +775,101 @@ service = aws.ecs.Service(
             route_a,
             route_b,
             http_listener,
-        ]
+        ],
+        ignore_changes=(
+            ["desired_count"]
+            if is_prod
+            else None
+        ),
     ),
 )
+
+
+
+# ------------------------------------------------------------
+# V20 production alerting and ECS service auto scaling
+# ------------------------------------------------------------
+
+production_alert_topic = None
+production_alarm_actions = None
+production_alert_subscription = None
+
+ecs_scalable_target = None
+ecs_cpu_scaling_policy = None
+ecs_memory_scaling_policy = None
+
+if is_prod:
+    production_alert_topic = aws.sns.Topic(
+        "redpa-production-alerts",
+        name="redpa-prod-v20-alerts",
+        tags={
+            **project_tags,
+            "Tier": "observability",
+            "Purpose": "production-alerting",
+        },
+    )
+
+    production_alarm_actions = [
+        production_alert_topic.arn,
+    ]
+
+    if alert_email:
+        production_alert_subscription = aws.sns.TopicSubscription(
+            "redpa-production-alert-email",
+            topic=production_alert_topic.arn,
+            protocol="email",
+            endpoint=alert_email,
+        )
+
+    ecs_scalable_target = aws.appautoscaling.Target(
+        "redpa-backend-scalable-target",
+        max_capacity=prod_ecs_max_capacity,
+        min_capacity=prod_ecs_min_capacity,
+        resource_id=pulumi.Output.concat(
+            "service/",
+            cluster.name,
+            "/",
+            service.name,
+        ),
+        scalable_dimension="ecs:service:DesiredCount",
+        service_namespace="ecs",
+    )
+
+    ecs_cpu_scaling_policy = aws.appautoscaling.Policy(
+        "redpa-backend-cpu-scaling",
+        policy_type="TargetTrackingScaling",
+        resource_id=ecs_scalable_target.resource_id,
+        scalable_dimension=ecs_scalable_target.scalable_dimension,
+        service_namespace=ecs_scalable_target.service_namespace,
+        target_tracking_scaling_policy_configuration={
+            "target_value": 60.0,
+            "predefined_metric_specification": {
+                "predefined_metric_type": (
+                    "ECSServiceAverageCPUUtilization"
+                ),
+            },
+            "scale_in_cooldown": 300,
+            "scale_out_cooldown": 60,
+        },
+    )
+
+    ecs_memory_scaling_policy = aws.appautoscaling.Policy(
+        "redpa-backend-memory-scaling",
+        policy_type="TargetTrackingScaling",
+        resource_id=ecs_scalable_target.resource_id,
+        scalable_dimension=ecs_scalable_target.scalable_dimension,
+        service_namespace=ecs_scalable_target.service_namespace,
+        target_tracking_scaling_policy_configuration={
+            "target_value": 70.0,
+            "predefined_metric_specification": {
+                "predefined_metric_type": (
+                    "ECSServiceAverageMemoryUtilization"
+                ),
+            },
+            "scale_in_cooldown": 300,
+            "scale_out_cooldown": 60,
+        },
+    )
 
 
 # ------------------------------------------------------------
@@ -648,7 +884,7 @@ service = aws.ecs.Service(
 
 ecs_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-ecs-cpu-high",
-    name="redpa-v196-ecs-cpu-high",
+    name=ecs_cpu_alarm_name,
     alarm_description=(
         "RedPA ECS backend CPU utilization is above 80 percent."
     ),
@@ -661,6 +897,7 @@ ecs_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
     threshold=80,
     comparison_operator="GreaterThanThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
         "ClusterName": cluster.name,
         "ServiceName": service.name,
@@ -674,7 +911,7 @@ ecs_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
 
 ecs_memory_high_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-ecs-memory-high",
-    name="redpa-v196-ecs-memory-high",
+    name=ecs_memory_alarm_name,
     alarm_description=(
         "RedPA ECS backend memory utilization is above 80 percent."
     ),
@@ -687,6 +924,7 @@ ecs_memory_high_alarm = aws.cloudwatch.MetricAlarm(
     threshold=80,
     comparison_operator="GreaterThanThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
         "ClusterName": cluster.name,
         "ServiceName": service.name,
@@ -700,7 +938,7 @@ ecs_memory_high_alarm = aws.cloudwatch.MetricAlarm(
 
 alb_unhealthy_host_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-alb-unhealthy-host",
-    name="redpa-v196-alb-unhealthy-host",
+    name=alb_unhealthy_alarm_name,
     alarm_description=(
         "RedPA ALB has one or more unhealthy backend targets."
     ),
@@ -713,6 +951,7 @@ alb_unhealthy_host_alarm = aws.cloudwatch.MetricAlarm(
     threshold=1,
     comparison_operator="GreaterThanOrEqualToThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
         "LoadBalancer": application_load_balancer.arn_suffix,
         "TargetGroup": backend_target_group.arn_suffix,
@@ -726,7 +965,7 @@ alb_unhealthy_host_alarm = aws.cloudwatch.MetricAlarm(
 
 alb_target_5xx_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-alb-target-5xx",
-    name="redpa-v196-alb-target-5xx",
+    name=alb_5xx_alarm_name,
     alarm_description=(
         "RedPA backend returned at least five HTTP 5xx responses "
         "within a five-minute period."
@@ -740,6 +979,7 @@ alb_target_5xx_alarm = aws.cloudwatch.MetricAlarm(
     threshold=5,
     comparison_operator="GreaterThanOrEqualToThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
         "LoadBalancer": application_load_balancer.arn_suffix,
         "TargetGroup": backend_target_group.arn_suffix,
@@ -753,7 +993,7 @@ alb_target_5xx_alarm = aws.cloudwatch.MetricAlarm(
 
 alb_response_time_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-alb-response-time",
-    name="redpa-v196-alb-response-time",
+    name=alb_latency_alarm_name,
     alarm_description=(
         "RedPA ALB target response time is above two seconds."
     ),
@@ -766,6 +1006,7 @@ alb_response_time_alarm = aws.cloudwatch.MetricAlarm(
     threshold=2,
     comparison_operator="GreaterThanThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
         "LoadBalancer": application_load_balancer.arn_suffix,
         "TargetGroup": backend_target_group.arn_suffix,
@@ -779,7 +1020,7 @@ alb_response_time_alarm = aws.cloudwatch.MetricAlarm(
 
 rds_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-rds-cpu-high",
-    name="redpa-v196-rds-cpu-high",
+    name=rds_cpu_alarm_name,
     alarm_description=(
         "RedPA PostgreSQL CPU utilization is above 80 percent."
     ),
@@ -792,8 +1033,9 @@ rds_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
     threshold=80,
     comparison_operator="GreaterThanThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
-        "DBInstanceIdentifier": "redpa-v193-postgres",
+        "DBInstanceIdentifier": database_identifier,
     },
     tags={
         **project_tags,
@@ -804,7 +1046,7 @@ rds_cpu_high_alarm = aws.cloudwatch.MetricAlarm(
 
 rds_low_storage_alarm = aws.cloudwatch.MetricAlarm(
     "redpa-rds-low-storage",
-    name="redpa-v196-rds-low-storage",
+    name=rds_storage_alarm_name,
     alarm_description=(
         "RedPA PostgreSQL free storage is below two GiB."
     ),
@@ -817,8 +1059,9 @@ rds_low_storage_alarm = aws.cloudwatch.MetricAlarm(
     threshold=2147483648,
     comparison_operator="LessThanThreshold",
     treat_missing_data="notBreaching",
+    alarm_actions=production_alarm_actions,
     dimensions={
-        "DBInstanceIdentifier": "redpa-v193-postgres",
+        "DBInstanceIdentifier": database_identifier,
     },
     tags={
         **project_tags,
@@ -831,6 +1074,28 @@ rds_low_storage_alarm = aws.cloudwatch.MetricAlarm(
 # ------------------------------------------------------------
 # Outputs
 # ------------------------------------------------------------
+
+if is_prod:
+    pulumi.export(
+        "production_alert_topic_arn",
+        production_alert_topic.arn,
+    )
+
+    pulumi.export(
+        "ecs_autoscaling_min_capacity",
+        prod_ecs_min_capacity,
+    )
+
+    pulumi.export(
+        "ecs_autoscaling_max_capacity",
+        prod_ecs_max_capacity,
+    )
+
+    pulumi.export(
+        "runtime_environment",
+        runtime_environment,
+    )
+
 
 pulumi.export(
     "vpc_id",

@@ -1,0 +1,8 @@
+config:
+  aws:region: eu-central-1
+  redpa-ai-aws:jwt_secret_key:
+    secure: AAABAM87stK7dUa1+GUEhnfd+jSBo49P3JIho4S0RbCvglKp3QZFjFeYXbTwmoq+Iw58copMcFF09LiEl0nmCmsiOU8M4NlBQdSt63Vt8VpuP15hkRzG/p2VXgvHJ7R2SmFnwvxCxP/rPVdgrfJ3UkELnpO4aPK7
+  redpa-ai-aws:rds_password:
+    secure: AAABACclLUx61KGHqTCgAfALh0NLF6Bcwju7eOOfhfKLKVjky+9jTVa9ZNAgQTAehdfQMWgLuzfe3oj8wsTWZg==
+  redpa-ai-aws:rds_multi_az: "false"
+  redpa-ai-aws:rds_backup_retention: "1"
