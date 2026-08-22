@@ -33,8 +33,55 @@ input,select,textarea{width:100%;border:1px solid var(--line);border-radius:8px;
 .authNotice{padding:14px;border:1px solid #f0d5d8;background:#fff8f8;border-radius:9px;color:#8d4148;font-size:10px}
 .mcpLayout{display:grid;grid-template-columns:.7fr 1fr 1fr;gap:12px}.stack{display:grid;gap:6px}.serverRow,.depRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px;border-bottom:1px solid #eff1f4}.serverRow strong,.depRow strong{font-size:9px}.toolList{display:grid;gap:5px;max-height:330px;overflow:auto}.toolList button{text-align:left;border:1px solid var(--line);background:#fff;padding:8px;border-radius:7px;cursor:pointer}.toolList button.selected{box-shadow:inset 3px 0 0 var(--red)}.toolList strong,.toolList small{display:block}.toolList strong{font-size:8px}.toolList small{margin-top:3px;color:var(--muted);font-size:7px}.toolRunner{display:grid;gap:7px;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fafbfc}.toolRunner textarea{min-height:100px;font:8px/1.5 ui-monospace,monospace}
 .opsGrid{display:grid;grid-template-columns:.8fr 1.1fr .7fr;gap:12px}.metricCards,.releaseGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.metric{padding:11px;border:1px solid var(--line);border-radius:8px}.metric span{display:block;color:var(--muted);font-size:8px}.metric strong{display:block;margin-top:5px;font-size:16px}.depRow{grid-template-columns:auto 1fr auto auto}.depRow small{color:var(--muted);font-size:7px}.links{display:grid;gap:6px}.links a{display:flex;justify-content:space-between;padding:10px;border:1px solid var(--line);border-radius:8px;color:var(--text);text-decoration:none;font-size:9px}.links a span{color:var(--muted)}
-.securityGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}.securityRow{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px}.check{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;font-size:8px;font-weight:900}.check.ok{background:var(--greenSoft);color:var(--green)}.check.warn{background:var(--amberSoft);color:var(--amber)}.check.neutral{background:#f1f3f6;color:#687185}.securityRow strong,.securityRow small{display:block}.securityRow strong{font-size:9px}.securityRow small{margin-top:3px;color:var(--muted);font-size:7px}.prodChecklist{padding:12px;border:1px solid var(--line);border-radius:9px;background:#fafbfc}.prodChecklist>div{display:grid;grid-template-columns:18px 1fr;gap:5px}.prodChecklist>div span{color:var(--green);font-weight:900}.prodChecklist p{margin:2px 0;font-size:8px;color:#596274}.prodChecklist>small{display:block;margin-top:8px;color:var(--muted);font-size:7px}
+.securityGrid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}.securityRow{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:8px}.check{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;font-size:8px;font-weight:900}.check.ok{background:var(--greenSoft);color:var(--green)}.check.warn{background:var(--amberSoft);color:var(--amber)}.check.neutral{background:#f1f3f6;color:#687185}.securityRow strong,.securityRow small{display:block}.securityRow strong{font-size:9px}.securityRow small{margin-top:3px;color:var(--muted);font-size:7px}.prodChecklist{padding:12px;border:1px solid var(--line);border-radius:9px;background:#fafbfc}.prodChecklist>.prodChecklistRow{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:14px}.prodChecklist>div span{color:var(--green);font-weight:900}.prodChecklist p{margin:2px 0;font-size:8px;color:#596274}.prodChecklist>small{display:block;margin-top:8px;color:var(--muted);font-size:7px}
 .releaseGrid{grid-template-columns:repeat(4,1fr)}.releaseBox{margin-top:10px;padding:12px;background:#f7f8fa;border-radius:9px}.releaseBox strong{font-size:9px}.releaseBox p{margin:5px 0 0;color:var(--muted);font-size:8px;line-height:1.5}.releaseBox code{color:#b62e38}
 @media(max-width:1150px){.cardGrid,.memoryGrid{grid-template-columns:repeat(2,1fr)}.mcpLayout,.opsGrid,.securityGrid{grid-template-columns:1fr 1fr}.toolRunner{grid-column:1/-1}.releaseGrid{grid-template-columns:1fr 1fr}.memoryForm{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:850px){.sidebar{position:static;width:auto}.sidebar nav{grid-template-columns:repeat(3,1fr)}.sidebarFooter{display:none}.content{margin-left:0;padding:22px}.stats,.workflowLayout,.mcpLayout,.opsGrid,.securityGrid{grid-template-columns:1fr}.toolRunner{grid-column:auto}}
 @media(max-width:600px){header{flex-direction:column}.stats,.cardGrid,.memoryGrid,.releaseGrid,.loginForm,.memoryForm{grid-template-columns:1fr}.sidebar nav{grid-template-columns:1fr 1fr}.content{padding:16px}}
+
+/* V20 production checklist polish */
+.prodChecklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.prodChecklist > h3 {
+  margin: 0 0 22px;
+}
+
+.prodChecklistRow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  min-height: 40px;
+  margin: 0;
+}
+
+.prodChecklistRow p {
+  margin: 0;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.prodChecklistOk {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-width: 48px;
+  height: 28px;
+  border-radius: 8px;
+  background: #edf8f2;
+  color: #42966a;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.prodChecklist > small {
+  display: block;
+  margin-top: 20px;
+  line-height: 1.5;
+}

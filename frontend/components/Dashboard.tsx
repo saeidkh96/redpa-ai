@@ -697,7 +697,7 @@ export default function Dashboard() {
                 "Health probes enabled",
                 "Telemetry retention reviewed",
                 "No real credentials committed",
-              ].map(item => <div key={item}><span>[OK]</span><p>{item}</p></div>)}
+              ].map(item => <div className="prodChecklistRow" key={item}><span className="prodChecklistOk">OK</span><p>{item}</p></div>)}
               <small>Checklist items are release requirements, not claims about the current development environment.</small>
             </div>
           </div>
