@@ -599,7 +599,7 @@ services:
       OTEL_ENABLED: "true"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
     ports:
-      - "8000:8000"
+      - "8111:8000"
     volumes:
       - ./backend/storage:/app/backend/storage
     depends_on:
@@ -633,11 +633,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_REDPA_API_URL: ${NEXT_PUBLIC_REDPA_API_URL:-http://localhost:8111}
     image: redpa-ai-frontend
     container_name: redpa-frontend
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_REDPA_API_URL: ${NEXT_PUBLIC_REDPA_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_REDPA_API_URL: ${NEXT_PUBLIC_REDPA_API_URL:-http://localhost:8111}
     ports:
       - "3001:3001"
     depends_on:
