@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncIterator
@@ -65,7 +65,7 @@ class GovernedOrchestratorService:
                         response_text=result.response_content,
                         success=True,
                         actual_route=result.route,
-                        actual_tools=[result.selected_tool] if result.selected_tool else [],
+                        actual_tools=[],
                         latency_ms=result.planner_latency_ms,
                         metadata={"provider": result.provider, "model": result.model},
                     ),
@@ -136,3 +136,4 @@ class GovernedOrchestratorService:
                 content = str(getattr(message, "content", "") or "").strip()
                 if content: return content
         return "Execute RedPA agent workflow"
+
