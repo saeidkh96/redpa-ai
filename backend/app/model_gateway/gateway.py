@@ -21,6 +21,7 @@ from app.model_gateway.routing import (
     ModelRoute,
     RoutingContext,
 )
+from app.observability.langfuse import LangfuseTracer, get_langfuse_tracer
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,10 +38,12 @@ class ModelGateway:
         registry: LLMProviderRegistry,
         router: CompositeRoutingStrategy | None = None,
         executor: ReliableProviderExecutor | None = None,
+        tracer: LangfuseTracer | None = None,
     ) -> None:
         self.registry = registry
         self.router = router or CompositeRoutingStrategy.from_environment()
         self.executor = executor or ReliableProviderExecutor()
+        self.tracer = tracer or get_langfuse_tracer()
 
     def preview_route(
         self,
@@ -123,10 +126,33 @@ class ModelGateway:
             )
 
             try:
-                response = await self.executor.execute(
-                    provider=selected,
-                    request=provider_request,
-                )
+                trace_metadata = {
+                    "agent_id": agent_id,
+                    "requested_provider": provider,
+                    "route_provider": route.provider,
+                    "fallback": provider_name != route.provider,
+                    "attempt": len(attempted),
+                    **request.metadata,
+                }
+                messages = [
+                    {"role": message.role, "content": message.content}
+                    for message in provider_request.messages
+                ]
+                with self.tracer.generation(
+                    provider=provider_name,
+                    model=target_model,
+                    messages=messages,
+                    metadata=trace_metadata,
+                ) as generation:
+                    try:
+                        response = await self.executor.execute(
+                            provider=selected,
+                            request=provider_request,
+                        )
+                        generation.success(response=response, usage=response.usage)
+                    except LLMProviderError as exc:
+                        generation.failure(exc)
+                        raise
 
                 return GatewayResult(
                     response=response,

@@ -76,6 +76,9 @@ langgraph-prebuilt==1.1.0
 
 langgraph-sdk==0.4.2
 
+# LLM / agent tracing. Kept separate from OpenTelemetry service telemetry.
+langfuse>=4.0,<5.0
+
 langsmith==0.10.11
 
 lxml==6.1.1

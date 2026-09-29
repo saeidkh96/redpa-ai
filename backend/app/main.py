@@ -18,6 +18,7 @@ from app.middleware.trace_headers import TraceHeadersMiddleware
 from app.monitoring.metrics import PrometheusMetricsMiddleware
 from app.performance import PerformanceMonitoringMiddleware, register_sql_performance_monitor
 from app.observability.tracing import configure_tracing
+from app.observability.langfuse import get_langfuse_tracer
 from app.security_hardening.config import SecuritySettings
 
 
@@ -37,6 +38,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     yield
 
+    # Ensures buffered LLM traces are sent during a graceful shutdown.
+    get_langfuse_tracer().flush()
     await close_database_connection()
 
 
