@@ -1,0 +1,22 @@
+﻿services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:1
+    restart: unless-stopped
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Set N8N_ENCRYPTION_KEY in .env}
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      GENERIC_TIMEZONE: Europe/Berlin
+      TZ: Europe/Berlin
+    ports:
+      - "127.0.0.1:5678:5678"
+    volumes:
+      - redpa-n8n-data:/home/node/.n8n
+    networks:
+      - redpa-network
+
+volumes:
+  redpa-n8n-data:

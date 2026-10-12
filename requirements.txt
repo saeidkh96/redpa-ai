@@ -74,7 +74,7 @@ langgraph-checkpoint==4.1.1
 
 langgraph-prebuilt==1.1.0
 
-langgraph-sdk==0.4.2
+langgraph-sdk==0.4.4
 
 # LLM / agent tracing. Kept separate from OpenTelemetry service telemetry.
 langfuse>=4.0,<5.0
@@ -120,9 +120,9 @@ pydantic_core==2.46.4
 
 Pygments==2.20.0
 
-PyJWT==2.14.0
+PyJWT==2.15.0
 
-pypdf==6.16.1
+pypdf==6.19.0
 
 python-docx==1.2.0
 
@@ -164,7 +164,7 @@ typing-inspection==0.4.2
 
 typing_extensions==4.16.0
 
-urllib3==2.7.0
+urllib3==2.8.0
 
 uuid_utils==0.17.0
 

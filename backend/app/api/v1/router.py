@@ -1,3 +1,4 @@
+from app.api.v1.automations import router as automations_router
 from app.api.v1.platform_evolution import router as platform_evolution_router
 from app.api.v1.adaptive_governance_v13 import (
     router as adaptive_governance_v13_router,
@@ -178,3 +179,5 @@ api_router.include_router(microsoft_integration_v184_router)
 api_router.include_router(microsoft_integration_v191_router)
 api_router.include_router(enterprise_analytics_v185_router)
 api_router.include_router(enterprise_analytics_v191_router)
+
+api_router.include_router(automations_router)
