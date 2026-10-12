@@ -94,6 +94,22 @@ class Settings(BaseSettings):
         alias="OLLAMA_MAX_CONTEXT_MESSAGES",
     )
 
+    n8n_base_url: str = Field(
+        default="http://localhost:5678",
+        alias="N8N_BASE_URL",
+    )
+
+    n8n_timeout_seconds: float = Field(
+        default=15.0,
+        gt=0,
+        le=120,
+        alias="N8N_TIMEOUT_SECONDS",
+    )
+
+    n8n_allowed_workflows: str = Field(
+        default="",
+        alias="N8N_ALLOWED_WORKFLOWS",
+    )
     @field_validator(
         "cors_allowed_origins",
         mode="before",
